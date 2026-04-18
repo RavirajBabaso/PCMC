@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
 import 'package:main_ui/models/user_model.dart';
 import 'package:main_ui/utils/validators.dart';
-import 'package:main_ui/widgets/custom_button.dart';
+import 'package:main_ui/widgets/app/app_button.dart';
 import 'package:main_ui/widgets/empty_state.dart';
 import 'package:main_ui/widgets/loading_indicator.dart';
 import '../../providers/user_provider.dart';
@@ -145,7 +145,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                     const SizedBox(width: 10),
                     SizedBox(
                       width: 100, // Fixed width to avoid layout issues
-                      child: CustomButton(
+                      child: AppButton(
                         text: l10n.add,
                         onPressed: () async {
                           if (formKey.currentState?.validate() ?? false) {
@@ -307,7 +307,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                           const SizedBox(width: 10),
                           SizedBox(
                             width: 100, // Fixed width to avoid layout issues
-                            child: CustomButton(
+                            child: AppButton(
                               text: l10n.update,
                               onPressed: () async {
                                 if (formKey.currentState?.validate() ?? false) {
@@ -400,7 +400,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                   const SizedBox(width: 10),
                   SizedBox(
                     width: 100,
-                    child: CustomButton(
+                    child: AppButton(
                       text: l10n.delete,
                       backgroundColor: Theme.of(context).colorScheme.error,
                       onPressed: () => Navigator.pop(context, true),
@@ -492,7 +492,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                     icon: Icons.people_outline,
                     title: l10n.noUsers,
                     message: l10n.noUsersMessage,
-                    actionButton: CustomButton(
+                    actionButton: AppButton(
                       text: l10n.addUser,
                       onPressed: _showAddUserDialog,
                     ),
@@ -517,7 +517,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
         icon: Icons.search_off,
         title: l10n.noResultsFound,
         message: l10n.noMatchingUsers,
-        actionButton: CustomButton(
+        actionButton: AppButton(
           text: l10n.retry,
           onPressed: () => _searchController.clear(),
         ),

@@ -369,14 +369,16 @@ class AppTheme {
         ),
         filled: true,
         fillColor: inputFillColor,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: EdgeInsets.symmetric(horizontal: spacing.lg, vertical: spacing.lg),
+        constraints: const BoxConstraints(minHeight: 56),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
           backgroundColor: colorScheme.primary,
           foregroundColor: colorScheme.onPrimary,
           textStyle: buttonText,
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: EdgeInsets.symmetric(horizontal: spacing.xl, vertical: spacing.lg),
+          minimumSize: const Size(0, 56),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(effects.radiusMd),
           ),
@@ -386,7 +388,8 @@ class AppTheme {
         style: TextButton.styleFrom(
           foregroundColor: colorScheme.primary,
           textStyle: buttonText.copyWith(color: colorScheme.primary),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          padding: EdgeInsets.symmetric(horizontal: spacing.lg, vertical: spacing.md),
+          minimumSize: const Size(0, 44),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -394,7 +397,8 @@ class AppTheme {
           foregroundColor: colorScheme.primary,
           side: BorderSide(color: colorScheme.primary),
           textStyle: buttonText.copyWith(color: colorScheme.primary),
-          padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+          padding: EdgeInsets.symmetric(horizontal: spacing.xl, vertical: spacing.lg),
+          minimumSize: const Size(0, 56),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(effects.radiusMd),
           ),

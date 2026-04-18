@@ -7,7 +7,7 @@ import 'package:geolocator/geolocator.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:main_ui/providers/master_data_provider.dart';
 import 'package:main_ui/services/grievance_service.dart';
-import 'package:main_ui/widgets/custom_button.dart';
+import 'package:main_ui/widgets/app/app_button.dart';
 import 'package:main_ui/widgets/file_upload_widget.dart';
 import 'package:main_ui/widgets/loading_indicator.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
@@ -340,7 +340,7 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
                       Row(
                         children: [
                           Expanded(
-                            child: CustomButton(
+                            child: AppButton(
                               text: _isSubmitting
                                   ? 'Getting Location...'
                                   : 'Get Location',
@@ -353,7 +353,7 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
                           ),
                           const SizedBox(width: 8),
                           Expanded(
-                            child: CustomButton(
+                            child: AppButton(
                               text: 'Add Media',
                               onPressed: _pickImage,
                               icon: Icons.image,
@@ -425,7 +425,7 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
                         },
                       ),
                       const SizedBox(height: 24),
-                      CustomButton(
+                      AppButton(
                         text: _isSubmitting
                             ? 'Submitting...'
                             : localizations.submit,

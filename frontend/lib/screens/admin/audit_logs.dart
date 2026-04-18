@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/api_service.dart';
-import '../../widgets/custom_button.dart';
+import '../../widgets/app/app_button.dart';
 import '../../widgets/empty_state.dart';
 
 class AuditLogs extends ConsumerStatefulWidget {
@@ -77,7 +77,7 @@ class _AuditLogsState extends ConsumerState<AuditLogs> {
               icon: Icons.error_outline,
               title: 'Error Loading Logs',
               message: 'Failed to load audit logs. Please try again.',
-              actionButton: CustomButton(
+              actionButton: AppButton(
                 text: 'Retry',
                 onPressed: _refreshLogs,
                 backgroundColor: Colors.blue.shade600,

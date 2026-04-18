@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:main_ui/providers/auth_provider.dart';
 import 'package:main_ui/utils/validators.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
-import 'package:main_ui/widgets/custom_button.dart';
+import 'package:main_ui/widgets/app/app_button.dart';
 import 'package:main_ui/exceptions/auth_exception.dart';
 import 'package:main_ui/services/api_service.dart'; // Assuming ApiService is available for direct API calls
 
@@ -309,7 +309,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
                     const SizedBox(height: 24),
 
-                    CustomButton(
+                    AppButton(
                       text: _isLogin ? l10n.login : l10n.register,
                       onPressed: _isLoading ? null : _submit,
                       isLoading: _isLoading,

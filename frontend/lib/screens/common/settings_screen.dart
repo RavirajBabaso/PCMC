@@ -6,7 +6,7 @@ import 'package:main_ui/providers/user_provider.dart';
 import 'package:main_ui/services/auth_service.dart';
 import 'package:main_ui/services/api_service.dart';
 import 'package:main_ui/utils/validators.dart';
-import 'package:main_ui/widgets/custom_button.dart';
+import 'package:main_ui/widgets/app/app_button.dart';
 import 'package:main_ui/widgets/loading_indicator.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
@@ -295,7 +295,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     // Save & Logout
                     SizedBox(
                       width: double.infinity,
-                      child: CustomButton(
+                      child: AppButton(
                         text: localizations.save ,
                         onPressed: _saveSettings,
                       ),
@@ -303,7 +303,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     const SizedBox(height: 12),
                     SizedBox(
                       width: double.infinity,
-                      child: CustomButton(
+                      child: AppButton(
                         text: localizations.logout ,
                         backgroundColor: Colors.red,
                         onPressed: () async {

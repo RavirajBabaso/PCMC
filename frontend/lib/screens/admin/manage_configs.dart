@@ -5,7 +5,7 @@ import '../../services/api_service.dart';
 
 import '../../l10n/app_localizations.dart';
 import '../../widgets/empty_state.dart';
-import '../../widgets/custom_button.dart';
+import '../../widgets/app/app_button.dart';
 
 // Define a Config model
 class Config {
@@ -86,7 +86,7 @@ class _ManageConfigsState extends ConsumerState<ManageConfigs> {
                 icon: Icons.settings_outlined,
                 title: l10n.noConfigs, // New localization key
                 message: l10n.noConfigsMessage, // New localization key
-                actionButton: CustomButton(
+                actionButton: AppButton(
                   text: l10n.addConfig, // New localization key
                   onPressed: () => _showAddConfigDialog(context),
                 ),
@@ -113,7 +113,7 @@ class _ManageConfigsState extends ConsumerState<ManageConfigs> {
           icon: Icons.error,
           title: l10n.error,
           message: error.toString(),
-          actionButton: CustomButton(
+          actionButton: AppButton(
             text: l10n.retry,
             onPressed: () => ref.read(adminProvider.notifier).getConfigs(),
           ),
@@ -160,7 +160,7 @@ class _ManageConfigsState extends ConsumerState<ManageConfigs> {
             onPressed: () => Navigator.pop(context),
             child: Text(l10n.cancel),
           ),
-          CustomButton(
+          AppButton(
             text: l10n.submit,
             onPressed: () async {
               if (_keyController.text.trim().isEmpty || _valueController.text.trim().isEmpty) {
@@ -225,7 +225,7 @@ class _ManageConfigsState extends ConsumerState<ManageConfigs> {
             onPressed: () => Navigator.pop(context),
             child: Text(l10n.cancel),
           ),
-          CustomButton(
+          AppButton(
             text: l10n.update,
             onPressed: () async {
               if (_valueController.text.trim().isEmpty) {
