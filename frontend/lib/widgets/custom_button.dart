@@ -72,37 +72,44 @@ class CustomButton extends StatelessWidget {
       case ButtonVariant.outlined:
         return OutlinedButton(
           onPressed: effectiveOnPressed,
-          style: OutlinedButton.styleFrom(
-            foregroundColor: foregroundColor ?? theme.colorScheme.primary,
-            side: BorderSide(color: theme.colorScheme.primary),
-            padding: _padding,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            minimumSize: _minSize,
+          style: theme.outlinedButtonTheme.style?.copyWith(
+            foregroundColor: WidgetStatePropertyAll(
+              foregroundColor ?? theme.colorScheme.primary,
+            ),
+            side: WidgetStatePropertyAll(
+              BorderSide(color: foregroundColor ?? theme.colorScheme.primary),
+            ),
+            padding: WidgetStatePropertyAll(_padding),
+            minimumSize: WidgetStatePropertyAll(_minSize),
           ),
           child: _child,
         );
       case ButtonVariant.text:
         return TextButton(
           onPressed: effectiveOnPressed,
-          style: TextButton.styleFrom(
-            foregroundColor: foregroundColor ?? theme.colorScheme.primary,
-            padding: _padding,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            minimumSize: _minSize,
+          style: theme.textButtonTheme.style?.copyWith(
+            foregroundColor: WidgetStatePropertyAll(
+              foregroundColor ?? theme.colorScheme.primary,
+            ),
+            padding: WidgetStatePropertyAll(_padding),
+            minimumSize: WidgetStatePropertyAll(_minSize),
           ),
           child: _child,
         );
       case ButtonVariant.filled:
+        final disabledBackground = theme.colorScheme.onSurface.withValues(alpha: 0.12);
+        final resolvedBackground = onPressed == null
+            ? disabledBackground
+            : backgroundColor ?? theme.colorScheme.primary;
         return ElevatedButton(
           onPressed: effectiveOnPressed,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: onPressed == null
-                ? Colors.grey
-                : backgroundColor ?? theme.colorScheme.primary,
-            foregroundColor: foregroundColor ?? theme.colorScheme.onPrimary,
-            padding: _padding,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            minimumSize: _minSize,
+          style: theme.elevatedButtonTheme.style?.copyWith(
+            backgroundColor: WidgetStatePropertyAll(resolvedBackground),
+            foregroundColor: WidgetStatePropertyAll(
+              foregroundColor ?? theme.colorScheme.onPrimary,
+            ),
+            padding: WidgetStatePropertyAll(_padding),
+            minimumSize: WidgetStatePropertyAll(_minSize),
           ),
           child: _child,
         );

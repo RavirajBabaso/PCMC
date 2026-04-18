@@ -1,29 +1,14 @@
 // main_ui/lib/widgets/status_badge.dart
 import 'package:flutter/material.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
+import 'package:main_ui/theme/status_colors.dart';
 
 class StatusBadge extends StatelessWidget {
   final String status;
   const StatusBadge({super.key, required this.status});
 
-  Color get color {
-    switch (status) {
-      case 'new':
-        return Colors.blue;
-      case 'in_progress':
-        return Colors.orange;
-      case 'resolved':
-        return Colors.green;
-      case 'rejected':
-        return Colors.red;
-      case 'on_hold':
-        // return Colors.yellow;
-        return const Color(0xFF6B21A8);
-      case 'closed':
-        return Colors.grey;
-      default:
-        return Colors.grey;
-    }
+  StatusColors colors(BuildContext context) {
+    return StatusPalette.fromStatus(status, Theme.of(context).colorScheme);
   }
 
   String displayText(BuildContext context) {
@@ -70,9 +55,9 @@ class StatusBadge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withValues (alpha:0.1),
+        color: colors(context).background,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withValues (alpha:0.3), width: 1),
+        border: Border.all(color: colors(context).border, width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -80,7 +65,7 @@ class StatusBadge extends StatelessWidget {
           Icon(
             icon,
             size: 14,
-            color: color,
+            color: colors(context).foreground,
           ),
           const SizedBox(width: 4),
           Text(
@@ -88,7 +73,7 @@ class StatusBadge extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w600,
-              color: color,
+              color: colors(context).foreground,
             ),
           ),
         ],
