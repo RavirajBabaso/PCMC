@@ -7,7 +7,7 @@ import 'package:main_ui/models/grievance_model.dart';
 import 'package:main_ui/models/workproof_model.dart';
 import 'package:main_ui/widgets/navigation_drawer.dart';
 import 'package:main_ui/services/api_service.dart';
-import 'package:main_ui/utils/dashboard_style.dart';
+import 'package:main_ui/theme/app_theme.dart';
 import 'package:intl/intl.dart';
 
 // ────────────── Field staff may only move to: in_progress, on_hold, resolved ─

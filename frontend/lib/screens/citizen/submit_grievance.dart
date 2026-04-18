@@ -11,7 +11,7 @@ import 'package:main_ui/widgets/custom_button.dart';
 import 'package:main_ui/widgets/file_upload_widget.dart';
 import 'package:main_ui/widgets/loading_indicator.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
-import 'package:main_ui/utils/dashboard_style.dart';
+import 'package:main_ui/theme/app_theme.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class SubmitGrievance extends ConsumerStatefulWidget {

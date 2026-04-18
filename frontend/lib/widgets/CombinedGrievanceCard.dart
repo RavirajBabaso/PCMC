@@ -3,7 +3,7 @@ import 'package:intl/intl.dart';
 import 'package:main_ui/models/grievance_model.dart';
 import 'package:main_ui/widgets/status_badge.dart';
 import 'package:main_ui/l10n/app_localizations.dart'; // Import AppLocalizations
-import 'package:main_ui/utils/dashboard_style.dart';
+import 'package:main_ui/theme/app_theme.dart';
 
 class CombinedGrievanceCard extends StatelessWidget {
   final Grievance grievance;
