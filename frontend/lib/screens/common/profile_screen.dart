@@ -11,6 +11,7 @@ import 'package:main_ui/models/user_model.dart';
 import 'package:main_ui/providers/user_provider.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:main_ui/utils/constants.dart';
+import 'package:main_ui/layouts/app_shell.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -81,32 +82,31 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final theme = Theme.of(context);
     final user = ref.watch(userNotifierProvider);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(localizations.profile),
-        actions: [
-          if (user != null)
-            IconButton(
-              icon: const Icon(Icons.logout),
-              tooltip: localizations.logout,
-              onPressed: () async {
-                setState(() => _isLoading = true);
-                try {
-                  await AuthService.logout();
-                  ref.read(userNotifierProvider.notifier).setUser(null);
-                  Navigator.pushReplacementNamed(context, '/login');
-                } catch (e) {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(localizations.logoutFailed)),
-                  );
-                } finally {
-                  setState(() => _isLoading = false);
-                }
-              },
-            ),
-        ],
-      ),
-      body: _isLoading
+    return AppShell(
+      title: localizations.profile,
+      currentRoute: '/profile',
+      actions: [
+        if (user != null)
+          IconButton(
+            icon: const Icon(Icons.logout),
+            tooltip: localizations.logout,
+            onPressed: () async {
+              setState(() => _isLoading = true);
+              try {
+                await AuthService.logout();
+                ref.read(userNotifierProvider.notifier).setUser(null);
+                Navigator.pushReplacementNamed(context, '/login');
+              } catch (e) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(localizations.logoutFailed)),
+                );
+              } finally {
+                setState(() => _isLoading = false);
+              }
+            },
+          ),
+      ],
+      child: _isLoading
           ? const LoadingIndicator()
           : user == null
               ? _buildNotLoggedInView(context, localizations, theme)

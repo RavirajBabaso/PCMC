@@ -8,6 +8,7 @@ import 'package:main_ui/services/api_service.dart';
 import 'package:main_ui/utils/validators.dart';
 import 'package:main_ui/widgets/app/app_button.dart';
 import 'package:main_ui/widgets/loading_indicator.dart';
+import 'package:main_ui/layouts/app_shell.dart';
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -96,17 +97,12 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
     final locale = ref.watch(localeNotifierProvider);
-    final theme = Theme.of(context);
 
-    return Scaffold(
+    return AppShell(
+      title: localizations.settings,
+      currentRoute: '/settings',
       backgroundColor: const Color(0xFFF8FBFF),
-      appBar: AppBar(
-        title: Text(localizations.settings),
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        foregroundColor: theme.appBarTheme.foregroundColor,
-        elevation: theme.appBarTheme.elevation,
-      ),
-      body: _isLoading
+      child: _isLoading
           ? const LoadingIndicator()
           : SingleChildScrollView(
               padding: const EdgeInsets.all(16.0),

@@ -6,7 +6,7 @@ import 'package:main_ui/l10n/app_localizations.dart';
 import 'package:main_ui/providers/admin_provider.dart';
 import 'package:main_ui/models/grievance_model.dart';
 import 'package:main_ui/models/kpi_model.dart';
-import 'package:main_ui/widgets/navigation_drawer.dart';
+import 'package:main_ui/layouts/app_shell.dart';
 import 'package:universal_html/html.dart' as html;
 import 'package:flutter/foundation.dart';
 import 'dart:io' as io;
@@ -96,11 +96,15 @@ class _DashboardState extends ConsumerState<Dashboard>
     final kpi = ref.watch(adminProvider).kpiData;
     final loc = AppLocalizations.of(context)!;
 
-    return Scaffold(
+    return AppShell(
+      title: 'COMMAND CENTER',
+      currentRoute: '/admin/home',
       backgroundColor: _bg,
-      appBar: _buildAppBar(),
-      drawer: const CustomNavigationDrawer(),
-      body: RefreshIndicator(
+      actions: [
+        for (final p in ['7d', '30d', 'all']) _periodChip(p),
+        const SizedBox(width: 8),
+      ],
+      child: RefreshIndicator(
         onRefresh: _fetchData, color: _cyan, backgroundColor: _surface,
         child: SingleChildScrollView(
           physics: const AlwaysScrollableScrollPhysics(),
@@ -131,31 +135,6 @@ class _DashboardState extends ConsumerState<Dashboard>
       ),
     );
   }
-
-  PreferredSizeWidget _buildAppBar() => AppBar(
-    backgroundColor: _surface,
-    elevation: 0,
-    bottom: PreferredSize(
-      preferredSize: const Size.fromHeight(1),
-      child: Container(height: 1, color: _cyan.withOpacity(0.3)),
-    ),
-    iconTheme: const IconThemeData(color: _cyan),
-    title: Row(children: [
-      AnimatedBuilder(
-        animation: _pulse,
-        builder: (_, __) => Container(width: 8, height: 8,
-          decoration: BoxDecoration(shape: BoxShape.circle, color: _cyan,
-            boxShadow: [BoxShadow(color: _cyan.withOpacity(0.4 + _pulse.value * 0.6), blurRadius: 10)])),
-      ),
-      const SizedBox(width: 10),
-      Text('COMMAND CENTER',
-          style: TextStyle(color: _cyan, fontSize: 15, fontWeight: FontWeight.w800, letterSpacing: 3)),
-    ]),
-    actions: [
-      for (final p in ['7d', '30d', 'all']) _periodChip(p),
-      const SizedBox(width: 8),
-    ],
-  );
 
   Widget _periodChip(String label) {
     final sel = _selectedPeriod == label;
