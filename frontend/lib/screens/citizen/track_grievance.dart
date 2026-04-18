@@ -8,7 +8,7 @@ import 'package:main_ui/widgets/ad_card.dart';
 import 'package:main_ui/widgets/CombinedGrievanceCard.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
 import 'package:main_ui/theme/app_theme.dart';
-import 'package:main_ui/widgets/navigation_drawer.dart';
+import 'package:main_ui/layouts/app_shell.dart';
 import 'package:main_ui/providers/auth_provider.dart';
 
 /// Derives the current authenticated user's ID from [authProvider].
@@ -27,7 +27,6 @@ class TrackGrievance extends ConsumerStatefulWidget {
 }
 
 class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
-  int _selectedIndex = 0;
   final PageController _pageController = PageController(viewportFraction: 0.9);
   int _currentPage = 0;
   final PageController _adsPageController = PageController(viewportFraction: 0.9);
@@ -83,20 +82,6 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
     super.dispose();
   }
 
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-    if (index == 1) { 
-      final userId = ref.read(userIdProvider);
-      if (userId != null) {
-        ref.invalidate(citizenHistoryProvider(userId));
-      }
-    } else if (index == 2) {
-      Navigator.pushNamed(context, '/profile');
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
@@ -124,16 +109,11 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
       );
     }
 
-    return Scaffold(
+    return AppShell(
+      title: localizations.track_grievances,
+      currentRoute: '/citizen/track',
       backgroundColor: dsBackground,
-      appBar: AppBar(
-        backgroundColor: dsSurface,
-        foregroundColor: dsAccent,
-        title: Text(localizations.track_grievances),
-        elevation: 0,
-      ),
-      drawer: const CustomNavigationDrawer(),
-      body: RefreshIndicator(
+      child: RefreshIndicator(
         color: dsAccent,
         backgroundColor: dsSurface,
         onRefresh: () async {
@@ -315,34 +295,6 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
         backgroundColor: dsAccent,
         foregroundColor: dsSurface,
         child: const Icon(Icons.add_rounded),
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: dsSurface,
-        selectedIconTheme: const IconThemeData(color: dsAccent),
-        unselectedIconTheme: const IconThemeData(color: dsTextSecondary),
-        items: const <BottomNavigationBarItem>[
-          BottomNavigationBarItem(
-            icon: Icon(Icons.track_changes_outlined),
-            activeIcon: Icon(Icons.track_changes_rounded),
-            label: 'Track',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.add_circle_outline),
-            activeIcon: Icon(Icons.add_circle_rounded),
-            label: 'Submit',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person_outline),
-            activeIcon: Icon(Icons.person_rounded),
-            label: 'Profile',
-          ),
-        ],
-        currentIndex: _selectedIndex,
-        selectedItemColor: dsAccent,
-        unselectedItemColor: dsTextSecondary,
-        showUnselectedLabels: true,
-        onTap: _onItemTapped,
       ),
     );
   }
