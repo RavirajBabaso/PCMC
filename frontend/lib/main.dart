@@ -5,7 +5,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 
 import 'l10n/app_localizations.dart';
 import 'routes.dart';
-import 'utils/theme.dart';
+import 'theme/app_theme.dart';
 import 'screens/auth/login_callback.dart';
 import 'screens/auth/splash_screen.dart';
 import 'providers/locale_provider.dart';
@@ -31,8 +31,8 @@ class MyApp extends ConsumerWidget {
 
     return MaterialApp(
       title: 'Grievance System',
-      theme: lightTheme,
-      darkTheme: darkTheme,
+      theme: AppTheme.light,
+      darkTheme: AppTheme.dark,
       themeMode: ThemeMode.system,
       locale: locale,
       localizationsDelegates: const [

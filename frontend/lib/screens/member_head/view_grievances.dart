@@ -8,7 +8,7 @@ import 'package:main_ui/widgets/empty_state.dart';
 import 'package:main_ui/widgets/loading_indicator.dart';
 import 'package:main_ui/widgets/status_badge.dart';
 import 'package:main_ui/widgets/navigation_drawer.dart';
-import 'package:main_ui/utils/dashboard_style.dart';
+import 'package:main_ui/theme/app_theme.dart';
 
 class ViewGrievances extends StatefulWidget {
   const ViewGrievances({super.key});

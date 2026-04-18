@@ -4,7 +4,7 @@ import 'package:main_ui/l10n/app_localizations.dart';
 import 'package:main_ui/models/grievance_model.dart';
 import 'package:main_ui/providers/master_data_provider.dart';
 import 'package:main_ui/services/grievance_service.dart';
-import 'package:main_ui/utils/dashboard_style.dart';
+import 'package:main_ui/theme/app_theme.dart';
 import 'package:main_ui/widgets/custom_button.dart';
 import 'package:main_ui/widgets/loading_indicator.dart';
 

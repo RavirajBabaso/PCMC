@@ -11,7 +11,7 @@ import '../../services/grievance_service.dart';
 import '../../widgets/status_badge.dart';
 import '../../widgets/comment_tile.dart';
 import '../../l10n/app_localizations.dart';
-import 'package:main_ui/utils/dashboard_style.dart';
+import 'package:main_ui/theme/app_theme.dart';
 import '../../widgets/empty_state.dart';
 import '../../widgets/custom_button.dart';
 import '../../services/api_service.dart'; // Import ApiService for baseUrl

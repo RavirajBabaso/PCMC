@@ -7,7 +7,7 @@ import 'package:main_ui/providers/ad_provider.dart';
 import 'package:main_ui/widgets/ad_card.dart';
 import 'package:main_ui/widgets/CombinedGrievanceCard.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
-import 'package:main_ui/utils/dashboard_style.dart';
+import 'package:main_ui/theme/app_theme.dart';
 import 'package:main_ui/widgets/navigation_drawer.dart';
 import 'package:main_ui/providers/auth_provider.dart';
 

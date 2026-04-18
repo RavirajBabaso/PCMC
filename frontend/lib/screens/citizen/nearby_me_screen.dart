@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:main_ui/services/api_service.dart';
-import 'package:main_ui/utils/dashboard_style.dart';
+import 'package:main_ui/theme/app_theme.dart';
 
 class NearbyMeScreen extends StatefulWidget {
   const NearbyMeScreen({super.key});
