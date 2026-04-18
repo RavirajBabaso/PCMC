@@ -45,9 +45,13 @@ class AppTextField extends StatelessWidget {
     final radius = context.appEffects.radiusMd;
     final isSingleLine = (maxLines ?? 1) == 1;
 
-    return TextFormField(
-      controller: controller,
-      focusNode: focusNode,
+    return Semantics(
+      textField: true,
+      label: label,
+      hint: hintText,
+      child: TextFormField(
+        controller: controller,
+        focusNode: focusNode,
       keyboardType: keyboardType,
       textInputAction: textInputAction,
       obscureText: obscureText,

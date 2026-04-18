@@ -54,12 +54,23 @@ def create_grievance(user):
 @citizen_or_admin_required
 def my_grievances(user):
     try:
+        page = request.args.get('page', default=1, type=int)
+        per_page = request.args.get('per_page', default=20, type=int)
+
         if user.role in (Role.ADMIN, Role.MEMBER_HEAD):
-            grievances = Grievance.query.order_by(Grievance.created_at.desc()).all()
+            page_obj = Grievance.query.order_by(Grievance.created_at.desc())
         else:
-            grievances = Grievance.query.filter_by(citizen_id=user.id)\
-                .order_by(Grievance.created_at.desc()).all()
-        return jsonify(GrievanceSchema(many=True).dump(grievances)), 200
+            page_obj = (Grievance.query
+                        .filter_by(citizen_id=user.id)
+                        .order_by(Grievance.created_at.desc()))
+
+        page_obj = page_obj.paginate(page=page, per_page=per_page, error_out=False)
+        return jsonify({
+            'grievances': GrievanceSchema(many=True).dump(page_obj.items),
+            'total': page_obj.total,
+            'page': page_obj.page,
+            'per_page': page_obj.per_page,
+        }), 200
     except Exception as e:
         logger.error("Error fetching grievances for user %s: %s", user.id, e)
         return jsonify({"msg": str(e)}), 400
@@ -81,8 +92,15 @@ def track_grievances(user):
 @member_head_required
 def new_grievances(user):
     try:
-        result, _ = get_new_grievances()
-        return jsonify(result), 200
+        page = request.args.get('page', default=1, type=int)
+        per_page = request.args.get('per_page', default=20, type=int)
+        result, total = get_new_grievances(page=page, per_page=per_page)
+        return jsonify({
+            'grievances': result,
+            'total': total,
+            'page': page,
+            'per_page': per_page,
+        }), 200
     except Exception as e:
         logger.error("Error fetching new grievances: %s", e)
         return jsonify({"msg": str(e)}), 400
@@ -92,8 +110,15 @@ def new_grievances(user):
 @field_staff_required
 def assigned_grievances(user):
     try:
-        result, _ = get_assigned_grievances(user.id)
-        return jsonify(result), 200
+        page = request.args.get('page', default=1, type=int)
+        per_page = request.args.get('per_page', default=20, type=int)
+        result, total = get_assigned_grievances(user.id, page=page, per_page=per_page)
+        return jsonify({
+            'grievances': result,
+            'total': total,
+            'page': page,
+            'per_page': per_page,
+        }), 200
     except Exception as e:
         logger.error("Error fetching assigned grievances for user %s: %s", user.id, e)
         return jsonify({"msg": str(e)}), 400

@@ -4,6 +4,7 @@ from datetime import datetime, timezone
 
 from flask import Blueprint, Response, current_app, jsonify, request
 from flask_jwt_extended import get_jwt_identity, jwt_required
+from sqlalchemy import desc
 from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from werkzeug.utils import secure_filename
 
@@ -245,8 +246,25 @@ def get_all_grievances(user):
             query = query.filter_by(area_id=a)
         if sub := request.args.get('subject_id', type=int):
             query = query.filter_by(subject_id=sub)
-        grievances = query.order_by(Grievance.created_at.desc()).all()
-        return jsonify(GrievanceSchema(many=True).dump(grievances))
+
+        page = request.args.get('page', default=1, type=int)
+        per_page = request.args.get('per_page', default=20, type=int)
+        sort_by = request.args.get('sort_by', 'created_at')
+        sort_order = request.args.get('sort_order', 'desc').lower()
+
+        if hasattr(Grievance, sort_by):
+            sort_column = getattr(Grievance, sort_by)
+            query = query.order_by(desc(sort_column) if sort_order == 'desc' else sort_column)
+        else:
+            query = query.order_by(Grievance.created_at.desc())
+
+        page_obj = query.paginate(page=page, per_page=per_page, error_out=False)
+        return jsonify({
+            'grievances': GrievanceSchema(many=True).dump(page_obj.items),
+            'total': page_obj.total,
+            'page': page_obj.page,
+            'per_page': page_obj.per_page,
+        }), 200
     except Exception as e:
         return jsonify({"success": False, "message": str(e)}), 500
 

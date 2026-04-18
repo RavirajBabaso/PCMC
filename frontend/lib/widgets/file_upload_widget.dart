@@ -33,7 +33,11 @@ class _FileUploadWidgetState extends State<FileUploadWidget> {
   Widget build(BuildContext context) {
     return Column(
       children: [
-        ElevatedButton(onPressed: _pickFiles, child: const Text('Upload Files')),
+        Semantics(
+          button: true,
+          label: 'Upload files',
+          child: ElevatedButton(onPressed: _pickFiles, child: const Text('Upload Files')),
+        ),
         ...files.map((file) {
           final mimeType = lookupMimeType(file.name); // Use name
           if (mimeType?.startsWith('image/') ?? false) {

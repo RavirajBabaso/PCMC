@@ -1,9 +1,11 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:geolocator/geolocator.dart';
 
 import '../models/grievance_model.dart';
+import '../models/paginated_result.dart';
 import 'api_service.dart';
 
 class GrievanceService {
@@ -23,6 +25,25 @@ class GrievanceService {
           .toList();
     }
     throw Exception('Unexpected response format');
+  }
+
+  PaginatedResult<Grievance> _parsePaginatedGrievanceResponse(Response response) {
+    final payload = response.data;
+    final grievances = _parseGrievanceList(response);
+    if (payload is Map<String, dynamic>) {
+      return PaginatedResult<Grievance>(
+        items: grievances,
+        total: payload['total'] as int? ?? grievances.length,
+        page: payload['page'] as int? ?? 1,
+        perPage: payload['per_page'] as int? ?? grievances.length,
+      );
+    }
+    return PaginatedResult<Grievance>(
+      items: grievances,
+      total: grievances.length,
+      page: 1,
+      perPage: grievances.length,
+    );
   }
 
   Exception _handleDioException(DioException e, String action) {
@@ -62,33 +83,62 @@ class GrievanceService {
     return getGrievanceById(id);
   }
 
-  Future<List<Grievance>> getMyGrievances() async {
+  Future<PaginatedResult<Grievance>> getMyGrievances({
+    int page = 1,
+    int perPage = 20,
+  }) async {
     try {
-      return _parseGrievanceList(await _dio.get('/grievances/mine'));
+      final response = await _dio.get(
+        '/grievances/mine',
+        queryParameters: {'page': page, 'per_page': perPage},
+      );
+      return _parsePaginatedGrievanceResponse(response);
     } on DioException catch (e) {
       throw _handleDioException(e, 'fetch my grievances');
     }
   }
 
-  Future<List<Grievance>> getGrievancesByUserId(int userId) async {
+  Future<PaginatedResult<Grievance>> getGrievancesByUserId(
+    int userId, {
+    int page = 1,
+    int perPage = 20,
+  }) async {
     try {
-      return _parseGrievanceList(await _dio.get('/grievances/track'));
+      final response = await _dio.get(
+        '/grievances/track',
+        queryParameters: {'page': page, 'per_page': perPage},
+      );
+      return _parsePaginatedGrievanceResponse(response);
     } on DioException catch (e) {
       throw _handleDioException(e, 'fetch user grievances');
     }
   }
 
-  Future<List<Grievance>> getNewGrievances() async {
+  Future<PaginatedResult<Grievance>> getNewGrievances({
+    int page = 1,
+    int perPage = 20,
+  }) async {
     try {
-      return _parseGrievanceList(await _dio.get('/grievances/all'));
+      final response = await _dio.get(
+        '/grievances/all',
+        queryParameters: {'page': page, 'per_page': perPage},
+      );
+      return _parsePaginatedGrievanceResponse(response);
     } on DioException catch (e) {
       throw _handleDioException(e, 'fetch new grievances');
     }
   }
 
-  Future<List<Grievance>> getAssignedGrievances() async {
+  Future<PaginatedResult<Grievance>> getAssignedGrievances({
+    int page = 1,
+    int perPage = 20,
+  }) async {
     try {
-      return _parseGrievanceList(await _dio.get('/grievances/assigned'));
+      final response = await _dio.get(
+        '/grievances/assigned',
+        queryParameters: {'page': page, 'per_page': perPage},
+      );
+      return _parsePaginatedGrievanceResponse(response);
     } on DioException catch (e) {
       throw _handleDioException(e, 'fetch assigned grievances');
     }
@@ -218,3 +268,5 @@ class GrievanceService {
     }
   }
 }
+
+final grievanceServiceProvider = Provider((ref) => GrievanceService());

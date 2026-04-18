@@ -1,8 +1,10 @@
-import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dio/dio.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/grievance_model.dart';
 import '../models/kpi_model.dart';
+import '../models/paginated_result.dart';
+import '../services/admin_service.dart';
 import '../services/api_service.dart';
 
 class Config {
@@ -49,7 +51,11 @@ class AdminState {
 }
 
 class AdminNotifier extends StateNotifier<AdminState> {
-  AdminNotifier() : super(const AdminState()) {
+  final AdminService _service;
+
+  AdminNotifier([AdminService? service])
+      : _service = service ?? AdminService(),
+        super(const AdminState()) {
     getConfigs();
   }
 
@@ -68,14 +74,24 @@ class AdminNotifier extends StateNotifier<AdminState> {
     String? priority,
     int? areaId,
     int? subjectId,
+    int page = 1,
+    int perPage = 20,
+    String sortBy = 'created_at',
+    String sortOrder = 'desc',
   }) async {
     try {
-      final response = await ApiService.get('/admins/grievances/all');
-      final grievances = (response.data as List)
-          .map((g) => Grievance.fromJson(g as Map<String, dynamic>))
-          .toList();
-      state = state.copyWith(grievances: grievances);
-      return grievances;
+      final pageResult = await _service.getAllGrievances(
+        status: status,
+        priority: priority,
+        areaId: areaId,
+        subjectId: subjectId,
+        page: page,
+        perPage: perPage,
+        sortBy: sortBy,
+        sortOrder: sortOrder,
+      );
+      state = state.copyWith(grievances: pageResult.items);
+      return pageResult.items;
     } catch (e) {
       state = state.copyWith(grievances: [], error: e.toString());
       return [];
@@ -133,7 +149,7 @@ class AdminNotifier extends StateNotifier<AdminState> {
 
   Future<void> addComment(int grievanceId, String comment) async {
     try {
-      await ApiService.post('/grievances/$grievanceId/comments', {'content': comment});
+      await ApiService.post('/grievances/$grievanceId/comments', {'comment_text': comment});
       await getAllGrievances();
     } catch (e) {
       state = state.copyWith(error: e.toString());

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/grievance_model.dart';
+import '../models/paginated_result.dart';
 import '../services/grievance_service.dart';
 
 // ── Family provider: citizen grievance history by userId ─────────────────────
@@ -35,26 +36,30 @@ class GrievanceState {
 
 // ── Notifier ──────────────────────────────────────────────────────────────────
 class GrievanceNotifier extends StateNotifier<GrievanceState> {
-  GrievanceNotifier() : super(const GrievanceState());
+  final GrievanceService _service;
 
-  final _service = GrievanceService();
+  GrievanceNotifier(this._service) : super(const GrievanceState());
 
-  Future<void> _fetch(Future<List<Grievance>> Function() loader) async {
+  Future<void> _fetch(Future<PaginatedResult<Grievance>> Function() loader) async {
     if (state.isLoading) return;
     state = state.copyWith(isLoading: true, error: null);
     try {
-      state = state.copyWith(grievances: await loader(), isLoading: false);
+      final page = await loader();
+      state = state.copyWith(grievances: page.items, isLoading: false);
     } catch (e) {
       state = state.copyWith(isLoading: false, error: e.toString());
       rethrow;
     }
   }
 
-  Future<void> fetchMyGrievances() => _fetch(_service.getMyGrievances);
-  Future<void> fetchNewGrievances() => _fetch(_service.getNewGrievances);
-  Future<void> fetchAssignedGrievances() => _fetch(_service.getAssignedGrievances);
+  Future<void> fetchMyGrievances({int page = 1, int perPage = 20}) =>
+      _fetch(() => _service.getMyGrievances(page: page, perPage: perPage));
+  Future<void> fetchNewGrievances({int page = 1, int perPage = 20}) =>
+      _fetch(() => _service.getNewGrievances(page: page, perPage: perPage));
+  Future<void> fetchAssignedGrievances({int page = 1, int perPage = 20}) =>
+      _fetch(() => _service.getAssignedGrievances(page: page, perPage: perPage));
 }
 
 final grievanceProvider =
     StateNotifierProvider<GrievanceNotifier, GrievanceState>(
-        (ref) => GrievanceNotifier());
+        (ref) => GrievanceNotifier(ref.read(grievanceServiceProvider)));

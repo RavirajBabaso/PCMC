@@ -13,12 +13,14 @@ class StandardTextInput extends StatelessWidget {
   final bool isRequired;
   final TextInputAction textInputAction;
   final void Function(String)? onChanged;
+  final FocusNode? focusNode;
   final String? helperText;
 
   const StandardTextInput({
     super.key,
     required this.controller,
     required this.label,
+    this.focusNode,
     this.hint,
     this.validator,
     this.maxLines = 1,
@@ -32,9 +34,14 @@ class StandardTextInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
+    return Semantics(
+      textField: true,
+      label: label,
+      hint: hint,
+      child: TextFormField(
+        controller: controller,
+        focusNode: focusNode,
+        decoration: InputDecoration(
         labelText: isRequired ? '${label} *' : label,
         hintText: hint,
         helperText: helperText,
@@ -82,6 +89,7 @@ class StandardDropdown<T> extends StatelessWidget {
   final void Function(T?)? onChanged;
   final String label;
   final String? Function(T?)? validator;
+  final FocusNode? focusNode;
   final bool isRequired;
   final String? hint;
 
@@ -91,6 +99,7 @@ class StandardDropdown<T> extends StatelessWidget {
     required this.items,
     required this.onChanged,
     required this.label,
+    this.focusNode,
     this.validator,
     this.isRequired = false,
     this.hint,
@@ -98,9 +107,13 @@ class StandardDropdown<T> extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<T>(
-      value: value,
-      decoration: InputDecoration(
+    return Semantics(
+      label: label,
+      hint: hint,
+      child: DropdownButtonFormField<T>(
+        focusNode: focusNode,
+        value: value,
+        decoration: InputDecoration(
         labelText: isRequired ? '${label} *' : label,
         hintText: hint,
         labelStyle: const TextStyle(color: Color(0xFF8BA3BE)),

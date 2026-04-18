@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
 import 'package:main_ui/models/grievance_model.dart';
-import 'package:main_ui/services/api_service.dart';
+import 'package:main_ui/services/grievance_service.dart';
 import 'package:main_ui/widgets/empty_state.dart';
 import 'package:main_ui/widgets/loading_indicator.dart';
 import 'package:main_ui/widgets/status_badge.dart';
@@ -62,21 +62,8 @@ class _ViewGrievancesState extends State<ViewGrievances> {
     });
 
     try {
-      final response = await ApiService.get('/grievances/all');
-     
-
-      if (response.data is! List) {
-        throw Exception("Expected a list from API, got ${response.data.runtimeType}");
-      }
-
-      grievances = (response.data as List).map((e) {
-        try {
-          return Grievance.fromJson(e);
-        } catch (e) {
-          rethrow;
-        }
-      }).toList();
-
+      final result = await GrievanceService().getNewGrievances(page: 1, perPage: 50);
+      grievances = result.items;
       filteredGrievances = List.from(grievances);
     
 

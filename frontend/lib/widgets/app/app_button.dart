@@ -84,41 +84,56 @@ class AppButton extends StatelessWidget {
 
     switch (variant) {
       case AppButtonVariant.outlined:
-        return OutlinedButton(
-          onPressed: effectiveOnPressed,
-          style: theme.outlinedButtonTheme.style?.copyWith(
-            minimumSize: WidgetStatePropertyAll(minimumSize),
-            padding: WidgetStatePropertyAll(_padding(context)),
-            shape: WidgetStatePropertyAll(shape),
-            foregroundColor: WidgetStatePropertyAll(foregroundColor ?? theme.colorScheme.primary),
+        return Semantics(
+          button: true,
+          label: _label,
+          enabled: effectiveOnPressed != null,
+          child: OutlinedButton(
+            onPressed: effectiveOnPressed,
+            style: theme.outlinedButtonTheme.style?.copyWith(
+              minimumSize: WidgetStatePropertyAll(minimumSize),
+              padding: WidgetStatePropertyAll(_padding(context)),
+              shape: WidgetStatePropertyAll(shape),
+              foregroundColor: WidgetStatePropertyAll(foregroundColor ?? theme.colorScheme.primary),
+            ),
+            child: child,
           ),
-          child: child,
         );
       case AppButtonVariant.text:
-        return TextButton(
-          onPressed: effectiveOnPressed,
-          style: theme.textButtonTheme.style?.copyWith(
-            minimumSize: WidgetStatePropertyAll(minimumSize),
-            padding: WidgetStatePropertyAll(_padding(context)),
-            shape: WidgetStatePropertyAll(shape),
-            foregroundColor: WidgetStatePropertyAll(foregroundColor ?? theme.colorScheme.primary),
+        return Semantics(
+          button: true,
+          label: _label,
+          enabled: effectiveOnPressed != null,
+          child: TextButton(
+            onPressed: effectiveOnPressed,
+            style: theme.textButtonTheme.style?.copyWith(
+              minimumSize: WidgetStatePropertyAll(minimumSize),
+              padding: WidgetStatePropertyAll(_padding(context)),
+              shape: WidgetStatePropertyAll(shape),
+              foregroundColor: WidgetStatePropertyAll(foregroundColor ?? theme.colorScheme.primary),
+            ),
+            child: child,
           ),
-          child: child,
         );
       case AppButtonVariant.filled:
         final disabledBackground = theme.colorScheme.onSurface.withValues(alpha: 0.12);
-        return ElevatedButton(
-          onPressed: effectiveOnPressed,
-          style: theme.elevatedButtonTheme.style?.copyWith(
-            minimumSize: WidgetStatePropertyAll(minimumSize),
-            padding: WidgetStatePropertyAll(_padding(context)),
-            shape: WidgetStatePropertyAll(shape),
-            backgroundColor: WidgetStatePropertyAll(
-              onPressed == null ? disabledBackground : backgroundColor ?? theme.colorScheme.primary,
+        return Semantics(
+          button: true,
+          label: _label,
+          enabled: effectiveOnPressed != null,
+          child: ElevatedButton(
+            onPressed: effectiveOnPressed,
+            style: theme.elevatedButtonTheme.style?.copyWith(
+              minimumSize: WidgetStatePropertyAll(minimumSize),
+              padding: WidgetStatePropertyAll(_padding(context)),
+              shape: WidgetStatePropertyAll(shape),
+              backgroundColor: WidgetStatePropertyAll(
+                onPressed == null ? disabledBackground : backgroundColor ?? theme.colorScheme.primary,
+              ),
+              foregroundColor: WidgetStatePropertyAll(foregroundColor ?? theme.colorScheme.onPrimary),
             ),
-            foregroundColor: WidgetStatePropertyAll(foregroundColor ?? theme.colorScheme.onPrimary),
+            child: child,
           ),
-          child: child,
         );
     }
   }

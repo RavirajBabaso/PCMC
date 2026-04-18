@@ -129,13 +129,29 @@ class MultiStepFormStepper extends StatelessWidget {
                 ),
               ),
             ),
-            itemBuilder: (context, index) => GestureDetector(
-              onTap: index < currentStep || steps[index].isValidated
-                  ? () {
-                      onStepChanged?.call(index);
-                    }
-                  : null,
-              child: _buildStepIndicator(context, index),
+            itemBuilder: (context, index) => FocusableActionDetector(
+              actions: {
+                ActivateIntent: CallbackAction<Intent>(onInvoke: (_) {
+                  if (index < currentStep || steps[index].isValidated) {
+                    onStepChanged?.call(index);
+                  }
+                  return null;
+                }),
+              },
+              enabled: index < currentStep || steps[index].isValidated,
+              child: Semantics(
+                button: true,
+                label: 'Step ${index + 1}: ${steps[index].title}',
+                enabled: index < currentStep || steps[index].isValidated,
+                child: GestureDetector(
+                  onTap: index < currentStep || steps[index].isValidated
+                      ? () {
+                          onStepChanged?.call(index);
+                        }
+                      : null,
+                  child: _buildStepIndicator(context, index),
+                ),
+              ),
             ),
           ),
         ),
@@ -254,30 +270,44 @@ class MultiStepFormStepper extends StatelessWidget {
         color: isPrimary ? dsAccent : Colors.transparent,
         border: isPrimary ? null : Border.all(color: dsAccent),
       ),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onPressed,
-          borderRadius: BorderRadius.circular(12),
-          child: Center(
-            child: isLoading
-                ? const SizedBox(
-                    width: 24,
-                    height: 24,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      valueColor:
-                          AlwaysStoppedAnimation<Color>(Colors.white),
-                    ),
-                  )
-                : Text(
-                    label,
-                    style: TextStyle(
-                      color: isPrimary ? Colors.white : dsAccent,
-                      fontWeight: FontWeight.w600,
-                      fontSize: 16,
-                    ),
-                  ),
+      child: FocusableActionDetector(
+        enabled: onPressed != null,
+        actions: {
+          ActivateIntent: CallbackAction<Intent>(onInvoke: (_) {
+            onPressed?.call();
+            return null;
+          }),
+        },
+        child: Semantics(
+          button: true,
+          label: label,
+          enabled: onPressed != null,
+          child: Material(
+            color: Colors.transparent,
+            child: InkWell(
+              onTap: onPressed,
+              borderRadius: BorderRadius.circular(12),
+              child: Center(
+                child: isLoading
+                    ? const SizedBox(
+                        width: 24,
+                        height: 24,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor:
+                              AlwaysStoppedAnimation<Color>(Colors.white),
+                        ),
+                      )
+                    : Text(
+                        label,
+                        style: TextStyle(
+                          color: isPrimary ? Colors.white : dsAccent,
+                          fontWeight: FontWeight.w600,
+                          fontSize: 16,
+                        ),
+                      ),
+              ),
+            ),
           ),
         ),
       ),
