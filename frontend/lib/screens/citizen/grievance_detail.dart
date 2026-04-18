@@ -13,7 +13,7 @@ import '../../widgets/comment_tile.dart';
 import '../../l10n/app_localizations.dart';
 import 'package:main_ui/theme/app_theme.dart';
 import '../../widgets/empty_state.dart';
-import '../../widgets/custom_button.dart';
+import '../../widgets/app/app_button.dart';
 import '../../services/api_service.dart'; // Import ApiService for baseUrl
 import '../../providers/user_provider.dart';
 import 'package:main_ui/utils/constants.dart';
@@ -486,7 +486,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                           
                           const SizedBox(height: 16),
                           
-                          CustomButton(
+                          AppButton(
                             text: l10n.submit,
                             onPressed: () async {
                               if (_rating == null) {

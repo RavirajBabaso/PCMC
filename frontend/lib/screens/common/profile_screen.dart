@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
 import 'package:main_ui/services/api_service.dart';
 import 'package:main_ui/services/auth_service.dart';
-import 'package:main_ui/widgets/custom_button.dart';
+import 'package:main_ui/widgets/app/app_button.dart';
 import 'package:main_ui/widgets/loading_indicator.dart';
 import 'package:main_ui/widgets/file_upload_widget.dart';
 import 'package:main_ui/models/user_model.dart';
@@ -127,7 +127,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           const SizedBox(height: 16),
           SizedBox(
             width: 200, // Constrain the button width
-            child: CustomButton(
+            child: AppButton(
               text: localizations.login,
               icon: Icons.login,
               onPressed: () => Navigator.pushNamed(context, '/login'),
@@ -311,7 +311,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.only(right: 8.0),
-                        child: CustomButton(
+                        child: AppButton(
                           text: localizations.cancel,
                           backgroundColor: theme.colorScheme.secondary,
                           onPressed: () => setState(() {
@@ -327,7 +327,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                     Expanded(
                       child: Padding(
                         padding: const EdgeInsets.only(left: 8.0),
-                        child: CustomButton(
+                        child: AppButton(
                           text: localizations.update,
                           icon: Icons.save,
                           onPressed: _updateProfile,
@@ -340,7 +340,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               else
                 SizedBox(
                   width: double.infinity,
-                  child: CustomButton( // Localize 'Edit Profile'
+                  child: AppButton( // Localize 'Edit Profile'
                     text: localizations.editProfile,
                     icon: Icons.edit,
                     onPressed: () => setState(() => _isEditing = true),

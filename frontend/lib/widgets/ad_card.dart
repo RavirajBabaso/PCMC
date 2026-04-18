@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../models/ad_model.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
+import 'package:main_ui/widgets/app/loading_skeleton.dart';
 
 class AdCard extends StatefulWidget {
   final Advertisement ad;
@@ -147,16 +148,8 @@ class _AdCardState extends State<AdCard> with SingleTickerProviderStateMixin {
             if (loadingProgress == null) return child;
             return Container(
               color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
-              child: Center(
-                child: CircularProgressIndicator(
-                  value: loadingProgress.expectedTotalBytes != null
-                      ? loadingProgress.cumulativeBytesLoaded /
-                          loadingProgress.expectedTotalBytes!
-                      : null,
-                  strokeWidth: 2,
-                  color: theme.colorScheme.primary,
-                ),
-              ),
+              padding: const EdgeInsets.all(16),
+              child: const LoadingSkeleton(height: double.infinity),
             );
           },
           errorBuilder: (context, error, stackTrace) => 

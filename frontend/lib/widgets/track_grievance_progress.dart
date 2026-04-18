@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:main_ui/models/grievance_model.dart';
+import 'package:main_ui/widgets/app/app_card.dart';
 import 'package:main_ui/widgets/status_badge.dart';
 
 class TrackGrievanceProgress extends StatelessWidget {
@@ -22,13 +23,10 @@ class TrackGrievanceProgress extends StatelessWidget {
 
     final currentStageIndex = _getCurrentStageIndex(status, grievance);
 
-    return Card(
-      elevation: 2,
-      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.all(Radius.circular(12))),
+    return AppCard(
+      radius: 12,
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
+      child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
@@ -117,7 +115,6 @@ class TrackGrievanceProgress extends StatelessWidget {
             ),
           ],
         ),
-      ),
     );
   }
 

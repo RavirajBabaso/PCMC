@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../models/master_data_model.dart';
-import '../../widgets/custom_button.dart';
+import '../../widgets/app/app_button.dart';
 import '../../widgets/empty_state.dart';
 import '../../services/master_data_service.dart';
 
@@ -86,7 +86,7 @@ class _ManageSubjectsState extends ConsumerState<ManageSubjects> {
                         // FIX: Wrap CustomButton with SizedBox to provide constraints
                         SizedBox(
                           width: 100, // Provide explicit width constraint
-                          child: CustomButton(
+                          child: AppButton(
                             text: 'Save',
                             onPressed: () async {
                               if (formKey.currentState!.validate()) {
@@ -199,7 +199,7 @@ class _ManageSubjectsState extends ConsumerState<ManageSubjects> {
             icon: Icons.error_outline,
             title: 'Error Loading Subjects',
             message: error.toString(),
-            actionButton: CustomButton(
+            actionButton: AppButton(
               text: 'Retry',
               onPressed: () => ref.refresh(subjectsProvider),
               icon: Icons.refresh,
@@ -213,7 +213,7 @@ class _ManageSubjectsState extends ConsumerState<ManageSubjects> {
                 icon: Icons.category,
                 title: 'No Subjects',
                 message: 'There are no subjects to display. Add a new subject to get started.',
-                actionButton: CustomButton(
+                actionButton: AppButton(
                   text: 'Add Subject',
                   onPressed: () => _showSubjectDialog(),
                   icon: Icons.add,

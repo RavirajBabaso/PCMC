@@ -5,7 +5,7 @@ import 'package:main_ui/models/grievance_model.dart';
 import 'package:main_ui/providers/master_data_provider.dart';
 import 'package:main_ui/services/grievance_service.dart';
 import 'package:main_ui/theme/app_theme.dart';
-import 'package:main_ui/widgets/custom_button.dart';
+import 'package:main_ui/widgets/app/app_button.dart';
 import 'package:main_ui/widgets/loading_indicator.dart';
 
 // Provider to fetch a single grievance
@@ -221,7 +221,7 @@ class _EditGrievanceState extends ConsumerState<EditGrievance> {
                       maxLines: 2,
                     ),
                     const SizedBox(height: 24),
-                    CustomButton(
+                    AppButton(
                       text: l10n.submit ?? 'Submit',
                       isLoading: _isSubmitting,
                       onPressed: _submitUpdate,
