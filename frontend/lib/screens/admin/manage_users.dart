@@ -42,11 +42,13 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
 
     showDialog(
       context: context,
-      builder: (context) => Dialog(
+      builder: (context) {
+        final theme = Theme.of(context);
+        return Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
           ),
           child: Padding(
@@ -59,7 +61,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                   style: TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Colors.blue[800],
+                    color: theme.colorScheme.primary,
                   ),
                 ),
                 const SizedBox(height: 20),
@@ -70,40 +72,19 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         TextFormField(
-                          decoration: InputDecoration(
-                            labelText: l10n.name,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[50],
-                          ),
+                          decoration: InputDecoration(labelText: l10n.name),
                           validator: validateRequired,
                           onChanged: (value) => name = value,
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
-                          decoration: InputDecoration(
-                            labelText: l10n.email,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[50],
-                          ),
+                          decoration: InputDecoration(labelText: l10n.email),
                           validator: validateEmail,
                           onChanged: (value) => email = value,
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
-                          decoration: InputDecoration(
-                            labelText: l10n.phoneNumber,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[50],
-                          ),
+                          decoration: InputDecoration(labelText: l10n.phoneNumber),
                           validator: (value) {
                             if (value == null || value.isEmpty) {
                               return l10n.phoneNumberRequired;
@@ -117,14 +98,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
-                          decoration: InputDecoration(
-                            labelText: l10n.password,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[50],
-                          ),
+                          decoration: InputDecoration(labelText: l10n.password),
                           obscureText: true,
                           validator: (value) {
                             if (value == null || value.isEmpty) {
@@ -140,14 +114,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                         const SizedBox(height: 12),
                         DropdownButtonFormField<String>(
                           initialValue: role,
-                          decoration: InputDecoration(
-                            labelText: l10n.role,
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[50],
-                          ),
+                          decoration: InputDecoration(labelText: l10n.role),
                           items: const [
                             DropdownMenuItem(value: 'CITIZEN', child: Text('CITIZEN')),
                             DropdownMenuItem(value: 'MEMBER_HEAD', child: Text('SUPERVISOR')),
@@ -159,14 +126,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                         ),
                         const SizedBox(height: 12),
                         TextFormField(
-                          decoration: InputDecoration(
-                            labelText: 'Department ID (Optional)',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                            filled: true,
-                            fillColor: Colors.grey[50],
-                          ),
+                          decoration: const InputDecoration(labelText: 'Department ID (Optional)'),
                           keyboardType: TextInputType.number,
                           onChanged: (value) => departmentId = value.isEmpty ? null : value,
                         ),
@@ -180,7 +140,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                   children: [
                     TextButton(
                       onPressed: () => Navigator.pop(context),
-                      child: Text(l10n.cancel, style: TextStyle(color: Colors.grey[700])),
+                      child: Text(l10n.cancel, style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
                     ),
                     const SizedBox(width: 10),
                     SizedBox(
@@ -202,15 +162,21 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                               Navigator.pop(context);
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text(l10n.userAddedSuccess),
-                                  backgroundColor: Colors.green,
+                                  content: Text(
+                                    l10n.userAddedSuccess,
+                                    style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+                                  ),
+                                  backgroundColor: Theme.of(context).colorScheme.secondary,
                                 ),
                               );
                             } catch (e) {
                               ScaffoldMessenger.of(context).showSnackBar(
                                 SnackBar(
-                                  content: Text('${l10n.failedToAddUser}: $e'),
-                                  backgroundColor: Colors.red,
+                                  content: Text(
+                                    '${l10n.failedToAddUser}: $e',
+                                    style: TextStyle(color: Theme.of(context).colorScheme.onError),
+                                  ),
+                                  backgroundColor: Theme.of(context).colorScheme.error,
                                 ),
                               );
                             }
@@ -224,7 +190,8 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
             ),
           ),
         ),
-      ),
+      );
+      },
     );
   }
 
@@ -246,11 +213,12 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
+            final theme = Theme.of(context);
             return Dialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               child: Container(
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: theme.colorScheme.surface,
                   borderRadius: BorderRadius.circular(16),
                 ),
                 child: Padding(
@@ -263,7 +231,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                         style: TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue[800],
+                          color: theme.colorScheme.primary,
                         ),
                       ),
                       const SizedBox(height: 20),
@@ -275,42 +243,21 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                             children: [
                               TextFormField(
                                 initialValue: name,
-                                decoration: InputDecoration(
-                                  labelText: l10n.name,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey[50],
-                                ),
+                                decoration: InputDecoration(labelText: l10n.name),
                                 validator: validateRequired,
                                 onChanged: (value) => name = value,
                               ),
                               const SizedBox(height: 12),
                               TextFormField(
                                 initialValue: email,
-                                decoration: InputDecoration(
-                                  labelText: l10n.email,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey[50],
-                                ),
+                                decoration: InputDecoration(labelText: l10n.email),
                                 validator: validateEmail,
                                 onChanged: (value) => email = value,
                               ),
                               const SizedBox(height: 12),
                               TextFormField(
                                 initialValue: phoneNumber,
-                                decoration: InputDecoration(
-                                  labelText: l10n.phoneNumber,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey[50],
-                                ),
+                                decoration: InputDecoration(labelText: l10n.phoneNumber),
                                 validator: (value) {
                                   if (value == null || value.isEmpty) {
                                     return l10n.phoneNumberRequired;
@@ -325,14 +272,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                               const SizedBox(height: 12),
                               DropdownButtonFormField<String>(
                                 value: role,
-                                decoration: InputDecoration(
-                                  labelText: l10n.role,
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey[50],
-                                ),
+                                decoration: InputDecoration(labelText: l10n.role),
                                 items: const [
                                   DropdownMenuItem(value: 'CITIZEN', child: Text('CITIZEN')),
                                   DropdownMenuItem(value: 'MEMBER_HEAD', child: Text('Supervisor')),
@@ -347,14 +287,8 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                               const SizedBox(height: 12),
                               TextFormField(
                                 initialValue: departmentId,
-                                decoration: InputDecoration(
-                                  labelText: 'Department ID (Optional)',
-                                  border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  filled: true,
-                                  fillColor: Colors.grey[50],
-                                ),
+                                decoration:
+                                    const InputDecoration(labelText: 'Department ID (Optional)'),
                                 keyboardType: TextInputType.number,
                                 onChanged: (value) => departmentId = value.isEmpty ? null : value,
                               ),
@@ -368,7 +302,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                         children: [
                           TextButton(
                             onPressed: () => Navigator.pop(context),
-                            child: Text(l10n.cancel, style: TextStyle(color: Colors.grey[700])),
+                            child: Text(l10n.cancel, style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
                           ),
                           const SizedBox(width: 10),
                           SizedBox(
@@ -390,15 +324,21 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                                     Navigator.pop(context);
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text(l10n.userUpdatedSuccess),
-                                        backgroundColor: Colors.green,
+                                        content: Text(
+                                          l10n.userUpdatedSuccess,
+                                          style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+                                        ),
+                                        backgroundColor: Theme.of(context).colorScheme.secondary,
                                       ),
                                     );
                                   } catch (e) {
                                     ScaffoldMessenger.of(context).showSnackBar(
                                       SnackBar(
-                                        content: Text('${l10n.failedToUpdateUser}: $e'),
-                                        backgroundColor: Colors.red,
+                                        content: Text(
+                                          '${l10n.failedToUpdateUser}: $e',
+                                          style: TextStyle(color: Theme.of(context).colorScheme.onError),
+                                        ),
+                                        backgroundColor: Theme.of(context).colorScheme.error,
                                       ),
                                     );
                                   }
@@ -424,18 +364,20 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
 
     final confirmed = await showDialog<bool>(
       context: context,
-      builder: (context) => Dialog(
+      builder: (context) {
+        final theme = Theme.of(context);
+        return Dialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: theme.colorScheme.surface,
             borderRadius: BorderRadius.circular(16),
           ),
           padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(Icons.warning_amber_rounded, size: 48, color: Colors.orange[700]),
+              Icon(Icons.warning_amber_rounded, size: 48, color: theme.colorScheme.tertiary),
               const SizedBox(height: 16),
               Text(
                 l10n.deleteUser,
@@ -445,7 +387,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
               Text(
                 l10n.deleteUserConfirmation,
                 textAlign: TextAlign.center,
-                style: TextStyle(color: Colors.grey[700]),
+                style: TextStyle(color: theme.colorScheme.onSurfaceVariant),
               ),
               const SizedBox(height: 20),
               Row(
@@ -453,14 +395,14 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                 children: [
                   TextButton(
                     onPressed: () => Navigator.pop(context, false),
-                    child: Text(l10n.cancel, style: TextStyle(color: Colors.grey[700])),
+                    child: Text(l10n.cancel, style: TextStyle(color: theme.colorScheme.onSurfaceVariant)),
                   ),
                   const SizedBox(width: 10),
                   SizedBox(
                     width: 100,
                     child: CustomButton(
                       text: l10n.delete,
-                      backgroundColor: Colors.red,
+                      backgroundColor: Theme.of(context).colorScheme.error,
                       onPressed: () => Navigator.pop(context, true),
                     ),
                   ),
@@ -469,7 +411,8 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
             ],
           ),
         ),
-      ),
+      );
+      },
     );
 
     if (confirmed != true) return;
@@ -482,15 +425,21 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.userDeletedSuccess),
-          backgroundColor: Colors.green,
+          content: Text(
+            l10n.userDeletedSuccess,
+            style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.secondary,
         ),
       );
     } else {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(l10n.failedToDeleteUser),
-          backgroundColor: Colors.red,
+          content: Text(
+            l10n.failedToDeleteUser,
+            style: TextStyle(color: Theme.of(context).colorScheme.onError),
+          ),
+          backgroundColor: Theme.of(context).colorScheme.error,
         ),
       );
     }
@@ -504,7 +453,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFf8fbff), // Set background color
+      backgroundColor: theme.colorScheme.surface,
       appBar: AppBar(
         title: Text(l10n.manageUsers),
         backgroundColor: theme.appBarTheme.backgroundColor,
@@ -522,7 +471,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
         onPressed: _showAddUserDialog,
         backgroundColor: theme.colorScheme.primary,
         tooltip: l10n.addUser,
-        child: const Icon(Icons.add, color: Colors.white),
+        child: Icon(Icons.add, color: theme.colorScheme.onPrimary),
       ),
       body: Column(
         children: [
@@ -532,10 +481,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
               controller: _searchController,
               decoration: InputDecoration(
                 hintText: l10n.searchByNameOrEmail,
-                prefixIcon: Icon(Icons.search),
-                border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-                filled: true,
-                fillColor: Colors.grey[100],
+                prefixIcon: const Icon(Icons.search),
               ),
               onChanged: (value) => setState(() {}),
             ),
@@ -596,11 +542,6 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       child: Card(
-        elevation: 1,
-        color: const Color(0xFFecf2fe), // Set card background color
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
         child: ListTile(
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           leading: CircleAvatar(
@@ -621,24 +562,23 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
               Text(
                 user.email ?? l10n.noEmail,
                 style: theme.textTheme.bodySmall?.copyWith(
-                  color: Colors.grey[700]
+                  color: theme.colorScheme.onSurfaceVariant
                 ),
               ),
               const SizedBox(height: 2),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                decoration: BoxDecoration(
-                  color: _getRoleColor(user.role),
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
+              Chip(
+                label: Text(
                   _getDisplayRole(user.role),
-                  style: TextStyle(
-                    color: Colors.white,
+                  style: theme.chipTheme.labelStyle?.copyWith(
+                    color: _getRoleForegroundColor(theme.colorScheme, user.role),
+                    fontWeight: FontWeight.w500,
                     fontSize: 12,
-                    fontWeight: FontWeight.w500
                   ),
                 ),
+                backgroundColor: _getRoleBackgroundColor(theme.colorScheme, user.role),
+                side: BorderSide.none,
+                visualDensity: VisualDensity.compact,
+                materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
             ],
           ),
@@ -646,13 +586,13 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
             mainAxisSize: MainAxisSize.min,
             children: [
               IconButton(
-                icon: Icon(Icons.edit, color: Colors.blue[700]),
+                icon: Icon(Icons.edit, color: theme.colorScheme.primary),
                 onPressed: () => _showEditUserDialog(user),
                 tooltip: l10n.editUser,
               ),
               IconButton(
                 icon: Icon(Icons.delete,
-                    color: currentUser?.id == user.id ? Colors.grey : Colors.red),
+                    color: currentUser?.id == user.id ? theme.colorScheme.onSurfaceVariant : theme.colorScheme.error),
                 onPressed:
                     currentUser?.id == user.id ? null : () => _confirmDeleteUser(user.id),
                 tooltip: l10n.deleteUser,
@@ -664,18 +604,31 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
     );
   }
 
-  Color _getRoleColor(String? role) {
+  Color _getRoleBackgroundColor(ColorScheme scheme, String? role) {
     switch (role?.toUpperCase()) {
       case 'ADMIN':
-        return Colors.red;
+        return scheme.error;
       case 'MEMBER_HEAD':
-        return Colors.orange;
+        return scheme.tertiary;
       case 'FIELD_STAFF':
-        return Colors.green;
+        return scheme.secondary;
       case 'CITIZEN':
-      
       default:
-        return Colors.blue;
+        return scheme.primary;
+    }
+  }
+
+  Color _getRoleForegroundColor(ColorScheme scheme, String? role) {
+    switch (role?.toUpperCase()) {
+      case 'ADMIN':
+        return scheme.onError;
+      case 'MEMBER_HEAD':
+        return scheme.onTertiary;
+      case 'FIELD_STAFF':
+        return scheme.onSecondary;
+      case 'CITIZEN':
+      default:
+        return scheme.onPrimary;
     }
   }
 

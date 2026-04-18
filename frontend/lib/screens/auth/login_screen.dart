@@ -115,11 +115,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: const Text(
+              content: Text(
                 'Password reset email sent successfully! Check your email for a link to reset your password on https://www.nivaran.co.in.',
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
               ),
-              backgroundColor: Colors.green,
+              backgroundColor: Theme.of(context).colorScheme.secondary,
               duration: const Duration(seconds: 5),
             ),
           );
@@ -129,8 +129,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(message),
-              backgroundColor: Colors.red,
+              content: Text(
+                message,
+                style: TextStyle(color: Theme.of(context).colorScheme.onError),
+              ),
+              backgroundColor: Theme.of(context).colorScheme.error,
             ),
           );
         }
@@ -140,8 +143,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
         Navigator.of(context).pop(); // Ensure dialog closes on error
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error sending reset email: $e'),
-            backgroundColor: Colors.red,
+            content: Text(
+              'Error sending reset email: $e',
+              style: TextStyle(color: Theme.of(context).colorScheme.onError),
+            ),
+            backgroundColor: Theme.of(context).colorScheme.error,
           ),
         );
       }
@@ -174,7 +180,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     final l10n = AppLocalizations.of(context)!;
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FBFF),
+      backgroundColor: theme.colorScheme.surface,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24),
@@ -189,7 +195,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   style: theme.textTheme.headlineLarge?.copyWith(
                     fontSize: 32,
                     fontWeight: FontWeight.bold,
-                    color: const Color(0xFF0076FD),
+                    color: theme.colorScheme.primary,
                   ),
                 ),
               ),
@@ -217,7 +223,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         decoration: InputDecoration(
                           labelText: l10n.name,
                           prefixIcon: const Icon(Icons.person_outline),
-                          border: const OutlineInputBorder(),
                         ),
                         validator: validateRequired,
                         onSaved: (v) => _name = v!,
@@ -228,7 +233,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         decoration: InputDecoration(
                           labelText: l10n.address,
                           prefixIcon: const Icon(Icons.home_outlined),
-                          border: const OutlineInputBorder(),
                         ),
                         validator: validateRequired,
                         onSaved: (v) => _address = v!,
@@ -239,7 +243,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         decoration: InputDecoration(
                           labelText: l10n.phoneNumber,
                           prefixIcon: const Icon(Icons.phone_outlined),
-                          border: const OutlineInputBorder(),
                         ),
                         keyboardType: TextInputType.phone,
                         validator: (v) => validatePhone(v, l10n),
@@ -251,7 +254,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         decoration: InputDecoration(
                           labelText: l10n.voterId,
                           prefixIcon: const Icon(Icons.badge_outlined),
-                          border: const OutlineInputBorder(),
                         ),
                         validator: validateRequired,
                         onSaved: (v) => _voterId = v!,
@@ -263,8 +265,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       decoration: InputDecoration(
                         labelText: l10n.email,
                         prefixIcon: const Icon(Icons.email_outlined),
-                        border: const OutlineInputBorder(),
-                      ),
+                              ),
                       keyboardType: TextInputType.emailAddress,
                       validator: validateEmail,
                       onSaved: (v) => _email = v!,
@@ -284,8 +285,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           onPressed: () =>
                               setState(() => _obscurePassword = !_obscurePassword),
                         ),
-                        border: const OutlineInputBorder(),
-                      ),
+                              ),
                       obscureText: _obscurePassword,
                       validator: validateRequired,
                       onSaved: (v) => _password = v!,
@@ -300,7 +300,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           child: Text(
                             l10n.forgotPassword ?? 'Forgot Password?',
                             style: TextStyle(
-                              color: const Color(0xFF0076FD),
+                              color: theme.colorScheme.primary,
                               fontWeight: FontWeight.w500,
                             ),
                           ),
@@ -314,7 +314,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       onPressed: _isLoading ? null : _submit,
                       isLoading: _isLoading,
                       fullWidth: true,
-                      backgroundColor: const Color(0xFF151a2f),
                     ),
 
                     const SizedBox(height: 16),
@@ -339,7 +338,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           },
                           child: Text(
                             _isLogin ? l10n.register : l10n.login,
-                            style: TextStyle(color: const Color(0xFF0076FD)),
+                            style: TextStyle(color: theme.colorScheme.primary),
                           ),
                         ),
                       ],
@@ -409,7 +408,6 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
               decoration: InputDecoration(
                 labelText: l10n.email,
                 prefixIcon: const Icon(Icons.email_outlined),
-                border: const OutlineInputBorder(),
               ),
               keyboardType: TextInputType.emailAddress,
               validator: (value) {
@@ -448,7 +446,7 @@ class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
                 height: 20, 
                 child: CircularProgressIndicator(
                   strokeWidth: 2, 
-                  valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onPrimary),
                 ),
               )
             : Text(l10n.send ?? 'Send Reset Link'),
