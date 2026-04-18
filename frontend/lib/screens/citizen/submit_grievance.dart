@@ -12,6 +12,8 @@ import 'package:main_ui/widgets/file_upload_widget.dart';
 import 'package:main_ui/widgets/loading_indicator.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
 import 'package:main_ui/theme/app_theme.dart';
+import 'package:main_ui/widgets/form_fields.dart';
+import 'package:main_ui/widgets/multi_step_form_stepper.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
 class SubmitGrievance extends ConsumerStatefulWidget {
@@ -22,16 +24,23 @@ class SubmitGrievance extends ConsumerStatefulWidget {
 }
 
 class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
-  final _formKey = GlobalKey<FormState>();
+  // Form controllers
   final _titleController = TextEditingController();
   final _descriptionController = TextEditingController();
   final _addressController = TextEditingController();
 
+  // Form state
+  int _currentStep = 0;
   int? _selectedSubjectId;
   int? _selectedAreaId;
   final List<PlatformFile> _attachments = [];
   Position? _currentPosition;
   bool _isSubmitting = false;
+
+  // Form validation keys for each step
+  final _detailsFormKey = GlobalKey<FormState>();
+  final _categoryFormKey = GlobalKey<FormState>();
+  final _locationFormKey = GlobalKey<FormState>();
 
   @override
   void dispose() {
@@ -56,8 +65,12 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
       });
     } catch (e) {
       setState(() => _isSubmitting = false);
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('${AppLocalizations.of(context)!.error}: $e')),
+        SnackBar(
+          content: Text('${AppLocalizations.of(context)!.error}: $e'),
+          backgroundColor: Colors.red,
+        ),
       );
     }
   }
@@ -66,9 +79,9 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
     bool serviceEnabled;
     LocationPermission permission;
 
-    // Check if location services are enabled
     serviceEnabled = await Geolocator.isLocationServiceEnabled();
     if (!serviceEnabled) {
+      if (!mounted) return false;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -80,11 +93,11 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
       return false;
     }
 
-    // Check current permission
     permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
+        if (!mounted) return false;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text(
@@ -97,6 +110,7 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
     }
 
     if (permission == LocationPermission.deniedForever) {
+      if (!mounted) return false;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text(
@@ -116,23 +130,21 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
     final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
     if (pickedFile != null) {
-      // Prepare values outside setState
       final fileBytes = kIsWeb ? await pickedFile.readAsBytes() : null;
       final filePath = kIsWeb ? null : pickedFile.path;
       final fileName = pickedFile.name;
-      // Compute size: Use bytes length for web, file length for non-web
       final fileSize = kIsWeb
           ? fileBytes?.length ?? 0
           : await File(pickedFile.path).length();
 
-      // Now call setState with already computed values
+      if (!mounted) return;
       setState(() {
         _attachments.add(
           PlatformFile(
             name: fileName,
-            size: fileSize, // Size in bytes, required
-            path: filePath, // Path for non-web
-            bytes: fileBytes, // Bytes for web
+            size: fileSize,
+            path: filePath,
+            bytes: fileBytes,
           ),
         );
       });
@@ -145,10 +157,38 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
     });
   }
 
+  void _nextStep() {
+    // Validate current step before proceeding
+    if (!_validateCurrentStep()) {
+      return;
+    }
+    setState(() => _currentStep++);
+  }
+
+  void _previousStep() {
+    setState(() => _currentStep--);
+  }
+
+  bool _validateCurrentStep() {
+    switch (_currentStep) {
+      case 0:
+        return _detailsFormKey.currentState?.validate() ?? false;
+      case 1:
+        return _categoryFormKey.currentState?.validate() ?? false &&
+            _selectedSubjectId != null &&
+            _selectedAreaId != null;
+      case 2:
+        return _locationFormKey.currentState?.validate() ?? false;
+      case 3:
+        return true; // No validation needed for attachments
+      default:
+        return false;
+    }
+  }
+
   Future<void> _submitGrievance() async {
-    if (!_formKey.currentState!.validate() ||
-        _selectedSubjectId == null ||
-        _selectedAreaId == null) {
+    if (!_validateCurrentStep()) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context)!.pleaseFillAllFields),
@@ -161,21 +201,12 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
     setState(() => _isSubmitting = true);
 
     try {
-      // Log before send
-      // Log count
-
-      for (var i = 0; i < _attachments.length; i++) {
-        // Log each file added
-
-        // Log details like name size
-      }
       final grievanceService = GrievanceService();
       await grievanceService.createGrievance(
         title: _titleController.text,
         description: _descriptionController.text,
         subjectId: _selectedSubjectId!,
         areaId: _selectedAreaId!,
-
         address: _addressController.text,
         attachments: _attachments,
       );
@@ -203,241 +234,302 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
     }
   }
 
+  bool get _canProceedToNextStep {
+    switch (_currentStep) {
+      case 0:
+        return _detailsFormKey.currentState?.validate() ?? false;
+      case 1:
+        return _selectedSubjectId != null && _selectedAreaId != null;
+      case 2:
+        return _locationFormKey.currentState?.validate() ?? false;
+      default:
+        return true;
+    }
+  }
+
+  Widget _buildDetailsStep(AppLocalizations localizations) {
+    return Form(
+      key: _detailsFormKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          FormSectionHeader(
+            title: localizations.grievanceDetails,
+            subtitle: 'Provide a brief title and detailed description',
+            icon: Icons.description,
+          ),
+          const SizedBox(height: 24),
+          StandardTextInput(
+            controller: _titleController,
+            label: localizations.title,
+            hint: 'e.g., Pothole on Main Street',
+            validator: (value) =>
+                value!.isEmpty ? localizations.titleRequired : null,
+            isRequired: true,
+            textInputAction: TextInputAction.next,
+          ),
+          const SizedBox(height: 16),
+          StandardTextInput(
+            controller: _descriptionController,
+            label: localizations.description,
+            hint: 'Describe the issue in detail',
+            validator: (value) => value!.isEmpty
+                ? localizations.descriptionRequired
+                : null,
+            isRequired: true,
+            maxLines: 5,
+            minLines: 3,
+            textInputAction: TextInputAction.newline,
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCategoryStep(
+      AppLocalizations localizations, WidgetRef ref) {
+    return Form(
+      key: _categoryFormKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          FormSectionHeader(
+            title: localizations.categorization,
+            subtitle: 'Categorize your grievance for better routing',
+            icon: Icons.category,
+          ),
+          const SizedBox(height: 24),
+          ref.watch(subjectsProvider).when(
+            data: (subjects) => StandardDropdown<int>(
+              value: _selectedSubjectId,
+              items: subjects
+                  .map(
+                    (subject) => DropdownMenuItem<int>(
+                      value: subject.id,
+                      child: Text(subject.name),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (value) =>
+                  setState(() => _selectedSubjectId = value),
+              label: localizations.filterBySubject,
+              isRequired: true,
+              validator: (value) => value == null
+                  ? localizations.subjectRequired
+                  : null,
+            ),
+            loading: () => const SizedBox(
+              height: 56,
+              child: Center(child: LoadingIndicator()),
+            ),
+            error: (error, stack) => Text(
+              '${localizations.error}: $error',
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+          const SizedBox(height: 16),
+          ref.watch(areasProvider).when(
+            data: (areas) => StandardDropdown<int>(
+              value: _selectedAreaId,
+              items: areas
+                  .map(
+                    (area) => DropdownMenuItem<int>(
+                      value: area.id,
+                      child: Text(area.name),
+                    ),
+                  )
+                  .toList(),
+              onChanged: (value) =>
+                  setState(() => _selectedAreaId = value),
+              label: localizations.filterByArea,
+              isRequired: true,
+              validator: (value) => value == null
+                  ? localizations.areaRequired
+                  : null,
+            ),
+            loading: () => const SizedBox(
+              height: 56,
+              child: Center(child: LoadingIndicator()),
+            ),
+            error: (error, stack) => Text(
+              '${localizations.error}: $error',
+              style: const TextStyle(color: Colors.red),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLocationStep(AppLocalizations localizations) {
+    return Form(
+      key: _locationFormKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          FormSectionHeader(
+            title: localizations.locationDetails,
+            subtitle: 'Provide location information for the issue',
+            icon: Icons.location_on,
+          ),
+          const SizedBox(height: 24),
+          StandardTextInput(
+            controller: _addressController,
+            label: localizations.address ?? 'Address',
+            hint: 'Enter the street address',
+            validator: (value) =>
+                value!.isEmpty ? 'Address is required' : null,
+            isRequired: true,
+            maxLines: 2,
+            minLines: 1,
+          ),
+          const SizedBox(height: 16),
+          Row(
+            children: [
+              Expanded(
+                child: AppButton(
+                  text: _isSubmitting
+                      ? 'Getting Location...'
+                      : 'Get Location',
+                  onPressed: _isSubmitting
+                      ? null
+                      : _getCurrentLocation,
+                  icon: Icons.location_on,
+                  fullWidth: true,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          if (_currentPosition != null)
+            SuccessInfoBox(
+              message:
+                  'Location captured: ${_currentPosition!.latitude.toStringAsFixed(4)}, '
+                  '${_currentPosition!.longitude.toStringAsFixed(4)}',
+            ),
+          if (_currentPosition == null)
+            FormInfoBox(
+              message: 'Tap "Get Location" to capture GPS coordinates',
+              icon: Icons.info,
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAttachmentsStep(AppLocalizations localizations) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        FormSectionHeader(
+          title: 'Attachments & Media',
+          subtitle: 'Add photos or documents to support your complaint',
+          icon: Icons.attach_file,
+        ),
+        const SizedBox(height: 24),
+        if (_attachments.isNotEmpty) ...[
+          Text(
+            'Attached Files (${_attachments.length})',
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: dsTextPrimary,
+            ),
+          ),
+          const SizedBox(height: 12),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: List.generate(_attachments.length, (index) {
+              final file = _attachments[index];
+              return Chip(
+                label: Text(
+                  file.name,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(fontSize: 12),
+                ),
+                avatar: const Icon(Icons.attachment, size: 18),
+                deleteIcon: const Icon(Icons.close, size: 18),
+                onDeleted: () => _removeAttachment(index),
+              );
+            }),
+          ),
+          const SizedBox(height: 16),
+        ],
+        FileUploadWidget(
+          onFilesSelected: (files) {
+            setState(() => _attachments.addAll(files));
+          },
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(
+              child: AppButton(
+                text: 'Add Media',
+                onPressed: _pickImage,
+                icon: Icons.image,
+                fullWidth: true,
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        FormInfoBox(
+          message:
+              'Attachments are optional but help speed up the resolution process',
+        ),
+      ],
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
-    return Scaffold(
-      backgroundColor: dsBackground,
-      appBar: AppBar(
-        backgroundColor: dsSurface,
-        foregroundColor: dsAccent,
-        title: Text(localizations.submitGrievance),
-        elevation: 0,
+    final steps = [
+      FormStep(
+        title: 'Details',
+        subtitle: 'Describe the issue',
+        content: _buildDetailsStep(localizations),
+        isValidated: _detailsFormKey.currentState?.validate() ?? false,
       ),
-      body: _isSubmitting && _currentPosition == null
-          ? const Center(child: LoadingIndicator())
-          : SingleChildScrollView(
-              padding: const EdgeInsets.all(16.0),
-              child: Container(
-                decoration: dsPanelDecoration(color: dsSurface),
-                padding: const EdgeInsets.all(20),
-                child: Form(
-                  key: _formKey,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        localizations.grievanceDetails,
-                        style: dsHeadingStyle(18),
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _titleController,
-                        decoration: dsFormFieldDecoration(
-                          label: localizations.title,
-                        ),
-                        style: const TextStyle(color: dsTextPrimary),
-                        validator: (value) =>
-                            value!.isEmpty ? localizations.titleRequired : null,
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _descriptionController,
-                        decoration: dsFormFieldDecoration(
-                          label: localizations.description,
-                        ),
-                        style: const TextStyle(color: dsTextPrimary),
-                        maxLines: 4,
-                        validator: (value) => value!.isEmpty
-                            ? localizations.descriptionRequired
-                            : null,
-                      ),
-                      const SizedBox(height: 24),
-                      Text(
-                        localizations.categorization,
-                        style: dsHeadingStyle(18),
-                      ),
-                      const SizedBox(height: 16),
-                      ref
-                          .watch(subjectsProvider)
-                          .when(
-                            data: (subjects) => DropdownButtonFormField<int>(
-                              decoration: dsFormFieldDecoration(
-                                label: localizations.filterBySubject,
-                              ),
-                              dropdownColor: dsSurface,
-                              style: const TextStyle(color: dsTextPrimary),
-                              value: _selectedSubjectId,
-                              items: subjects
-                                  .map(
-                                    (subject) => DropdownMenuItem<int>(
-                                      value: subject.id,
-                                      child: Text(subject.name),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (value) =>
-                                  setState(() => _selectedSubjectId = value),
-                              validator: (value) => value == null
-                                  ? localizations.subjectRequired
-                                  : null,
-                            ),
-                            loading: () => const LoadingIndicator(),
-                            error: (error, stack) => Text(
-                              '${localizations.error}: $error',
-                              style: const TextStyle(color: dsTextSecondary),
-                            ),
-                          ),
-                      const SizedBox(height: 16),
-                      ref
-                          .watch(areasProvider)
-                          .when(
-                            data: (areas) => DropdownButtonFormField<int>(
-                              decoration: dsFormFieldDecoration(
-                                label: localizations.filterByArea,
-                              ),
-                              dropdownColor: dsSurface,
-                              style: const TextStyle(color: dsTextPrimary),
-                              value: _selectedAreaId,
-                              items: areas
-                                  .map(
-                                    (area) => DropdownMenuItem<int>(
-                                      value: area.id,
-                                      child: Text(area.name),
-                                    ),
-                                  )
-                                  .toList(),
-                              onChanged: (value) =>
-                                  setState(() => _selectedAreaId = value),
-                              validator: (value) => value == null
-                                  ? localizations.areaRequired
-                                  : null,
-                            ),
-                            loading: () => const LoadingIndicator(),
-                            error: (error, stack) => Text(
-                              '${localizations.error}: $error',
-                              style: const TextStyle(color: dsTextSecondary),
-                            ),
-                          ),
-                      const SizedBox(height: 24),
-                      Text(
-                        localizations.locationDetails,
-                        style: dsHeadingStyle(18),
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        controller: _addressController,
-                        decoration: dsFormFieldDecoration(
-                          label: localizations.address ?? 'Address',
-                        ),
-                        style: const TextStyle(color: dsTextPrimary),
-                        validator: (value) =>
-                            value!.isEmpty ? 'Address is required' : null,
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            child: AppButton(
-                              text: _isSubmitting
-                                  ? 'Getting Location...'
-                                  : 'Get Location',
-                              onPressed: _isSubmitting
-                                  ? null
-                                  : _getCurrentLocation,
-                              icon: Icons.location_on,
-                              fullWidth: true,
-                            ),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: AppButton(
-                              text: 'Add Media',
-                              onPressed: _pickImage,
-                              icon: Icons.image,
-                              fullWidth: true,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
-                      if (_currentPosition != null)
-                        Container(
-                          padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: dsSurfaceAlt,
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(
-                              color: dsAccent.withOpacity(0.25),
-                            ),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(
-                                Icons.check_circle,
-                                color: Colors.green,
-                              ),
-                              const SizedBox(width: 8),
-                              Expanded(
-                                child: Text(
-                                  'Location captured: ${_currentPosition!.latitude.toStringAsFixed(4)}, '
-                                  '${_currentPosition!.longitude.toStringAsFixed(4)}',
-                                  style: const TextStyle(fontSize: 14),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                      const SizedBox(height: 24),
-                      if (_attachments.isNotEmpty) ...[
-                        Text(
-                          'Attachments (${_attachments.length})',
-                          style: theme.textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: theme.primaryColor,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Wrap(
-                          spacing: 8,
-                          runSpacing: 8,
-                          children: List.generate(_attachments.length, (index) {
-                            final file = _attachments[index];
-                            return Chip(
-                              label: Text(
-                                file.name,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontSize: 12),
-                              ),
-                              avatar: const Icon(Icons.attachment, size: 18),
-                              deleteIcon: const Icon(Icons.close, size: 18),
-                              onDeleted: () => _removeAttachment(index),
-                            );
-                          }),
-                        ),
-                        const SizedBox(height: 16),
-                      ],
-                      FileUploadWidget(
-                        onFilesSelected: (files) {
-                          setState(() => _attachments.addAll(files));
-                        },
-                      ),
-                      const SizedBox(height: 24),
-                      AppButton(
-                        text: _isSubmitting
-                            ? 'Submitting...'
-                            : localizations.submit,
-                        onPressed: _isSubmitting ? null : _submitGrievance,
-                        icon: Icons.send,
-                        fullWidth: true,
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
+      FormStep(
+        title: 'Category',
+        subtitle: 'Categorize the issue',
+        content: _buildCategoryStep(localizations, ref),
+        isValidated: _selectedSubjectId != null && _selectedAreaId != null,
+      ),
+      FormStep(
+        title: 'Location',
+        subtitle: 'Specify the location',
+        content: _buildLocationStep(localizations),
+        isValidated: _locationFormKey.currentState?.validate() ?? false,
+      ),
+      FormStep(
+        title: 'Attachments',
+        subtitle: 'Add supporting media',
+        content: _buildAttachmentsStep(localizations),
+        isValidated: true,
+      ),
+    ];
+
+    return MultiStepFormStepper(
+      steps: steps,
+      currentStep: _currentStep,
+      onNextStep: _nextStep,
+      onPreviousStep: _previousStep,
+      onSubmit: _submitGrievance,
+      isSubmitting: _isSubmitting,
+      canProceedToNext: _canProceedToNextStep,
+      onStepChanged: (newStep) {
+        if (newStep < _currentStep || steps[newStep].isValidated) {
+          setState(() => _currentStep = newStep);
+        }
+      },
+      nextButtonLabel: 'Next',
+      previousButtonLabel: 'Back',
+      submitButtonLabel: localizations.submit,
     );
   }
 }

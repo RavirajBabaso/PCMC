@@ -7,6 +7,7 @@ import 'package:main_ui/services/grievance_service.dart';
 import 'package:main_ui/theme/app_theme.dart';
 import 'package:main_ui/widgets/app/app_button.dart';
 import 'package:main_ui/widgets/loading_indicator.dart';
+import 'package:main_ui/widgets/form_fields.dart';
 
 // Provider to fetch a single grievance
 final editGrievanceProvider = FutureProvider.family<Grievance, int>((ref, id) {
@@ -109,6 +110,7 @@ class _EditGrievanceState extends ConsumerState<EditGrievance> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final localizations = l10n;
     final theme = Theme.of(context);
     final grievanceAsync = ref.watch(editGrievanceProvider(widget.id));
 
@@ -140,36 +142,44 @@ class _EditGrievanceState extends ConsumerState<EditGrievance> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    TextFormField(
+                    FormSectionHeader(
+                      title: l10n.grievanceDetails ?? 'Grievance Details',
+                      icon: Icons.edit,
+                    ),
+                    const SizedBox(height: 24),
+                    StandardTextInput(
                       controller: _titleController,
-                      decoration: dsFormFieldDecoration(
-                        label: l10n.title ?? 'Title',
-                      ),
-                      style: const TextStyle(color: dsTextPrimary),
+                      label: l10n.title ?? 'Title',
+                      hint: 'Enter the grievance title',
+                      isRequired: true,
                       validator: (value) => value?.isEmpty ?? true
                           ? (l10n.titleRequired ?? 'Title is required')
                           : null,
                     ),
                     const SizedBox(height: 16),
-                    TextFormField(
+                    StandardTextInput(
                       controller: _descriptionController,
-                      decoration: dsFormFieldDecoration(
-                        label: l10n.description ?? 'Description',
-                      ),
-                      style: const TextStyle(color: dsTextPrimary),
+                      label: l10n.description ?? 'Description',
+                      hint: 'Describe the issue',
+                      isRequired: true,
                       maxLines: 4,
+                      minLines: 3,
                       validator: (value) => value?.isEmpty ?? true
                           ? (l10n.descriptionRequired ??
                                 'Description is required')
                           : null,
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 24),
+                    FormSectionHeader(
+                      title: localizations.categorization ?? 'Categorization',
+                      icon: Icons.category,
+                    ),
+                    const SizedBox(height: 24),
                     areasAsync.when(
-                      data: (areas) => DropdownButtonFormField<int>(
+                      data: (areas) => StandardDropdown<int>(
                         value: _selectedAreaId,
-                        decoration: dsFormFieldDecoration(
-                          label: l10n.filterByArea ?? 'Area',
-                        ),
+                        label: l10n.filterByArea ?? 'Area',
+                        isRequired: true,
                         items: areas
                             .map(
                               (area) => DropdownMenuItem(
@@ -184,16 +194,20 @@ class _EditGrievanceState extends ConsumerState<EditGrievance> {
                             ? (l10n.areaRequired ?? 'Area is required')
                             : null,
                       ),
-                      loading: () => const LoadingIndicator(),
-                      error: (e, s) => Text('Error: $e'),
+                      loading: () => const SizedBox(
+                        height: 56,
+                        child: Center(child: LoadingIndicator()),
+                      ),
+                      error: (e, s) => FormInfoBox(
+                        message: 'Failed to load areas: $e',
+                      ),
                     ),
                     const SizedBox(height: 16),
                     subjectsAsync.when(
-                      data: (subjects) => DropdownButtonFormField<int>(
+                      data: (subjects) => StandardDropdown<int>(
                         value: _selectedSubjectId,
-                        decoration: dsFormFieldDecoration(
-                          label: l10n.filterBySubject ?? 'Subject',
-                        ),
+                        label: l10n.filterBySubject ?? 'Subject',
+                        isRequired: true,
                         items: subjects
                             .map(
                               (subject) => DropdownMenuItem(
@@ -208,17 +222,26 @@ class _EditGrievanceState extends ConsumerState<EditGrievance> {
                             ? (l10n.subjectRequired ?? 'Subject is required')
                             : null,
                       ),
-                      loading: () => const LoadingIndicator(),
-                      error: (e, s) => Text('Error: $e'),
-                    ),
-                    const SizedBox(height: 16),
-                    TextFormField(
-                      controller: _addressController,
-                      decoration: dsFormFieldDecoration(
-                        label: 'Address (optional)',
+                      loading: () => const SizedBox(
+                        height: 56,
+                        child: Center(child: LoadingIndicator()),
                       ),
-                      style: const TextStyle(color: dsTextPrimary),
+                      error: (e, s) => FormInfoBox(
+                        message: 'Failed to load subjects: $e',
+                      ),
+                    ),
+                    const SizedBox(height: 24),
+                    FormSectionHeader(
+                      title: l10n.locationDetails ?? 'Location Details',
+                      icon: Icons.location_on,
+                    ),
+                    const SizedBox(height: 24),
+                    StandardTextInput(
+                      controller: _addressController,
+                      label: 'Address',
+                      hint: 'Enter the address',
                       maxLines: 2,
+                      minLines: 1,
                     ),
                     const SizedBox(height: 24),
                     AppButton(
