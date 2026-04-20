@@ -7,7 +7,8 @@ import '../services/grievance_service.dart';
 // ── Family provider: citizen grievance history by userId ─────────────────────
 final citizenHistoryProvider =
     FutureProvider.family<List<Grievance>, int>((ref, userId) async {
-  return GrievanceService().getGrievancesByUserId(userId);
+  final response = await GrievanceService().getGrievancesByUserId(userId);
+  return response.items;
 });
 
 // ── State ─────────────────────────────────────────────────────────────────────

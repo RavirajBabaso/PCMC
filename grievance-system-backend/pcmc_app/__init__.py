@@ -200,6 +200,7 @@ def create_app(config_class=None):
         "http://localhost:5000",
         "http://127.0.0.1:3000",
         "http://127.0.0.1:5000",
+        "http://localhost:50550",  # Flutter web dev server
         "https://pcmcapp.onrender.com",
         "https://pcmc-updated.onrender.com",
         "https://www.nivaran.co.in",

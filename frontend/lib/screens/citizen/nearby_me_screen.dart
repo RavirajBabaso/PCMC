@@ -187,7 +187,7 @@ class _NearbyMeScreenState extends State<NearbyMeScreen> {
                   ? "Choose a category to search nearby places."
                   : "No nearby ${selectedCategory!.replaceAll('_', ' ')} found.",
               textAlign: TextAlign.center,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 16,
                 color: dsTextPrimary,
               ),
@@ -234,12 +234,12 @@ class _NearbyMeScreenState extends State<NearbyMeScreen> {
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Icon(Icons.location_on, size: 14, color: dsTextSecondary),
+                        Icon(Icons.location_on, size: 14, color: dsTextSecondary),
                         const SizedBox(width: 4),
                         Expanded(
                           child: Text(
                             item["address"],
-                            style: const TextStyle(
+                            style: TextStyle(
                               color: dsTextSecondary,
                               fontSize: 13,
                             ),
@@ -254,7 +254,7 @@ class _NearbyMeScreenState extends State<NearbyMeScreen> {
                       padding: const EdgeInsets.only(top: 4),
                       child: Row(
                         children: [
-                          const Icon(Icons.phone, size: 14, color: dsTextSecondary),
+                          Icon(Icons.phone, size: 14, color: dsTextSecondary),
                           const SizedBox(width: 4),
                           Text(
                             item["contact_no"],

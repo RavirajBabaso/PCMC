@@ -42,7 +42,7 @@ class LoadingIndicator extends StatelessWidget {
               Text(
                 message!,
                 textAlign: TextAlign.center,
-                style: const TextStyle(
+                style: TextStyle(
                   color: dsTextSecondary,
                   fontSize: 14,
                 ),

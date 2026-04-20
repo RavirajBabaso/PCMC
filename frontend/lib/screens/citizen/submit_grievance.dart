@@ -430,7 +430,7 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
         if (_attachments.isNotEmpty) ...[
           Text(
             'Attached Files (${_attachments.length})',
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: dsTextPrimary,

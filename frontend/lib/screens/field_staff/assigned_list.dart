@@ -45,10 +45,10 @@ IconData _si(String s) {
 }
 String _sl(String s) => s == 'in_progress' ? 'IN PROGRESS' : s == 'on_hold' ? 'ON HOLD' : s.toUpperCase();
 
-TextStyle _h(double s, {Color c = dsTextPrimary}) =>
-    TextStyle(color: c, fontSize: s, fontWeight: FontWeight.w700);
-TextStyle _m(double s, {Color c = dsTextSecondary}) =>
-    TextStyle(color: c, fontSize: s, fontFamily: 'monospace');
+TextStyle _h(double s, {Color? c}) =>
+    TextStyle(color: c ?? dsTextPrimary, fontSize: s, fontWeight: FontWeight.w700);
+TextStyle _m(double s, {Color? c}) =>
+    TextStyle(color: c ?? dsTextSecondary, fontSize: s, fontFamily: 'monospace');
 
 // ─────────────────────────────────── Screen ──────────────────────────────────
 class AssignedList extends ConsumerStatefulWidget {
@@ -122,7 +122,7 @@ class _AssignedListState extends ConsumerState<AssignedList>
 
   PreferredSizeWidget _appBar() => AppBar(
     backgroundColor: dsSurface, elevation: 0,
-    iconTheme: const IconThemeData(color: dsAccent),
+    iconTheme: IconThemeData(color: dsAccent),
     bottom: PreferredSize(preferredSize: const Size.fromHeight(1),
         child: Container(height: 1, color: const Color(0xFFFF6D00).withOpacity(0.4))),
     title: Row(children: [
@@ -136,7 +136,7 @@ class _AssignedListState extends ConsumerState<AssignedList>
       Text('FIELD OPS', style: TextStyle(color: dsTextPrimary, fontSize: 15, fontWeight: FontWeight.w800, letterSpacing: 2)),
     ]),
     actions: [
-      IconButton(icon: const Icon(Icons.refresh, color: dsAccent), onPressed: _reload),
+      IconButton(icon: Icon(Icons.refresh, color: dsAccent), onPressed: _reload),
     ],
   );
 
@@ -265,7 +265,7 @@ class _AssignedListState extends ConsumerState<AssignedList>
                       style: ElevatedButton.styleFrom(
                         backgroundColor: dsAccent.withOpacity(0.12),
                         foregroundColor: dsAccent,
-                        side: const BorderSide(color: dsAccentDim),
+                        side: BorderSide(color: dsAccentDim),
                         padding: const EdgeInsets.symmetric(vertical: 10),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                       ),
@@ -374,7 +374,7 @@ class _AssignedListState extends ConsumerState<AssignedList>
       builder: (ctx) => Dialog(
         backgroundColor: dsSurface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16),
-            side: const BorderSide(color: dsAccentDim)),
+            side: BorderSide(color: dsAccentDim)),
         child: StatefulBuilder(
           builder: (ctx2, setDlg) => SingleChildScrollView(
             padding: const EdgeInsets.all(24),
@@ -382,7 +382,7 @@ class _AssignedListState extends ConsumerState<AssignedList>
 
               // Title
               Row(children: [
-                const Icon(Icons.upload_file, color: dsAccent, size: 20),
+                Icon(Icons.upload_file, color: dsAccent, size: 20),
                 const SizedBox(width: 10),
                 Text('UPLOAD WORK PROOF', style: _h(13, c: dsAccent)),
               ]),
@@ -457,8 +457,8 @@ class _AssignedListState extends ConsumerState<AssignedList>
                 child: TextField(
                   controller: notesCtrl,
                   maxLines: 3,
-                  style: const TextStyle(color: dsTextPrimary, fontSize: 13),
-                  decoration: const InputDecoration(
+                  style: TextStyle(color: dsTextPrimary, fontSize: 13),
+                  decoration: InputDecoration(
                     hintText: 'Work notes / description…',
                     hintStyle: TextStyle(color: dsTextSecondary, fontSize: 12),
                     border: InputBorder.none,
@@ -471,7 +471,7 @@ class _AssignedListState extends ConsumerState<AssignedList>
               Row(children: [
                 Expanded(child: TextButton(
                   onPressed: () => Navigator.pop(ctx),
-                  child: const Text('CANCEL', style: TextStyle(color: dsTextSecondary, letterSpacing: 1, fontSize: 12)),
+                  child: Text('CANCEL', style: TextStyle(color: dsTextSecondary, letterSpacing: 1, fontSize: 12)),
                 )),
                 const SizedBox(width: 10),
                 Expanded(child: ElevatedButton(
@@ -482,7 +482,7 @@ class _AssignedListState extends ConsumerState<AssignedList>
                   style: ElevatedButton.styleFrom(
                     backgroundColor: dsAccent.withOpacity(0.2),
                     foregroundColor: dsAccent,
-                    side: const BorderSide(color: dsAccentDim),
+                    side: BorderSide(color: dsAccentDim),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   child: const Text('UPLOAD', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 1)),
@@ -525,7 +525,7 @@ class _AssignedListState extends ConsumerState<AssignedList>
         Container(width: 4, height: 28,
             decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2))),
         const SizedBox(width: 10),
-        Expanded(child: Text(msg, style: const TextStyle(color: dsTextPrimary, fontSize: 13))),
+        Expanded(child: Text(msg, style: TextStyle(color: dsTextPrimary, fontSize: 13))),
       ]),
       backgroundColor: dsSurfaceAlt,
       behavior: SnackBarBehavior.floating,

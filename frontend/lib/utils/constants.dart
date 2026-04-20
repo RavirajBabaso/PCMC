@@ -7,7 +7,7 @@ class Constants {
     // For mobile builds, this ensures the app points to the Render backend.
     const apiBaseUrl = String.fromEnvironment(
       'API_BASE_URL',
-      defaultValue: 'https://pcmc-updated.onrender.com',
+      defaultValue: 'http://localhost:5000',
     );
 
     return apiBaseUrl;

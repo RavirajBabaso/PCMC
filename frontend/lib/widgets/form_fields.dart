@@ -71,14 +71,15 @@ class StandardTextInput extends StatelessWidget {
           borderSide: const BorderSide(color: Colors.red, width: 2),
         ),
       ),
-      style: const TextStyle(color: dsTextPrimary),
+      style: TextStyle(color: dsTextPrimary),
       maxLines: maxLines,
       minLines: minLines,
       keyboardType: keyboardType,
       textInputAction: textInputAction,
       validator: validator,
       onChanged: onChanged,
-    );
+    ),
+  );
   }
 }
 
@@ -142,11 +143,12 @@ class StandardDropdown<T> extends StatelessWidget {
         ),
       ),
       dropdownColor: dsSurface,
-      style: const TextStyle(color: dsTextPrimary),
+      style: TextStyle(color: dsTextPrimary),
       items: items,
       onChanged: onChanged,
       validator: validator,
-    );
+    ),
+  );
   }
 }
 
@@ -186,7 +188,7 @@ class FormSectionHeader extends StatelessWidget {
           const SizedBox(height: 4),
           Text(
             subtitle!,
-            style: const TextStyle(
+            style: TextStyle(
               color: dsTextSecondary,
               fontSize: 14,
             ),
@@ -221,13 +223,13 @@ class FormProgressIndicator extends StatelessWidget {
             value: currentStep / totalSteps,
             minHeight: 6,
             backgroundColor: dsAccent.withOpacity(0.1),
-            valueColor: const AlwaysStoppedAnimation<Color>(dsAccent),
+            valueColor: AlwaysStoppedAnimation<Color>(dsAccent),
           ),
         ),
         const SizedBox(height: 12),
         Text(
           'Step ${currentStep + 1} of $totalSteps: ${stepTitles[currentStep]}',
-          style: const TextStyle(
+          style: TextStyle(
             color: dsTextSecondary,
             fontSize: 12,
             fontWeight: FontWeight.w500,

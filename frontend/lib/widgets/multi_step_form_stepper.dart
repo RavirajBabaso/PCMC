@@ -24,14 +24,14 @@ class MultiStepFormStepper extends StatelessWidget {
   final VoidCallback onPreviousStep;
   final VoidCallback onSubmit;
   final bool isSubmitting;
-  final @required String nextButtonLabel;
-  final @required String previousButtonLabel;
-  final @required String submitButtonLabel;
+  final String nextButtonLabel;
+  final String previousButtonLabel;
+  final String submitButtonLabel;
   final bool canProceedToNext;
   final void Function(int)? onStepChanged;
   final Color backgroundColor;
 
-  const MultiStepFormStepper({
+  MultiStepFormStepper({
     super.key,
     required this.steps,
     required this.currentStep,
@@ -44,8 +44,8 @@ class MultiStepFormStepper extends StatelessWidget {
     this.submitButtonLabel = 'Submit',
     this.canProceedToNext = true,
     this.onStepChanged,
-    this.backgroundColor = dsBackground,
-  });
+    Color? backgroundColor,
+  }) : backgroundColor = backgroundColor ?? dsBackground;
 
   @override
   Widget build(BuildContext context) {
@@ -73,7 +73,7 @@ class MultiStepFormStepper extends StatelessWidget {
               if (steps[currentStep].subtitle != null) ...[
                 Text(
                   steps[currentStep].subtitle!,
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: dsTextSecondary,
                     fontSize: 14,
                   ),
@@ -105,7 +105,7 @@ class MultiStepFormStepper extends StatelessWidget {
             value: (currentStep + 1) / steps.length,
             minHeight: 6,
             backgroundColor: dsAccent.withOpacity(0.1),
-            valueColor: const AlwaysStoppedAnimation<Color>(dsAccent),
+            valueColor: AlwaysStoppedAnimation<Color>(dsAccent),
           ),
         ),
         const SizedBox(height: 16),

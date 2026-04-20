@@ -602,7 +602,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                   Expanded(
                     child: TextField(
                       controller: _commentController,
-                      style: const TextStyle(color: dsTextPrimary),
+                      style: TextStyle(color: dsTextPrimary),
                       decoration: dsFormFieldDecoration(label: l10n.addComment),
                     ),
                   ),

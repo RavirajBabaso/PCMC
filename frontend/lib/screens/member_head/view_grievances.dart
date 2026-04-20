@@ -8,6 +8,7 @@ import 'package:main_ui/widgets/empty_state.dart';
 import 'package:main_ui/widgets/loading_indicator.dart';
 import 'package:main_ui/widgets/status_badge.dart';
 import 'package:main_ui/widgets/navigation_drawer.dart';
+import 'package:main_ui/services/api_service.dart';
 import 'package:main_ui/theme/app_theme.dart';
 
 class ViewGrievances extends StatefulWidget {
@@ -220,14 +221,14 @@ class _ViewGrievancesState extends State<ViewGrievances> {
       context: context,
       builder: (ctx) => AlertDialog(
         title: Text(AppLocalizations.of(context)!.updateStatus,
-            style: const TextStyle(fontWeight: FontWeight.bold, color: dsTextPrimary)),
+            style: TextStyle(fontWeight: FontWeight.bold, color: dsTextPrimary)),
         backgroundColor: dsSurface,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         content: DropdownButtonFormField<String>(
           initialValue: newStatus,
           decoration: dsFormFieldDecoration(label: AppLocalizations.of(context)!.selectStatus),
           hint: Text(AppLocalizations.of(context)!.selectStatus, style: TextStyle(color: dsTextSecondary)),
-          style: const TextStyle(color: dsTextPrimary),
+          style: TextStyle(color: dsTextPrimary),
           items: statuses.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
           onChanged: (value) => newStatus = value,
         ),
@@ -235,7 +236,7 @@ class _ViewGrievancesState extends State<ViewGrievances> {
           TextButton(
             onPressed: () => Navigator.pop(ctx),
             child: Text(AppLocalizations.of(context)!.cancel,
-                style: const TextStyle(color: dsTextSecondary)),
+                style: TextStyle(color: dsTextSecondary)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
@@ -256,7 +257,7 @@ class _ViewGrievancesState extends State<ViewGrievances> {
               }
             },
             child: Text(AppLocalizations.of(context)!.update,
-                style: const TextStyle(color: dsSurface)),
+                style: TextStyle(color: dsSurface)),
           ),
         ],
       ),
@@ -406,7 +407,7 @@ class _ViewGrievancesState extends State<ViewGrievances> {
                                 borderRadius: BorderRadius.circular(12),
                               ),
                             ),
-                            child: Text(l.retry, style: const TextStyle(color: dsSurface)),
+                            child: Text(l.retry, style: TextStyle(color: dsSurface)),
                           ),
                         )
                       : RefreshIndicator(
