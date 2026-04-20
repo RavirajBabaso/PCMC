@@ -1,0 +1,139 @@
+# Flutter
+frontend/build/
+frontend/.dart_tool/
+frontend/.packages
+frontend/pubspec.lock
+frontend/.flutter-plugins
+frontend/.flutter-plugins-dependencies
+frontend/coverage/
+frontend/.idea/
+frontend/.vscode/
+frontend/*.iml
+frontend/.gradle/
+frontend/.classpath
+frontend/.project
+frontend/.c9/
+frontend/*.launch
+frontend/.settings/
+frontend/*.sublime-workspace
+frontend/local.properties
+frontend/.env
+frontend/.env.*.local
+
+# iOS Flutter
+frontend/ios/Flutter/Flutter.framework/
+frontend/ios/Flutter/Flutter.podspec
+frontend/ios/Flutter/Generated.xcconfig
+frontend/ios/Flutter/ephemeral/
+frontend/ios/Pods/
+frontend/ios/Podfile.lock
+
+# Android Flutter
+frontend/android/.gradle/
+frontend/android/gradlew
+frontend/android/gradlew.bat
+frontend/android/gradle/
+frontend/android/.idea/
+frontend/android/*.iml
+frontend/android/app/debug/
+frontend/android/app/profile/
+frontend/android/app/release/
+
+# macOS Flutter
+frontend/macos/Flutter/Flutter-Release.podspec
+frontend/macos/Pods/
+frontend/macos/Podfile.lock
+
+# Web Flutter
+frontend/web/canvaskit/
+
+# Python/Django Backend
+grievance-system-backend/__pycache__/
+grievance-system-backend/*.py[cod]
+grievance-system-backend/*$py.class
+grievance-system-backend/*.so
+grievance-system-backend/.Python
+grievance-system-backend/build/
+grievance-system-backend/develop-eggs/
+grievance-system-backend/dist/
+grievance-system-backend/downloads/
+grievance-system-backend/eggs/
+grievance-system-backend/.eggs/
+grievance-system-backend/lib/
+grievance-system-backend/lib64/
+grievance-system-backend/parts/
+grievance-system-backend/sdist/
+grievance-system-backend/var/
+grievance-system-backend/wheels/
+grievance-system-backend/pip-wheel-metadata/
+grievance-system-backend/share/python-wheels/
+grievance-system-backend/*.egg-info/
+grievance-system-backend/.installed.cfg
+grievance-system-backend/*.egg
+grievance-system-backend/MANIFEST
+grievance-system-backend/.env
+grievance-system-backend/.env.local
+grievance-system-backend/.env.*.local
+grievance-system-backend/.venv
+grievance-system-backend/venv/
+grievance-system-backend/ENV/
+grievance-system-backend/env/
+grievance-system-backend/.pytest_cache/
+grievance-system-backend/.coverage
+grievance-system-backend/htmlcov/
+grievance-system-backend/instance/
+grievance-system-backend/migrations/versions/
+grievance-system-backend/uploads/
+grievance-system-backend/.idea/
+grievance-system-backend/.vscode/
+grievance-system-backend/*.iml
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*.swn
+*~
+*.sublime-project
+*.sublime-workspace
+.DS_Store
+Thumbs.db
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+desktop.ini
+
+# Environment files
+.env
+.env.local
+.env.*.local
+*.pem
+*.key
+*.cert
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.bak
+*.backup
+*.temp
+*.swp
+
+# Build outputs
+dist/
+build/
+
+# Docker
+.docker/
+docker-compose.override.yml
