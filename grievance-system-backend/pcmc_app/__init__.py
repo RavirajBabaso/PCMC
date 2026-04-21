@@ -198,8 +198,10 @@ def create_app(config_class=None):
     cors_origins = app.config.get('CORS_ORIGINS', [
         "http://localhost:3000",
         "http://localhost:5000",
+        "http://localhost:62984",  # Flutter web dev server current port
         "http://127.0.0.1:3000",
         "http://127.0.0.1:5000",
+        "http://127.0.0.1:62984",
         "http://localhost:50550",  # Flutter web dev server
         "http://localhost:51868",  # Flutter web dev server (current port)
         "https://pcmcapp.onrender.com",

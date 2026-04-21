@@ -1,9 +1,10 @@
 import 'dart:io' show Platform;
-import 'package:flutter/foundation.dart' show kIsWeb;
+
+import 'package:flutter/foundation.dart' show debugPrint, kIsWeb;
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:main_ui/services/api_service.dart';
 
-/// Local notification service — no Firebase / FCM dependency.
+/// Local notification service with no Firebase / FCM dependency.
 ///
 /// On mobile, flutter_local_notifications shows heads-up banners.
 /// The backend stores notifications in its DB; this service can be
@@ -12,6 +13,7 @@ import 'package:main_ui/services/api_service.dart';
 class NotificationService {
   static final FlutterLocalNotificationsPlugin _plugin =
       FlutterLocalNotificationsPlugin();
+  static bool _isInitialized = false;
 
   static const _androidChannel = AndroidNotificationChannel(
     'pcmc_grievance_channel',
@@ -21,9 +23,11 @@ class NotificationService {
   );
 
   static Future<void> initialize() async {
-    if (kIsWeb) return; // Web uses browser notifications — future work
+    if (kIsWeb || _isInitialized) {
+      return;
+    }
 
-    const androidInit = AndroidInitializationSettings('@mipmap/launcher_icon');
+    const androidInit = AndroidInitializationSettings('@mipmap/ic_launcher');
     const iosInit = DarwinInitializationSettings(
       requestAlertPermission: true,
       requestBadgePermission: true,
@@ -34,14 +38,21 @@ class NotificationService {
       iOS: iosInit,
     );
 
-    await _plugin.initialize(initSettings);
+    try {
+      await _plugin.initialize(initSettings);
 
-    // Create the high-importance channel (Android 8+)
-    if (!kIsWeb && Platform.isAndroid) {
-      await _plugin
-          .resolvePlatformSpecificImplementation<
-              AndroidFlutterLocalNotificationsPlugin>()
-          ?.createNotificationChannel(_androidChannel);
+      // Create the high-importance channel (Android 8+).
+      if (Platform.isAndroid) {
+        await _plugin
+            .resolvePlatformSpecificImplementation<
+                AndroidFlutterLocalNotificationsPlugin>()
+            ?.createNotificationChannel(_androidChannel);
+      }
+
+      _isInitialized = true;
+    } catch (error, stackTrace) {
+      debugPrint('NotificationService.initialize failed: $error');
+      debugPrint('$stackTrace');
     }
   }
 
@@ -51,7 +62,16 @@ class NotificationService {
     required String body,
     int id = 0,
   }) async {
-    if (kIsWeb) return;
+    if (kIsWeb) {
+      return;
+    }
+
+    if (!_isInitialized) {
+      await initialize();
+      if (!_isInitialized) {
+        return;
+      }
+    }
 
     final androidDetails = AndroidNotificationDetails(
       _androidChannel.id,
@@ -86,7 +106,7 @@ class NotificationService {
         );
       }
     } catch (_) {
-      // Silently ignore — notifications are non-critical
+      // Silently ignore; notifications are non-critical.
     }
   }
 }

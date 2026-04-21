@@ -150,6 +150,7 @@ class UsersNotifier extends StateNotifier<List<User>> {
         dataToSend['role'] = dataToSend['role'].toString().toLowerCase();
       }
 
+      dataToSend['id'] = userId;
       await ApiService.addUpdateUser(dataToSend);
       
       // Only refresh if not disposed

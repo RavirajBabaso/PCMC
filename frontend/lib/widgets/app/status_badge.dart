@@ -1,100 +1,51 @@
 import 'package:flutter/material.dart';
-import 'package:main_ui/l10n/app_localizations.dart';
 import 'package:main_ui/theme/app_theme.dart';
 
+/// Compact pill badge for grievance status — used everywhere uniformly.
 class StatusBadge extends StatelessWidget {
-  const StatusBadge({super.key, required this.status});
+  const StatusBadge({
+    super.key,
+    required this.status,
+    this.compact = false,
+  });
 
   final String status;
-
-  ({Color background, Color foreground, Color border}) _tone(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return switch (status) {
-      'new' => (
-        background: scheme.primaryContainer,
-        foreground: scheme.onPrimaryContainer,
-        border: scheme.primary,
-      ),
-      'in_progress' => (
-        background: scheme.tertiaryContainer,
-        foreground: scheme.onTertiaryContainer,
-        border: scheme.tertiary,
-      ),
-      'resolved' || 'closed' => (
-        background: const Color(0xFFE6F4EA),
-        foreground: const Color(0xFF1E7D35),
-        border: const Color(0xFF3BA55C),
-      ),
-      'rejected' => (
-        background: scheme.errorContainer,
-        foreground: scheme.onErrorContainer,
-        border: scheme.error,
-      ),
-      'on_hold' => (
-        background: const Color(0xFFFFF4E5),
-        foreground: const Color(0xFF8A6100),
-        border: const Color(0xFFF0B429),
-      ),
-      _ => (
-        background: scheme.surfaceContainerHighest,
-        foreground: scheme.onSurfaceVariant,
-        border: scheme.outline,
-      ),
-    };
-  }
-
-  IconData get _icon => switch (status) {
-    'new' => Icons.fiber_new_rounded,
-    'in_progress' => Icons.autorenew_rounded,
-    'resolved' => Icons.check_circle_rounded,
-    'rejected' => Icons.cancel_rounded,
-    'on_hold' => Icons.pause_circle_rounded,
-    'closed' => Icons.done_all_rounded,
-    _ => Icons.info_rounded,
-  };
-
-  String _label(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    return switch (status) {
-      'new' => l10n.statusNew,
-      'in_progress' => l10n.statusInProgress,
-      'resolved' => l10n.statusResolved,
-      'rejected' => l10n.statusRejected,
-      'on_hold' => l10n.statusOnHold,
-      'closed' => l10n.statusClosed,
-      _ => l10n.statusUnknown,
-    };
-  }
+  /// When true, shows icon-only to save space.
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
-    final tone = _tone(context);
+    final color = AppStatus.fromStatus(status);
+    final label = AppStatus.labelFromStatus(status);
+    final icon  = AppStatus.iconFromStatus(status);
 
-    return Semantics(
-      label: 'Status ${_label(context)}',
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: context.appSpacing.md, vertical: context.appSpacing.xs + 2),
-        decoration: BoxDecoration(
-          color: tone.background,
-          borderRadius: BorderRadius.circular(context.appEffects.radiusLg),
-          border: Border.all(color: tone.border),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(_icon, size: 14, color: tone.foreground),
-            SizedBox(width: context.appSpacing.xs),
-            Text(
-              _label(context),
-              style: TextStyle(
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-                color: tone.foreground,
-              ),
-            ),
-          ],
-        ),
+    return Container(
+      padding: compact
+          ? const EdgeInsets.all(4)
+          : const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+      decoration: BoxDecoration(
+        color: color.withOpacity(0.12),
+        borderRadius: BorderRadius.circular(AppRadius.full),
+        border: Border.all(color: color.withOpacity(0.35)),
       ),
+      child: compact
+          ? Icon(icon, color: color, size: 14)
+          : Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, color: color, size: 12),
+                const SizedBox(width: 4),
+                Text(
+                  label,
+                  style: TextStyle(
+                    color: color,
+                    fontSize: 11,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ),
     );
   }
 }

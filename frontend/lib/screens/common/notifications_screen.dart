@@ -1,188 +1,174 @@
 import 'package:flutter/material.dart';
+import 'package:main_ui/layouts/app_shell.dart';
+import 'package:main_ui/theme/app_theme.dart';
 
+/// Notifications screen — styled with AppShell and design system tokens.
+/// Backend integration: replace [_mockNotifications] with GET /notifications.
 class NotificationsScreen extends StatelessWidget {
   const NotificationsScreen({super.key});
 
+  // TODO: Replace with backend-driven data via a provider
+  static const List<Map<String, String>> _mockNotifications = [
+    {'title': 'Grievance Update',  'body': 'Your complaint #123 has been resolved.',      'time': '2 hours ago',  'type': 'success'},
+    {'title': 'Reminder',          'body': 'Submit feedback for grievance #101.',          'time': '1 day ago',    'type': 'info'},
+    {'title': 'New Message',       'body': 'You have a new message from support.',          'time': '3 days ago',   'type': 'message'},
+    {'title': 'System Update',     'body': 'New features have been added to the app.',     'time': '1 week ago',   'type': 'update'},
+  ];
+
   @override
   Widget build(BuildContext context) {
-    // Later connect with backend: GET /notifications
-    final notifications = [
-      {
-        "title": "Grievance Update", 
-        "body": "Your complaint #123 resolved.", 
-        "time": "2 hours ago",
-        "type": "success"
-      },
-      {
-        "title": "Reminder", 
-        "body": "Submit feedback for grievance #101.", 
-        "time": "1 day ago",
-        "type": "info"
-      },
-      {
-        "title": "New Message", 
-        "body": "You have a new message from support team.", 
-        "time": "3 days ago",
-        "type": "message"
-      },
-      {
-        "title": "System Update", 
-        "body": "New features added to the app. Update now!", 
-        "time": "1 week ago",
-        "type": "update"
-      },
-    ];
+    return AppShell(
+      title: 'Notifications',
+      currentRoute: '/notifications',
+      child: _mockNotifications.isEmpty
+          ? _EmptyNotifications()
+          : ListView.separated(
+              padding: const EdgeInsets.fromLTRB(
+                AppSpacing.base, AppSpacing.base,
+                AppSpacing.base, AppSpacing.xxl,
+              ),
+              itemCount: _mockNotifications.length,
+              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+              itemBuilder: (context, i) =>
+                  _NotificationTile(data: _mockNotifications[i]),
+            ),
+    );
+  }
+}
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFf8fbff),
-      appBar: AppBar(
-        title: const Text(
-          "Notifications", // This should be localized, e.g., localizations.notifications
-          style: TextStyle(
-            fontWeight: FontWeight.w600,
-            color: Colors.black,
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _NotificationTile extends StatelessWidget {
+  const _NotificationTile({required this.data});
+  final Map<String, String> data;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final type  = data['type'] ?? 'info';
+
+    IconData icon;
+    Color color;
+    switch (type) {
+      case 'success':
+        icon = Icons.check_circle_outline_rounded;
+        color = AppTheme.success;
+        break;
+      case 'message':
+        icon = Icons.email_outlined;
+        color = const Color(0xFF7C3AED);
+        break;
+      case 'update':
+        icon = Icons.system_update_outlined;
+        color = AppTheme.warning;
+        break;
+      default:
+        icon = Icons.info_outline_rounded;
+        color = theme.colorScheme.primary;
+    }
+
+    return Container(
+      decoration: BoxDecoration(
+        color: theme.cardColor,
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        border: Border.all(color: theme.dividerColor),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.lg),
+        onTap: () {}, // TODO: navigate to relevant screen
+        child: Padding(
+          padding: AppSpacing.card,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Icon container
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: color.withOpacity(0.1),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(icon, color: color, size: 22),
+              ),
+              const SizedBox(width: AppSpacing.md),
+
+              // Content
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      data['title'] ?? '',
+                      style: theme.textTheme.titleMedium,
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(
+                      data['body'] ?? '',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: theme.colorScheme.onSurface.withOpacity(0.65),
+                      ),
+                    ),
+                    const SizedBox(height: AppSpacing.sm),
+                    Text(
+                      data['time'] ?? '',
+                      style: theme.textTheme.labelSmall,
+                    ),
+                  ],
+                ),
+              ),
+
+              // Unread dot — hardcoded; real app would check read state
+              Container(
+                width: 8, height: 8,
+                decoration: BoxDecoration(
+                  color: theme.colorScheme.primary,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
           ),
         ),
-        backgroundColor: const Color(0xFFF8FBFF),
-        elevation: 0,
-        foregroundColor: Colors.blue,
       ),
-      body: notifications.isEmpty
-          ? Center(
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    Icons.notifications_off_outlined,
-                    size: 64,
-                    color: Colors.grey.shade400,
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    "No notifications yet",
-                    style: TextStyle(
-                      fontSize: 18,
-                      color: Colors.grey.shade600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    "We'll notify you when something arrives",
-                    style: TextStyle(
-                      fontSize: 14,
-                      color: Colors.grey.shade500,
-                    ),
-                  ),
-                ],
-              ),
-            )
-          : ListView.builder(
-              padding: const EdgeInsets.all(16),
-              itemCount: notifications.length,
-              itemBuilder: (context, index) {
-                final notif = notifications[index];
-                final type = notif['type'] as String;
-                
-                // Different icons based on notification type
-                IconData icon;
-                Color iconColor;
-                
-                switch (type) {
-                  case "success":
-                    icon = Icons.check_circle_outline;
-                    iconColor = Colors.green;
-                    break;
-                  case "info":
-                    icon = Icons.info_outline;
-                    iconColor = Colors.blue;
-                    break;
-                  case "message":
-                    icon = Icons.email_outlined;
-                    iconColor = Colors.purple;
-                    break;
-                  case "update":
-                    icon = Icons.system_update_outlined;
-                    iconColor = Colors.orange;
-                    break;
-                  default:
-                    icon = Icons.notifications_outlined;
-                    iconColor = Colors.blue;
-                }
-                
-                return Container(
-                  margin: const EdgeInsets.only(bottom: 16),
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Card(
-                    color: const Color(0xFFecf2fe),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Container(
-                            width: 40,
-                            height: 40,
-                            decoration: BoxDecoration(
-                              color: iconColor.withOpacity(0.1),
-                              shape: BoxShape.circle,
-                            ),
-                            child: Icon(
-                              icon,
-                              color: iconColor,
-                              size: 20,
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  notif['title']!,
-                                  style: const TextStyle(
-                                    fontSize: 16,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  notif['body']!,
-                                  style: TextStyle(
-                                    fontSize: 14,
-                                    color: Colors.grey.shade700,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  notif['time']!,
-                                  style: TextStyle(
-                                    fontSize: 12,
-                                    color: Colors.grey.shade500,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-              },
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _EmptyNotifications extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.xxl),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              Icons.notifications_off_outlined,
+              size: 72,
+              color: theme.colorScheme.onSurface.withOpacity(0.2),
             ),
+            const SizedBox(height: AppSpacing.base),
+            Text(
+              'No notifications yet',
+              style: theme.textTheme.titleLarge?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.5),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              "We'll notify you when something arrives",
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurface.withOpacity(0.4),
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

@@ -1,1 +1,2 @@
-export 'package:main_ui/widgets/app/status_badge.dart';
+// Barrel re-export — keeps backward-compatible import path for existing screens.
+export 'app/status_badge.dart';

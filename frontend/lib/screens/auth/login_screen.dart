@@ -5,7 +5,8 @@ import 'package:main_ui/utils/validators.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
 import 'package:main_ui/widgets/app/app_button.dart';
 import 'package:main_ui/exceptions/auth_exception.dart';
-import 'package:main_ui/services/api_service.dart'; // Assuming ApiService is available for direct API calls
+import 'package:main_ui/services/api_service.dart';
+import 'package:main_ui/theme/app_theme.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -29,270 +30,240 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
-
     _formKey.currentState!.save();
     setState(() => _isLoading = true);
 
     try {
       if (_isLogin) {
-        await ref.read(authProvider.notifier)
-            .loginWithEmail(_email, _password);
+        await ref.read(authProvider.notifier).loginWithEmail(_email, _password);
       } else {
         await ref.read(authProvider.notifier).register(
-          _name,
-          _email,
-          _password,
-          address: _address,
-          phoneNumber: _phone,
-          voterId: _voterId,
+          _name, _email, _password,
+          address: _address, phoneNumber: _phone, voterId: _voterId,
         );
       }
 
       final user = ref.read(authProvider);
+      if (!mounted) return;
       if (user != null) {
-        Navigator.pushReplacementNamed(
-          context,
-          '/${user.role}/home',
-        );
+        Navigator.pushReplacementNamed(context, '/${user.role}/home');
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              AppLocalizations.of(context)!.authenticationFailed,
-            ),
-          ),
-        );
+        _showError(AppLocalizations.of(context)!.authenticationFailed);
       }
     } catch (e) {
       if (!mounted) return;
-
       final l10n = AppLocalizations.of(context)!;
-      String message = l10n.authenticationFailed;
-
-      if (e is AuthException) {
-        message = e.message; // 🔥 backend message
-      }
-
-      showDialog(
-        context: context,
-        builder: (ctx) => AlertDialog(
-          title: Text(
-            _isLogin ? l10n.loginFailed : l10n.registrationFailed,
-          ),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(ctx).pop(),
-              child: Text(l10n.ok),
-            ),
-          ],
-        ),
+      final message = e is AuthException ? e.message : l10n.authenticationFailed;
+      _showErrorDialog(
+        _isLogin ? l10n.loginFailed : l10n.registrationFailed,
+        message,
       );
     } finally {
-      if (mounted) {
-        setState(() => _isLoading = false);
-      }
+      if (mounted) setState(() => _isLoading = false);
     }
+  }
+
+  void _showError(String msg) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
+    );
+  }
+
+  void _showErrorDialog(String title, String message) {
+    final l10n = AppLocalizations.of(context)!;
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: Text(title),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(ctx).pop(),
+            child: Text(l10n.ok),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _requestPasswordReset(String email) async {
     try {
-      // Call the forgot password API endpoint
       final response = await ApiService.post('/auth/forgot-password', {'email': email});
-      
-      // Close the dialog first
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
-      
-      // Adjust check based on backend response format (e.g., {'message': 'Password reset email sent'})
+      if (!mounted) return;
+      Navigator.of(context).pop();
       final data = response.data;
       final message = data['message'] ?? (data['error'] ?? 'Unknown response');
-      final isSuccess = !message.toLowerCase().contains('error') && !message.toLowerCase().contains('failed');
-      
-      if (isSuccess) {
-        // Success: Show message directing to web domain
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                'Password reset email sent successfully! Check your email for a link to reset your password on https://www.nivaran.co.in.',
-                style: TextStyle(color: Theme.of(context).colorScheme.onSecondary),
-              ),
-              backgroundColor: Theme.of(context).colorScheme.secondary,
-              duration: const Duration(seconds: 5),
-            ),
-          );
-        }
-      } else {
-        // Error: Show failure message
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(
-                message,
-                style: TextStyle(color: Theme.of(context).colorScheme.onError),
-              ),
-              backgroundColor: Theme.of(context).colorScheme.error,
-            ),
-          );
-        }
-      }
+      final isSuccess = !message.toLowerCase().contains('error') &&
+          !message.toLowerCase().contains('failed');
+      _showError(isSuccess
+          ? 'Reset link sent! Check your email at https://www.nivaran.co.in.'
+          : message);
     } catch (e) {
       if (mounted) {
-        Navigator.of(context).pop(); // Ensure dialog closes on error
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              'Error sending reset email: $e',
-              style: TextStyle(color: Theme.of(context).colorScheme.onError),
-            ),
-            backgroundColor: Theme.of(context).colorScheme.error,
-          ),
-        );
+        Navigator.of(context).pop();
+        _showError('Error sending reset email: $e');
       }
     }
   }
 
   void _showForgotPasswordDialog() {
-    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
-      builder: (ctx) => ForgotPasswordDialog(
-        onSubmit: _requestPasswordReset,
-      ),
+      builder: (ctx) => _ForgotPasswordDialog(onSubmit: _requestPasswordReset),
     );
   }
 
-  String? validatePhone(String? value, AppLocalizations l10n) {
-    if (value == null || value.isEmpty) {
-      return l10n.phoneNumberRequired;
-    }
-    if (!RegExp(r'^\+?[1-9]\d{1,14}$').hasMatch(value)) {
-      return l10n.invalidMobileNumber;
-    }
+  String? _validatePhone(String? value, AppLocalizations l10n) {
+    if (value == null || value.isEmpty) return l10n.phoneNumberRequired;
+    if (!RegExp(r'^\+?[1-9]\d{1,14}$').hasMatch(value)) return l10n.invalidMobileNumber;
     return null;
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final l10n = AppLocalizations.of(context)!;
+    final l10n  = AppLocalizations.of(context)!;
+    final primary = theme.colorScheme.primary;
 
     return Scaffold(
-      backgroundColor: theme.colorScheme.surface,
+      // No AppBar — full immersive auth experience
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.xl,
+            vertical: AppSpacing.xl,
+          ),
           child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              const SizedBox(height: 40),
+              const SizedBox(height: AppSpacing.xxl),
 
-              Center(
-                child: Text(
-                  _isLogin ? l10n.login : l10n.register,
-                  style: theme.textTheme.headlineLarge?.copyWith(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: theme.colorScheme.primary,
-                  ),
+              // ── App identity ─────────────────────────────────────────────
+              Icon(Icons.gavel_rounded, size: 56, color: primary),
+              const SizedBox(height: AppSpacing.base),
+              Text(
+                'NIVARAN',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.w800,
+                  color: primary,
+                  letterSpacing: 2,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                _isLogin ? l10n.welcomeBack : l10n.createAccountPrompt,
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: theme.colorScheme.onSurface.withOpacity(0.55),
                 ),
               ),
 
-              const SizedBox(height: 8),
-              Center(
-                child: Text(
-                  _isLogin
-                      ? l10n.welcomeBack
-                      : l10n.createAccountPrompt,
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: theme.colorScheme.onSurface.withOpacity(0.6),
-                  ),
-                ),
+              const SizedBox(height: AppSpacing.xxl),
+
+              // ── Toggle chip ──────────────────────────────────────────────
+              _AuthToggle(
+                isLogin: _isLogin,
+                loginLabel: l10n.login,
+                registerLabel: l10n.register,
+                onToggle: (v) => setState(() {
+                  _isLogin = v;
+                  _formKey.currentState?.reset();
+                }),
               ),
 
-              const SizedBox(height: 40),
+              const SizedBox(height: AppSpacing.xl),
 
+              // ── Form ─────────────────────────────────────────────────────
               Form(
                 key: _formKey,
                 child: Column(
                   children: [
+                    // Register-only fields
                     if (!_isLogin) ...[
                       TextFormField(
-                        decoration: InputDecoration(
-                          labelText: l10n.name,
-                          prefixIcon: const Icon(Icons.person_outline),
+                        decoration: const InputDecoration(
+                          labelText: 'Full Name',
+                          prefixIcon: Icon(Icons.person_outline_rounded),
                         ),
+                        textCapitalization: TextCapitalization.words,
+                        textInputAction: TextInputAction.next,
                         validator: validateRequired,
-                        onSaved: (v) => _name = v!,
+                        onSaved: (v) => _name = v!.trim(),
                       ),
-                      const SizedBox(height: 16),
-
+                      const SizedBox(height: AppSpacing.base),
                       TextFormField(
-                        decoration: InputDecoration(
-                          labelText: l10n.address,
-                          prefixIcon: const Icon(Icons.home_outlined),
+                        decoration: const InputDecoration(
+                          labelText: 'Address',
+                          prefixIcon: Icon(Icons.home_outlined),
                         ),
+                        textInputAction: TextInputAction.next,
                         validator: validateRequired,
-                        onSaved: (v) => _address = v!,
+                        onSaved: (v) => _address = v!.trim(),
                       ),
-                      const SizedBox(height: 16),
-
+                      const SizedBox(height: AppSpacing.base),
                       TextFormField(
-                        decoration: InputDecoration(
-                          labelText: l10n.phoneNumber,
-                          prefixIcon: const Icon(Icons.phone_outlined),
+                        decoration: const InputDecoration(
+                          labelText: 'Phone Number',
+                          prefixIcon: Icon(Icons.phone_outlined),
                         ),
                         keyboardType: TextInputType.phone,
-                        validator: (v) => validatePhone(v, l10n),
-                        onSaved: (v) => _phone = v!,
+                        textInputAction: TextInputAction.next,
+                        validator: (v) => _validatePhone(v, l10n),
+                        onSaved: (v) => _phone = v!.trim(),
                       ),
-                      const SizedBox(height: 16),
-
+                      const SizedBox(height: AppSpacing.base),
                       TextFormField(
-                        decoration: InputDecoration(
-                          labelText: l10n.voterId,
-                          prefixIcon: const Icon(Icons.badge_outlined),
+                        decoration: const InputDecoration(
+                          labelText: 'Voter ID',
+                          prefixIcon: Icon(Icons.badge_outlined),
                         ),
+                        textInputAction: TextInputAction.next,
                         validator: validateRequired,
-                        onSaved: (v) => _voterId = v!,
+                        onSaved: (v) => _voterId = v!.trim(),
                       ),
-                      const SizedBox(height: 16),
+                      const SizedBox(height: AppSpacing.base),
                     ],
 
+                    // Common fields
                     TextFormField(
-                      decoration: InputDecoration(
-                        labelText: l10n.email,
-                        prefixIcon: const Icon(Icons.email_outlined),
-                              ),
+                      decoration: const InputDecoration(
+                        labelText: 'Email',
+                        prefixIcon: Icon(Icons.email_outlined),
+                      ),
                       keyboardType: TextInputType.emailAddress,
+                      textInputAction: TextInputAction.next,
+                      autofillHints: const [AutofillHints.email],
                       validator: validateEmail,
-                      onSaved: (v) => _email = v!,
+                      onSaved: (v) => _email = v!.trim(),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.base),
 
                     TextFormField(
                       decoration: InputDecoration(
                         labelText: l10n.password,
-                        prefixIcon: const Icon(Icons.lock_outline),
+                        prefixIcon: const Icon(Icons.lock_outline_rounded),
                         suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility_outlined
-                                : Icons.visibility_off_outlined,
-                          ),
+                          icon: Icon(_obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined),
                           onPressed: () =>
                               setState(() => _obscurePassword = !_obscurePassword),
                         ),
-                              ),
+                      ),
                       obscureText: _obscurePassword,
+                      textInputAction: _isLogin
+                          ? TextInputAction.done
+                          : TextInputAction.next,
+                      autofillHints: const [AutofillHints.password],
                       validator: validateRequired,
                       onSaved: (v) => _password = v!,
+                      onFieldSubmitted: (_) => _submit(),
                     ),
 
-                    // Forgot Password link (only for login mode)
-                    if (_isLogin)
+                    // Forgot password
+                    if (_isLogin) ...[
+                      const SizedBox(height: AppSpacing.xs),
                       Align(
                         alignment: Alignment.centerRight,
                         child: TextButton(
@@ -300,45 +271,49 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           child: Text(
                             l10n.forgotPassword ?? 'Forgot Password?',
                             style: TextStyle(
-                              color: theme.colorScheme.primary,
-                              fontWeight: FontWeight.w500,
+                              color: primary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 13,
                             ),
                           ),
                         ),
                       ),
+                    ],
 
-                    const SizedBox(height: 24),
+                    const SizedBox(height: AppSpacing.xl),
 
+                    // Submit button
                     AppButton(
                       text: _isLogin ? l10n.login : l10n.register,
                       onPressed: _isLoading ? null : _submit,
                       isLoading: _isLoading,
                       fullWidth: true,
+                      size: AppButtonSize.large,
                     ),
 
-                    const SizedBox(height: 16),
+                    const SizedBox(height: AppSpacing.xl),
 
+                    // Switch mode row
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Expanded(
-                          child: Text(
-                            _isLogin
-                                ? l10n.registerPrompt
-                                : l10n.loginPrompt,
-                            textAlign: TextAlign.center,
-                          ),
+                        Text(
+                          _isLogin ? l10n.registerPrompt : l10n.loginPrompt,
+                          style: theme.textTheme.bodySmall,
                         ),
+                        const SizedBox(width: 4),
                         TextButton(
-                          onPressed: () {
-                            setState(() {
-                              _isLogin = !_isLogin;
-                              _formKey.currentState?.reset();
-                            });
-                          },
+                          onPressed: () => setState(() {
+                            _isLogin = !_isLogin;
+                            _formKey.currentState?.reset();
+                          }),
                           child: Text(
                             _isLogin ? l10n.register : l10n.login,
-                            style: TextStyle(color: theme.colorScheme.primary),
+                            style: TextStyle(
+                              color: primary,
+                              fontWeight: FontWeight.w700,
+                              fontSize: 13,
+                            ),
                           ),
                         ),
                       ],
@@ -346,6 +321,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ],
                 ),
               ),
+
+              const SizedBox(height: AppSpacing.xxl),
             ],
           ),
         ),
@@ -354,132 +331,145 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 }
 
-// Simple StatefulWidget for Forgot Password Dialog (to manage TextEditingController)
-class ForgotPasswordDialog extends StatefulWidget {
-  final Function(String) onSubmit;
+// ─────────────────────────────────────────────────────────────────────────────
+// Auth Toggle (Login / Register segmented switch)
+// ─────────────────────────────────────────────────────────────────────────────
+class _AuthToggle extends StatelessWidget {
+  const _AuthToggle({
+    required this.isLogin,
+    required this.loginLabel,
+    required this.registerLabel,
+    required this.onToggle,
+  });
 
-  const ForgotPasswordDialog({super.key, required this.onSubmit});
+  final bool isLogin;
+  final String loginLabel;
+  final String registerLabel;
+  final ValueChanged<bool> onToggle;
 
   @override
-  State<ForgotPasswordDialog> createState() => _ForgotPasswordDialogState();
-}
-
-class _ForgotPasswordDialogState extends State<ForgotPasswordDialog> {
-  final _emailController = TextEditingController();
-  final _formKey = GlobalKey<FormState>();
-  bool _isSending = false; // Added loading state for the send button
-  bool _isFormValid = false; // Track form validation state
-
-  @override
-  void initState() {
-    super.initState();
-    // Listen to form field changes to update validation state
-    _emailController.addListener(_updateFormValidation);
+  Widget build(BuildContext context) {
+    final primary = Theme.of(context).colorScheme.primary;
+    return Container(
+      height: 48,
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
+        borderRadius: BorderRadius.circular(AppRadius.md),
+      ),
+      child: Row(
+        children: [
+          _tab(context, loginLabel, isLogin, () => onToggle(true), primary),
+          _tab(context, registerLabel, !isLogin, () => onToggle(false), primary),
+        ],
+      ),
+    );
   }
 
-  void _updateFormValidation() {
-    final isValid = _emailController.text.isNotEmpty && 
-                    RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(_emailController.text);
-    if (_isFormValid != isValid) {
-      setState(() {
-        _isFormValid = isValid;
-      });
+  Widget _tab(BuildContext ctx, String label, bool selected, VoidCallback onTap, Color primary) {
+    return Expanded(
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          margin: const EdgeInsets.all(4),
+          decoration: BoxDecoration(
+            color: selected ? primary : Colors.transparent,
+            borderRadius: BorderRadius.circular(AppRadius.sm),
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            label,
+            style: TextStyle(
+              color: selected ? Colors.white : Theme.of(ctx).colorScheme.onSurface.withOpacity(0.6),
+              fontWeight: FontWeight.w600,
+              fontSize: 14,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Forgot Password Dialog
+// ─────────────────────────────────────────────────────────────────────────────
+class _ForgotPasswordDialog extends StatefulWidget {
+  const _ForgotPasswordDialog({required this.onSubmit});
+  final Future<void> Function(String) onSubmit;
+
+  @override
+  State<_ForgotPasswordDialog> createState() => _ForgotPasswordDialogState();
+}
+
+class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
+  final _emailCtrl = TextEditingController();
+  final _formKey   = GlobalKey<FormState>();
+  bool _sending    = false;
+
+  bool get _valid =>
+      _emailCtrl.text.isNotEmpty &&
+      RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(_emailCtrl.text);
+
+  @override
+  void dispose() {
+    _emailCtrl.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    if (_sending || !_valid) return;
+    setState(() => _sending = true);
+    try {
+      await widget.onSubmit(_emailCtrl.text.trim());
+    } finally {
+      if (mounted) setState(() => _sending = false);
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
     return AlertDialog(
-      title: Text(l10n.forgotPassword ?? 'Forgot Password?'),
+      title: const Text('Reset Password'),
       content: Form(
         key: _formKey,
-        autovalidateMode: AutovalidateMode.onUserInteraction,
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              l10n.forgotPasswordDescription ?? 'Enter your email address below. We\'ll send you a link to reset your password on our website.',
-              style: Theme.of(context).textTheme.bodyMedium,
+            const Text(
+              "Enter your email address. We'll send you a reset link.",
+              style: TextStyle(fontSize: 14),
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: AppSpacing.base),
             TextFormField(
-              controller: _emailController,
-              decoration: InputDecoration(
-                labelText: l10n.email,
-                prefixIcon: const Icon(Icons.email_outlined),
+              controller: _emailCtrl,
+              decoration: const InputDecoration(
+                labelText: 'Email',
+                prefixIcon: Icon(Icons.email_outlined),
               ),
               keyboardType: TextInputType.emailAddress,
-              validator: (value) {
-                if (value == null || value.isEmpty) {
-                  return l10n.emailRequired ?? 'Email is required';
-                }
-                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-                  return l10n.invalidEmail ?? 'Please enter a valid email';
-                }
-                return null;
-              },
-              onFieldSubmitted: (value) {
-                if (_isFormValid && !_isSending) {
-                  _handleSubmit(value);
-                }
-              },
+              onChanged: (_) => setState(() {}),
+              onFieldSubmitted: (_) => _submit(),
+              validator: validateEmail,
             ),
           ],
         ),
       ),
       actions: [
         TextButton(
-          onPressed: _isSending ? null : () => Navigator.of(context).pop(),
-          child: Text(l10n.cancel ?? 'Cancel'),
+          onPressed: _sending ? null : () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
         ),
         ElevatedButton(
-          onPressed: _isSending || !_isFormValid ? null : () {
-            final email = _emailController.text.trim();
-            if (email.isNotEmpty) {
-              _handleSubmit(email);
-            }
-          },
-          child: _isSending 
-            ? SizedBox(
-                width: 20, 
-                height: 20, 
-                child: CircularProgressIndicator(
-                  strokeWidth: 2, 
-                  valueColor: AlwaysStoppedAnimation<Color>(Theme.of(context).colorScheme.onPrimary),
-                ),
-              )
-            : Text(l10n.send ?? 'Send Reset Link'),
+          onPressed: _sending || !_valid ? null : _submit,
+          child: _sending
+              ? const SizedBox(
+                  width: 18, height: 18,
+                  child: CircularProgressIndicator(strokeWidth: 2),
+                )
+              : const Text('Send Link'),
         ),
       ],
     );
-  }
-
-  void _handleSubmit(String email) async {
-    if (_isSending) return;
-    
-    setState(() => _isSending = true);
-    
-    try {
-      await widget.onSubmit(email);
-      // Note: The dialog will be closed by the onSubmit function after success
-    } catch (e) {
-      // Error handling is done in the parent widget, but we need to re-enable the button
-      if (mounted) {
-        setState(() => _isSending = false);
-      }
-    }
-    
-    // Don't setState here if the dialog was already closed
-    if (mounted && _isSending) {
-      setState(() => _isSending = false);
-    }
-  }
-
-  @override
-  void dispose() {
-    _emailController.removeListener(_updateFormValidation);
-    _emailController.dispose();
-    super.dispose();
   }
 }

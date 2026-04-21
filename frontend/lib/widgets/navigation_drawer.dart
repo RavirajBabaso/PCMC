@@ -4,272 +4,302 @@ import 'package:main_ui/l10n/app_localizations.dart';
 import 'package:main_ui/navigation/nav_config.dart';
 import 'package:main_ui/providers/auth_provider.dart';
 import 'package:main_ui/providers/user_provider.dart';
+import 'package:main_ui/theme/app_theme.dart';
 
-const Color _bg = Color(0xFF050B18);
-const Color _surfaceAlt = Color(0xFF0F2040);
-const Color _cyan = Color(0xFF00E5FF);
-const Color _amber = Color(0xFFFFB300);
-const Color _green = Color(0xFF00E676);
-const Color _red = Color(0xFFFF1744);
-const Color _orange = Color(0xFFFF6D00);
-const Color _purple = Color(0xFFD500F9);
-const Color _gold = Color(0xFFFFD700);
-const Color _text1 = Color(0xFFE8F4FD);
-const Color _text2 = Color(0xFF8BA3BE);
-const Color _border = Color(0xFF1A3050);
+// ─────────────────────────────────────────────────────────────────────────────
+// Role accent theming — one definition, no duplicate constants
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _RoleTheme {
+  const _RoleTheme({
+    required this.accent,
+    required this.label,
+    required this.icon,
+  });
+  final Color accent;
+  final String label;
+  final IconData icon;
+}
 
 _RoleTheme _roleTheme(String? role) {
   switch (role?.toUpperCase()) {
-    case 'SUPER_USER':
-      return _RoleTheme(_gold, [const Color(0xFF1A1200), const Color(0xFF302000)], 'SUPER USER', Icons.shield_moon, '✦');
-    case 'ADMIN':
-      return _RoleTheme(_cyan, [const Color(0xFF001220), const Color(0xFF001830)], 'ADMINISTRATOR', Icons.admin_panel_settings, '⬡');
-    case 'FIELD_STAFF':
-      return _RoleTheme(_orange, [const Color(0xFF180800), const Color(0xFF200D00)], 'FIELD STAFF', Icons.engineering, '▲');
-    case 'MEMBER_HEAD':
-      return _RoleTheme(_purple, [const Color(0xFF0D0020), const Color(0xFF140030)], 'MEMBER HEAD', Icons.verified_user, '◆');
-    default:
-      return _RoleTheme(_green, [const Color(0xFF001810), const Color(0xFF002018)], 'CITIZEN', Icons.person, '●');
+    case 'SUPER_USER':  return const _RoleTheme(accent: Color(0xFFFFD700), label: 'SUPER USER',    icon: Icons.shield_rounded);
+    case 'ADMIN':       return const _RoleTheme(accent: Color(0xFF60A5FA), label: 'ADMINISTRATOR', icon: Icons.admin_panel_settings_rounded);
+    case 'FIELD_STAFF': return const _RoleTheme(accent: Color(0xFFFB923C), label: 'FIELD STAFF',   icon: Icons.engineering_rounded);
+    case 'MEMBER_HEAD': return const _RoleTheme(accent: Color(0xFFA78BFA), label: 'MEMBER HEAD',   icon: Icons.verified_user_rounded);
+    default:            return const _RoleTheme(accent: Color(0xFF34D399), label: 'CITIZEN',       icon: Icons.person_rounded);
   }
 }
 
-class _RoleTheme {
-  const _RoleTheme(this.accent, this.headerGradient, this.label, this.icon, this.badge);
+// ─────────────────────────────────────────────────────────────────────────────
+// Drawer widget
+// ─────────────────────────────────────────────────────────────────────────────
 
-  final Color accent;
-  final List<Color> headerGradient;
-  final String label;
-  final IconData icon;
-  final String badge;
-}
-
-class CustomNavigationDrawer extends ConsumerStatefulWidget {
+class CustomNavigationDrawer extends ConsumerWidget {
   const CustomNavigationDrawer({super.key});
 
   @override
-  ConsumerState<CustomNavigationDrawer> createState() => _CustomNavigationDrawerState();
-}
-
-class _CustomNavigationDrawerState extends ConsumerState<CustomNavigationDrawer>
-    with SingleTickerProviderStateMixin {
-  late final AnimationController _animCtrl;
-  late final Animation<double> _pulse;
-
-  @override
-  void initState() {
-    super.initState();
-    _animCtrl = AnimationController(vsync: this, duration: const Duration(seconds: 2))..repeat(reverse: true);
-    _pulse = CurvedAnimation(parent: _animCtrl, curve: Curves.easeInOut);
-  }
-
-  @override
-  void dispose() {
-    _animCtrl.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context)!;
-    final user = ref.watch(userNotifierProvider);
-    final role = user?.role?.toUpperCase();
-    final roleTheme = _roleTheme(role);
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loc      = AppLocalizations.of(context)!;
+    final user     = ref.watch(userNotifierProvider);
+    final role     = user?.role?.toUpperCase();
+    final rt       = _roleTheme(role);
     final sections = buildNavigationSections(role: role, loc: loc);
 
     return Drawer(
-      backgroundColor: _bg,
-      child: Column(
-        children: [
-          _buildHeader(roleTheme, user?.name, user?.email),
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(vertical: 8),
-              child: Column(
-                children: [
-                  for (final section in sections) ...[
-                    _sectionHeader(section.title, roleTheme.accent),
-                    for (final item in section.items)
-                      _item(
-                        context,
-                        icon: item.icon,
-                        label: item.label(loc),
-                        route: item.route,
-                        color: item.highlighted ? roleTheme.accent : null,
+      backgroundColor: dsBackground,
+      shape: const RoundedRectangleBorder(borderRadius: BorderRadius.zero),
+      child: SafeArea(
+        bottom: false,
+        child: Column(
+          children: [
+            // ── Header ─────────────────────────────────────────────────
+            _DrawerHeader(user: user, roleTheme: rt),
+
+            // ── Nav items ──────────────────────────────────────────────
+            Expanded(
+              child: SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
+                child: Column(
+                  children: [
+                    for (final section in sections) ...[
+                      _SectionLabel(title: section.title, color: rt.accent),
+                      for (final item in section.items)
+                        _NavItem(
+                          icon: item.icon,
+                          label: item.label(loc),
+                          route: item.route,
+                          accentColor: item.highlighted ? rt.accent : null,
+                          onTap: () {
+                            Navigator.pop(context);
+                            Navigator.pushNamed(context, item.route);
+                          },
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.base, vertical: AppSpacing.xs),
+                        child: Divider(color: dsBorder, height: 1),
                       ),
-                    _divider(),
+                    ],
+
+                    // Logout
+                    _NavItem(
+                      icon: Icons.logout_rounded,
+                      label: loc.logout,
+                      accentColor: AppTheme.error,
+                      onTap: () async {
+                        await ref.read(authProvider.notifier).logout();
+                        if (context.mounted) {
+                          Navigator.pushNamedAndRemoveUntil(
+                              context, '/login', (_) => false);
+                        }
+                      },
+                    ),
+
+                    const SizedBox(height: AppSpacing.xxl),
                   ],
-                  _item(
-                    context,
-                    icon: Icons.logout,
-                    label: loc.logout,
-                    color: _red,
-                    onTap: () async {
-                      await ref.read(authProvider.notifier).logout();
-                      if (context.mounted) {
-                        Navigator.pushNamedAndRemoveUntil(context, '/login', (_) => false);
-                      }
-                    },
+                ),
+              ),
+            ),
+
+            // ── Footer ────────────────────────────────────────────────
+            Container(
+              padding: const EdgeInsets.all(AppSpacing.base),
+              decoration: BoxDecoration(
+                border: Border(top: BorderSide(color: dsBorder)),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 6, height: 6,
+                    decoration: BoxDecoration(
+                      color: AppTheme.success,
+                      shape: BoxShape.circle,
+                      boxShadow: [BoxShadow(color: AppTheme.success.withOpacity(0.5), blurRadius: 6)],
+                    ),
                   ),
-                  const SizedBox(height: 8),
+                  const SizedBox(width: AppSpacing.sm),
+                  Text(
+                    'PCMC GRIEVANCE SYSTEM',
+                    style: TextStyle(
+                      color: dsTextSecondary,
+                      fontSize: 9,
+                      letterSpacing: 1.5,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ],
               ),
             ),
-          ),
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: const BoxDecoration(border: Border(top: BorderSide(color: _border))),
-            child: Row(
-              children: [
-                AnimatedBuilder(
-                  animation: _pulse,
-                  builder: (_, __) => Container(
-                    width: 6,
-                    height: 6,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      color: _green,
-                      boxShadow: [
-                        BoxShadow(color: _green.withOpacity(0.3 + _pulse.value * 0.7), blurRadius: 6),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 8),
-                const Text(
-                  'PCMC GRIEVANCE SYSTEM',
-                  style: TextStyle(color: _text2, fontSize: 9, letterSpacing: 1.5),
-                ),
-              ],
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
+}
 
-  Widget _buildHeader(_RoleTheme roleTheme, String? name, String? email) {
+// ─────────────────────────────────────────────────────────────────────────────
+// Internal widgets
+// ─────────────────────────────────────────────────────────────────────────────
+
+class _DrawerHeader extends StatelessWidget {
+  const _DrawerHeader({required this.user, required this.roleTheme});
+
+  final dynamic user;
+  final _RoleTheme roleTheme;
+
+  @override
+  Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(16, 52, 16, 16),
+      padding: const EdgeInsets.fromLTRB(
+        AppSpacing.base, AppSpacing.xl,
+        AppSpacing.base, AppSpacing.base,
+      ),
       decoration: BoxDecoration(
-        gradient: LinearGradient(begin: Alignment.topLeft, end: Alignment.bottomRight, colors: roleTheme.headerGradient),
-        border: Border(bottom: BorderSide(color: roleTheme.accent.withOpacity(0.3))),
+        color: dsSurface,
+        border: Border(bottom: BorderSide(color: dsBorder)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: roleTheme.accent.withOpacity(0.15),
-                  border: Border.all(color: roleTheme.accent.withOpacity(0.5), width: 2),
-                  boxShadow: [BoxShadow(color: roleTheme.accent.withOpacity(0.3), blurRadius: 12)],
-                ),
-                child: Center(child: Icon(roleTheme.icon, color: roleTheme.accent, size: 22)),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(name ?? 'User', style: const TextStyle(color: _text1, fontSize: 15, fontWeight: FontWeight.w700)),
-                    if (email != null)
-                      Text(email, style: const TextStyle(color: _text2, fontSize: 11), maxLines: 1, overflow: TextOverflow.ellipsis),
-                  ],
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
+          // Avatar
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+            width: 52, height: 52,
             decoration: BoxDecoration(
-              color: roleTheme.accent.withOpacity(0.15),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: roleTheme.accent.withOpacity(0.5)),
-              boxShadow: [BoxShadow(color: roleTheme.accent.withOpacity(0.2), blurRadius: 8)],
+              shape: BoxShape.circle,
+              color: roleTheme.accent.withOpacity(0.12),
+              border: Border.all(color: roleTheme.accent.withOpacity(0.4), width: 2),
             ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(roleTheme.badge, style: TextStyle(color: roleTheme.accent, fontSize: 10)),
-                const SizedBox(width: 6),
-                Text(
-                  roleTheme.label,
-                  style: TextStyle(color: roleTheme.accent, fontSize: 10, fontWeight: FontWeight.w800, letterSpacing: 1.5),
-                ),
-              ],
+            child: Icon(roleTheme.icon, color: roleTheme.accent, size: 26),
+          ),
+          const SizedBox(height: AppSpacing.md),
+
+          // Name
+          Text(
+            user?.name ?? 'User',
+            style: TextStyle(
+              color: dsTextPrimary,
+              fontSize: 15,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+
+          if (user?.email != null) ...[
+            const SizedBox(height: 2),
+            Text(
+              user!.email!,
+              style: TextStyle(color: dsTextSecondary, fontSize: 11),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+
+          const SizedBox(height: AppSpacing.sm),
+
+          // Role badge
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
+            decoration: BoxDecoration(
+              color: roleTheme.accent.withOpacity(0.12),
+              borderRadius: BorderRadius.circular(AppRadius.full),
+              border: Border.all(color: roleTheme.accent.withOpacity(0.4)),
+            ),
+            child: Text(
+              roleTheme.label,
+              style: TextStyle(
+                color: roleTheme.accent,
+                fontSize: 10,
+                fontWeight: FontWeight.w800,
+                letterSpacing: 1,
+              ),
             ),
           ),
         ],
       ),
     );
   }
+}
 
-  Widget _sectionHeader(String label, Color color) {
+class _SectionLabel extends StatelessWidget {
+  const _SectionLabel({required this.title, required this.color});
+  final String title;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+      padding: const EdgeInsets.fromLTRB(AppSpacing.base, AppSpacing.md, AppSpacing.base, AppSpacing.xs),
       child: Row(
         children: [
           Text(
-            label,
-            style: TextStyle(color: color.withOpacity(0.7), fontSize: 9, fontWeight: FontWeight.w800, letterSpacing: 2),
+            title.toUpperCase(),
+            style: TextStyle(
+              color: color.withOpacity(0.7),
+              fontSize: 9,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.5,
+            ),
           ),
-          const SizedBox(width: 8),
-          Expanded(child: Container(height: 1, color: color.withOpacity(0.2))),
+          const SizedBox(width: AppSpacing.sm),
+          Expanded(child: Divider(color: color.withOpacity(0.2), height: 1)),
         ],
       ),
     );
   }
+}
 
-  Widget _divider() => Container(margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6), height: 1, color: _border);
+class _NavItem extends StatelessWidget {
+  const _NavItem({
+    required this.icon,
+    required this.label,
+    this.route,
+    this.accentColor,
+    this.onTap,
+  });
 
-  Widget _item(
-    BuildContext context, {
-    required IconData icon,
-    required String label,
-    Color? color,
-    String? route,
-    VoidCallback? onTap,
-  }) {
-    final itemColor = color ?? _text2;
+  final IconData icon;
+  final String label;
+  final String? route;
+  final Color? accentColor;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final color = accentColor ?? dsTextSecondary;
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: onTap ?? () {
-          if (route == null) return;
-          Navigator.pop(context);
-          Navigator.pushNamed(context, route);
-        },
-        borderRadius: BorderRadius.circular(8),
-        splashColor: itemColor.withOpacity(0.1),
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.sm),
         child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.sm,
+            vertical: 2,
+          ),
           child: ListTile(
             dense: true,
+            contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm),
             leading: Container(
-              width: 32,
-              height: 32,
+              width: 34, height: 34,
               decoration: BoxDecoration(
-                color: itemColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: itemColor.withOpacity(0.2)),
+                color: color.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
-              child: Icon(icon, color: itemColor, size: 16),
+              child: Icon(icon, color: color, size: 18),
             ),
             title: Text(
               label,
               style: TextStyle(
-                color: color != null ? _text1 : _text2,
+                color: accentColor != null ? dsTextPrimary : dsTextSecondary,
                 fontSize: 13,
-                fontWeight: color != null ? FontWeight.w600 : FontWeight.w400,
+                fontWeight: accentColor != null ? FontWeight.w600 : FontWeight.w400,
               ),
             ),
-            trailing: Icon(Icons.chevron_right, color: itemColor.withOpacity(0.3), size: 16),
+            trailing: Icon(Icons.chevron_right_rounded,
+                color: color.withOpacity(0.3), size: 16),
+            minVerticalPadding: AppSpacing.xs,
           ),
         ),
       ),

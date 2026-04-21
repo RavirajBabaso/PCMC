@@ -1,6 +1,8 @@
+// lib/widgets/app/app_card.dart
 import 'package:flutter/material.dart';
 import 'package:main_ui/theme/app_theme.dart';
 
+/// Standard surface card — border-based, no shadows by default.
 class AppCard extends StatelessWidget {
   const AppCard({
     super.key,
@@ -27,47 +29,41 @@ class AppCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final spacing = context.appSpacing;
-    final effects = context.appEffects;
-    final cardRadius = radius ?? effects.radiusMd;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final cardColor = color ?? Theme.of(context).cardColor;
+    final borderColor = border?.color ?? (isDark ? dsBorder : AppTheme.border);
+    final r = radius ?? AppRadius.lg;
 
-    final card = Card(
-      elevation: elevation ?? effects.cardElevation,
-      margin: margin ?? EdgeInsets.all(spacing.sm),
-      color: color,
-      clipBehavior: clipBehavior,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(cardRadius),
-        side: border == null
-            ? BorderSide.none
-            : BorderSide(color: border!.color, width: border!.width),
-      ),
-      child: Padding(
-        padding: padding ?? EdgeInsets.all(spacing.lg),
-        child: child,
-      ),
+    final decoration = BoxDecoration(
+      color: cardColor,
+      borderRadius: BorderRadius.circular(r),
+      border: Border.all(color: borderColor, width: border?.width ?? 1),
     );
 
-    if (onTap == null) return card;
+    final content = Padding(
+      padding: padding ?? AppSpacing.card,
+      child: child,
+    );
 
-    return Card(
-      elevation: elevation ?? effects.cardElevation,
-      margin: margin ?? EdgeInsets.all(spacing.sm),
-      color: color,
+    if (onTap == null) {
+      return Container(
+        margin: margin,
+        decoration: decoration,
+        clipBehavior: clipBehavior,
+        child: content,
+      );
+    }
+
+    return Container(
+      margin: margin,
+      decoration: decoration,
       clipBehavior: clipBehavior,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(cardRadius),
-        side: border == null
-            ? BorderSide.none
-            : BorderSide(color: border!.color, width: border!.width),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(cardRadius),
-        child: Padding(
-          padding: padding ?? EdgeInsets.all(spacing.lg),
-          child: child,
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(r),
+          child: content,
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:main_ui/theme/app_theme.dart';
 
+/// Unified text field — wraps [TextFormField] with consistent decoration.
 class AppTextField extends StatelessWidget {
   const AppTextField({
     super.key,
@@ -20,6 +21,8 @@ class AppTextField extends StatelessWidget {
     this.onChanged,
     this.validator,
     this.onTap,
+    this.onFieldSubmitted,
+    this.autofillHints,
   });
 
   final TextEditingController? controller;
@@ -38,13 +41,11 @@ class AppTextField extends StatelessWidget {
   final ValueChanged<String>? onChanged;
   final FormFieldValidator<String>? validator;
   final VoidCallback? onTap;
+  final ValueChanged<String>? onFieldSubmitted;
+  final Iterable<String>? autofillHints;
 
   @override
   Widget build(BuildContext context) {
-    final spacing = context.appSpacing;
-    final radius = context.appEffects.radiusMd;
-    final isSingleLine = (maxLines ?? 1) == 1;
-
     return Semantics(
       textField: true,
       label: label,
@@ -52,29 +53,24 @@ class AppTextField extends StatelessWidget {
       child: TextFormField(
         controller: controller,
         focusNode: focusNode,
-      keyboardType: keyboardType,
-      textInputAction: textInputAction,
-      obscureText: obscureText,
-      readOnly: readOnly,
-      enabled: enabled,
-      maxLines: maxLines,
-      minLines: minLines,
-      onChanged: onChanged,
-      validator: validator,
-      onTap: onTap,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hintText,
-        prefixIcon: prefixIcon,
-        suffixIcon: suffixIcon,
-        contentPadding: EdgeInsets.symmetric(
-          horizontal: spacing.lg,
-          vertical: isSingleLine ? spacing.lg : spacing.md,
+        keyboardType: keyboardType,
+        textInputAction: textInputAction,
+        obscureText: obscureText,
+        readOnly: readOnly,
+        enabled: enabled,
+        maxLines: maxLines,
+        minLines: minLines,
+        onChanged: onChanged,
+        validator: validator,
+        onTap: onTap,
+        onFieldSubmitted: onFieldSubmitted,
+        autofillHints: autofillHints,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hintText,
+          prefixIcon: prefixIcon,
+          suffixIcon: suffixIcon,
         ),
-        constraints: isSingleLine ? const BoxConstraints(minHeight: 56) : null,
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(radius)),
-        enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(radius)),
-        focusedBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(radius)),
       ),
     );
   }

@@ -41,6 +41,7 @@ class Grievance {
   final User? assignee;
   final MasterSubject? subject;
   final MasterArea? area;
+  String? get areaName => area?.name;
   final List<GrievanceAttachment>? attachments; // From old version
   final List<Comment>? comments; // From old version
   final List<Workproof>? workproofs;

@@ -60,7 +60,7 @@ class CombinedGrievanceCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      grievance.title ?? 'Untitled Grievance',
+                      grievance.title,
                       style: theme.textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w600,
                         color: dsTextPrimary,
@@ -70,7 +70,7 @@ class CombinedGrievanceCard extends StatelessWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      grievance.description ?? 'No description provided',
+                      grievance.description,
                       style: theme.textTheme.bodyMedium?.copyWith(
                         color: dsTextSecondary,
                       ),

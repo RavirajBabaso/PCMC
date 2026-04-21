@@ -9,6 +9,7 @@ import 'package:main_ui/services/master_data_service.dart';
 import 'package:main_ui/providers/admin_provider.dart';
 import 'package:main_ui/widgets/navigation_drawer.dart';
 import 'package:intl/intl.dart';
+import 'package:main_ui/theme/app_theme.dart';
 
 // ─────────────────────────────── Design Tokens (shared dark theme) ────────────
 const Color _bg         = Color(0xFF050B18);
@@ -43,36 +44,11 @@ List<String> _allowedTransitions(String current) {
 bool _isTerminal(String status) =>
     status == 'closed' || status == 'rejected';
 
-// ────────────────────────── Status Helpers ───────────────────────────────────
-Color _statusColor(String s) {
-  switch (s.toLowerCase()) {
-    case 'new':         return _amber;
-    case 'in_progress': return _orange;
-    case 'on_hold':     return _purple;
-    case 'resolved':    return _green;
-    case 'closed':      return _cyanDim;
-    case 'rejected':    return _red;
-    default:            return _text2;
-  }
-}
-IconData _statusIcon(String s) {
-  switch (s.toLowerCase()) {
-    case 'new':         return Icons.fiber_new;
-    case 'in_progress': return Icons.sync;
-    case 'on_hold':     return Icons.pause_circle;
-    case 'resolved':    return Icons.check_circle;
-    case 'closed':      return Icons.lock;
-    case 'rejected':    return Icons.cancel;
-    default:            return Icons.help;
-  }
-}
-String _statusLabel(String s) {
-  switch (s.toLowerCase()) {
-    case 'in_progress': return 'IN PROGRESS';
-    case 'on_hold':     return 'ON HOLD';
-    default:            return s.toUpperCase();
-  }
-}
+// ────────────────────────── Status Helpers — unified via AppStatus ────────────
+/// Delegates to AppStatus for consistent colours across all screens.
+Color _statusColor(String s)   => AppStatus.fromStatus(s);
+IconData _statusIcon(String s) => AppStatus.iconFromStatus(s);
+String _statusLabel(String s)  => AppStatus.labelFromStatus(s);
 
 TextStyle _heading(double s, {Color c = _text1}) =>
     TextStyle(color: c, fontSize: s, fontWeight: FontWeight.w700);

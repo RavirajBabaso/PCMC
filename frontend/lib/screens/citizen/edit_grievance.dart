@@ -44,8 +44,8 @@ class _EditGrievanceState extends ConsumerState<EditGrievance> {
 
   void _loadGrievanceData(Grievance grievance) {
     if (!_initialDataLoaded) {
-      _titleController.text = grievance.title ?? '';
-      _descriptionController.text = grievance.description ?? '';
+      _titleController.text = grievance.title;
+      _descriptionController.text = grievance.description;
       _addressController.text = grievance.address ?? '';
       _selectedAreaId = grievance.areaId;
       _selectedSubjectId = grievance.subjectId;

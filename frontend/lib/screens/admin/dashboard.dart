@@ -12,8 +12,10 @@ import 'package:flutter/foundation.dart';
 import 'dart:io' as io;
 import 'package:path_provider/path_provider.dart';
 import 'package:open_file/open_file.dart';
+import 'package:main_ui/theme/app_theme.dart';
 
 // ─────────────────────────────────── Design Tokens ────────────────────────────
+// Legacy local tokens kept for chart/glow effects; status colors unified to AppStatus
 const Color _bg         = Color(0xFF050B18);
 const Color _surface    = Color(0xFF0D1829);
 const Color _surfaceAlt = Color(0xFF0F2040);
@@ -39,17 +41,8 @@ TextStyle _heading(double s, {Color c = _text1}) =>
 TextStyle _mono(double s, {Color c = _text2}) =>
     TextStyle(color: c, fontSize: s, fontFamily: 'monospace');
 
-Color _statusColor(String s) {
-  switch (s.toLowerCase()) {
-    case 'new':         return _amber;
-    case 'in_progress': return _orange;
-    case 'on_hold':     return _purple;
-    case 'resolved':    return _green;
-    case 'closed':      return _cyanDim;
-    case 'rejected':    return _red;
-    default:            return _text2;
-  }
-}
+/// Unified status color — delegates to AppStatus for consistency across all screens.
+Color _statusColor(String s) => AppStatus.fromStatus(s);
 
 class Dashboard extends ConsumerStatefulWidget {
   const Dashboard({super.key});
