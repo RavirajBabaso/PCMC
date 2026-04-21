@@ -3,13 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
 import 'package:main_ui/navigation/nav_config.dart';
 import 'package:main_ui/providers/user_provider.dart';
-import 'package:main_ui/services/auth_service.dart';
 import 'package:main_ui/widgets/navigation_drawer.dart';
-import 'package:main_ui/theme/app_theme.dart';
 
 /// Mobile-first scaffold shell.
 /// Mobile (< 600 px): AppBar + Drawer + BottomNav.
-/// Tablet / desktop is supported minimally (rail) but primary focus is mobile.
 class AppShell extends ConsumerWidget {
   const AppShell({
     super.key,
@@ -18,6 +15,10 @@ class AppShell extends ConsumerWidget {
     required this.child,
     this.actions,
     this.backgroundColor,
+    this.bottomNavCurrentRoute,
+    this.appBarBackgroundColor,
+    this.appBarForegroundColor,
+    this.appBarElevation,
     this.floatingActionButton,
     this.floatingActionButtonLocation,
   });
@@ -27,27 +28,33 @@ class AppShell extends ConsumerWidget {
   final Widget child;
   final List<Widget>? actions;
   final Color? backgroundColor;
+  final String? bottomNavCurrentRoute;
+  final Color? appBarBackgroundColor;
+  final Color? appBarForegroundColor;
+  final double? appBarElevation;
   final Widget? floatingActionButton;
   final FloatingActionButtonLocation? floatingActionButtonLocation;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final loc   = AppLocalizations.of(context)!;
-    final role  = ref.watch(userNotifierProvider)?.role;
+    final loc = AppLocalizations.of(context)!;
+    final role = ref.watch(userNotifierProvider)?.role;
     final sections = buildNavigationSections(role: role, loc: loc);
     final bottomItems = mobilePrimaryItems(sections);
+    final selectedBottomRoute = bottomNavCurrentRoute ?? currentRoute;
 
-    // ── Mobile layout ────────────────────────────────────────────────────────
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
+        backgroundColor: appBarBackgroundColor,
+        foregroundColor: appBarForegroundColor,
+        elevation: appBarElevation,
+        surfaceTintColor: Colors.transparent,
         title: Text(title),
         actions: actions,
-        // Back button auto-added by Navigator when applicable
       ),
       drawer: const CustomNavigationDrawer(),
       body: SafeArea(
-        // Bottom safe area handled by BottomNavBar; top already in AppBar
         bottom: false,
         child: child,
       ),
@@ -55,31 +62,35 @@ class AppShell extends ConsumerWidget {
       floatingActionButtonLocation:
           floatingActionButtonLocation ?? FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: bottomItems.isNotEmpty
-          ? _BottomNav(items: bottomItems, currentRoute: currentRoute)
+          ? _BottomNav(
+              items: bottomItems,
+              currentRoute: currentRoute,
+              selectedRoute: selectedBottomRoute,
+            )
           : null,
     );
   }
 }
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Bottom Navigation
-// ─────────────────────────────────────────────────────────────────────────────
-
 class _BottomNav extends StatelessWidget {
-  const _BottomNav({required this.items, required this.currentRoute});
+  const _BottomNav({
+    required this.items,
+    required this.currentRoute,
+    required this.selectedRoute,
+  });
 
   final List<NavItem> items;
   final String currentRoute;
+  final String selectedRoute;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final loc   = AppLocalizations.of(context)!;
-    final index = items.indexWhere((item) => item.route == currentRoute);
+    final loc = AppLocalizations.of(context)!;
+    final index = items.indexWhere((item) => item.route == selectedRoute);
     final selectedIndex = index < 0 ? 0 : index;
 
     return Container(
-      // Top border instead of elevation noise
       decoration: BoxDecoration(
         color: theme.bottomNavigationBarTheme.backgroundColor,
         border: Border(
@@ -97,17 +108,21 @@ class _BottomNav extends StatelessWidget {
         selectedFontSize: 11,
         unselectedFontSize: 11,
         iconSize: 22,
-        items: items.map((item) => BottomNavigationBarItem(
-          icon: Padding(
-            padding: const EdgeInsets.only(bottom: 2),
-            child: Icon(item.icon),
-          ),
-          activeIcon: Padding(
-            padding: const EdgeInsets.only(bottom: 2),
-            child: Icon(item.icon),
-          ),
-          label: item.label(loc),
-        )).toList(),
+        items: items
+            .map(
+              (item) => BottomNavigationBarItem(
+                icon: Padding(
+                  padding: const EdgeInsets.only(bottom: 2),
+                  child: Icon(item.icon),
+                ),
+                activeIcon: Padding(
+                  padding: const EdgeInsets.only(bottom: 2),
+                  child: Icon(item.icon),
+                ),
+                label: item.label(loc),
+              ),
+            )
+            .toList(),
         onTap: (newIndex) {
           final route = items[newIndex].route;
           if (route != currentRoute) {

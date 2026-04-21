@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:main_ui/layouts/app_shell.dart';
 import 'package:package_info_plus/package_info_plus.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
+import 'package:main_ui/theme/app_theme.dart';
 
 class AppVersionScreen extends StatefulWidget {
   const AppVersionScreen({super.key});
@@ -36,16 +38,14 @@ class _AppVersionScreenState extends State<AppVersionScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    return Scaffold(
+    return AppShell(
+      title: l10n.appVersion,
+      currentRoute: '/app-version',
+      bottomNavCurrentRoute: '/profile',
       backgroundColor: const Color(0xFFf8fbff),
-      appBar: AppBar(
-        title: Text(l10n.appVersion),
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        foregroundColor: theme.appBarTheme.foregroundColor,
-        elevation: theme.appBarTheme.elevation,
-      ),
-      body: SingleChildScrollView(
+      appBarBackgroundColor: dsSurface,
+      appBarForegroundColor: dsTextPrimary,
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           children: [

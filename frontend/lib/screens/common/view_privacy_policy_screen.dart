@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:main_ui/layouts/app_shell.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
+import 'package:main_ui/theme/app_theme.dart';
 
 class PrivacyPolicyScreen extends StatelessWidget {
   const PrivacyPolicyScreen({super.key});
@@ -7,16 +9,14 @@ class PrivacyPolicyScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-    return Scaffold(
+    return AppShell(
+      title: l10n.privacyPolicy,
+      currentRoute: '/privacy-policy',
+      bottomNavCurrentRoute: '/profile',
       backgroundColor: const Color(0xFFF8FBFF), // Background color
-      appBar: AppBar(
-        title: Text(l10n.privacyPolicy),
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        foregroundColor: theme.appBarTheme.foregroundColor,
-        elevation: theme.appBarTheme.elevation,
-      ),
-      body: SingleChildScrollView(
+      appBarBackgroundColor: dsSurface,
+      appBarForegroundColor: dsTextPrimary,
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Card(
           color: const Color(0xFFECF2FE), // Card background

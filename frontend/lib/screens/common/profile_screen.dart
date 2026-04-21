@@ -82,12 +82,13 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n  = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
     final user  = ref.watch(userNotifierProvider);
 
     return AppShell(
       title: l10n.profile,
       currentRoute: '/profile',
+      appBarBackgroundColor: dsSurface,
+      appBarForegroundColor: dsTextPrimary,
       actions: [
         if (user != null)
           IconButton(

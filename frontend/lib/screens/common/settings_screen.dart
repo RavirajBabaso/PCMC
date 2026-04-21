@@ -105,6 +105,9 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
     return AppShell(
       title: l10n.settings,
       currentRoute: '/settings',
+      bottomNavCurrentRoute: '/profile',
+      appBarBackgroundColor: dsSurface,
+      appBarForegroundColor: dsTextPrimary,
       child: _isLoading
           ? const LoadingIndicator()
           : SingleChildScrollView(

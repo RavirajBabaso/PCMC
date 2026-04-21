@@ -2,18 +2,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
+import 'package:main_ui/layouts/app_shell.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
 import 'package:main_ui/models/announcement_model.dart';
 import 'package:main_ui/providers/user_provider.dart';
 import 'package:main_ui/services/api_service.dart';
+import 'package:main_ui/theme/app_theme.dart';
 
 final announcementsProvider = FutureProvider<List<Announcement>>((ref) async {
-  final user = ref.read(userNotifierProvider);
-  final endpoint = user?.role?.toUpperCase() == 'ADMIN'
-      ? '/admins/announcements'
-      : '/admins/public/announcements';
-
-  final response = await ApiService.get(endpoint);
+  final response = await ApiService.get('/admins/announcements');
   return (response.data as List)
       .map((json) => Announcement.fromJson(json))
       .toList();
@@ -252,14 +249,13 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
     final isAdmin = user?.role?.toUpperCase() == 'ADMIN';
     final announcementsAsync = ref.watch(announcementsProvider);
 
-    return Scaffold(
+    return AppShell(
+      title: localizations.announcements,
+      currentRoute: '/announcements',
+      bottomNavCurrentRoute: '/profile',
       backgroundColor: const Color(0xFFf8fbff),
-      appBar: AppBar(
-        title: Text(localizations.announcements),
-        backgroundColor: Theme.of(context).appBarTheme.backgroundColor,
-        foregroundColor: Theme.of(context).appBarTheme.foregroundColor,
-        elevation: Theme.of(context).appBarTheme.elevation,
-      ),
+      appBarBackgroundColor: dsSurface,
+      appBarForegroundColor: dsTextPrimary,
       floatingActionButton: isAdmin
           ? FloatingActionButton(
               onPressed: _showAddAnnouncementDialog,
@@ -269,7 +265,7 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
               child: const Icon(Icons.add),
             )
           : null,
-      body: announcementsAsync.when(
+      child: announcementsAsync.when(
         data: (announcements) => announcements.isEmpty
             ? Center(
                 child: Column(

@@ -43,6 +43,15 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
   final _locationFormKey = GlobalKey<FormState>();
 
   @override
+  void initState() {
+    super.initState();
+    // Add listeners to rebuild when text fields change to enable/disable Next button
+    _titleController.addListener(() => setState(() {}));
+    _descriptionController.addListener(() => setState(() {}));
+    _addressController.addListener(() => setState(() {}));
+  }
+
+  @override
   void dispose() {
     _titleController.dispose();
     _descriptionController.dispose();
@@ -237,11 +246,14 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
   bool get _canProceedToNextStep {
     switch (_currentStep) {
       case 0:
-        return _detailsFormKey.currentState?.validate() ?? false;
+        // Check if title and description are filled without triggering validation
+        return _titleController.text.isNotEmpty &&
+            _descriptionController.text.isNotEmpty;
       case 1:
         return _selectedSubjectId != null && _selectedAreaId != null;
       case 2:
-        return _locationFormKey.currentState?.validate() ?? false;
+        // Check if address is filled without triggering validation
+        return _addressController.text.isNotEmpty;
       default:
         return true;
     }

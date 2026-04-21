@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:main_ui/layouts/app_shell.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
+import 'package:main_ui/theme/app_theme.dart';
 
 class FaqsScreen extends StatelessWidget {
   const FaqsScreen({super.key});
@@ -45,16 +47,14 @@ class FaqsScreen extends StatelessWidget {
       },
     ];
 
-    final theme = Theme.of(context);
-    return Scaffold(
+    return AppShell(
+      title: l10n.faqs,
+      currentRoute: '/faqs',
+      bottomNavCurrentRoute: '/profile',
       backgroundColor: const Color(0xFFf8fbff),
-      appBar: AppBar(
-        title: Text(l10n.faqs),
-        backgroundColor: theme.appBarTheme.backgroundColor,
-        foregroundColor: theme.appBarTheme.foregroundColor,
-        elevation: theme.appBarTheme.elevation,
-      ),
-      body: SingleChildScrollView(
+      appBarBackgroundColor: dsSurface,
+      appBarForegroundColor: dsTextPrimary,
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

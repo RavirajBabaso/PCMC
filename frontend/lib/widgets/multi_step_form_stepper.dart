@@ -112,7 +112,7 @@ class MultiStepFormStepper extends StatelessWidget {
 
         // Step indicators
         SizedBox(
-          height: 80,
+          height: 110,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             itemCount: steps.length,

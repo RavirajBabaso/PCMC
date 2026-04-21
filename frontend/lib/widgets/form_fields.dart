@@ -34,6 +34,14 @@ class StandardTextInput extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final usesMultilineInput = maxLines > 1 ||
+        minLines > 1 ||
+        textInputAction == TextInputAction.newline;
+    final effectiveKeyboardType = usesMultilineInput &&
+            keyboardType == TextInputType.text
+        ? TextInputType.multiline
+        : keyboardType;
+
     return Semantics(
       textField: true,
       label: label,
@@ -74,7 +82,7 @@ class StandardTextInput extends StatelessWidget {
       style: TextStyle(color: dsTextPrimary),
       maxLines: maxLines,
       minLines: minLines,
-      keyboardType: keyboardType,
+      keyboardType: effectiveKeyboardType,
       textInputAction: textInputAction,
       validator: validator,
       onChanged: onChanged,
