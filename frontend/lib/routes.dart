@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'screens/auth/login_screen.dart';
 import 'screens/auth/login_callback.dart';
+import 'screens/citizen/citizen_home_screen.dart';
 import 'screens/citizen/submit_grievance.dart';
 import 'screens/citizen/track_grievance.dart';
 import 'screens/citizen/grievance_detail.dart';
@@ -61,7 +62,7 @@ Map<String, WidgetBuilder> appRoutes = {
   },
   '/profile': (context) => const ProfileScreen(),
   '/settings': (context) => const SettingsScreen(),
-  '/citizen/home': (context) => const TrackGrievance(),
+  '/citizen/home': (context) => const CitizenHomeScreen(),
   '/member_head/home': (context) => const ViewGrievances(),
   '/field_staff/home': (context) => const AssignedList(), 
   '/admin/ads': (context) => const ManageAdsScreen(),

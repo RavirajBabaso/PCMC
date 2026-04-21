@@ -29,7 +29,7 @@ class LoadingScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppShell(
       title: title,
-      currentRoute: currentRoute,
+      currentRoute: currentRoute ?? '',
       backgroundColor: backgroundColor ?? dsBackground,
       child: Center(
         child: LoadingIndicator(
@@ -61,7 +61,7 @@ class ListLoadingScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppShell(
       title: title,
-      currentRoute: currentRoute,
+      currentRoute: currentRoute ?? '',
       backgroundColor: backgroundColor ?? dsBackground,
       child: ListSkeleton(itemCount: itemCount),
     );
@@ -87,7 +87,7 @@ class FormLoadingScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppShell(
       title: title,
-      currentRoute: currentRoute,
+      currentRoute: currentRoute ?? '',
       backgroundColor: backgroundColor ?? dsBackground,
       child: FormSkeleton(fieldCount: fieldCount),
     );
@@ -113,7 +113,7 @@ class CardLoadingScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppShell(
       title: title,
-      currentRoute: currentRoute,
+      currentRoute: currentRoute ?? '',
       backgroundColor: backgroundColor ?? dsBackground,
       child: CardSkeleton(count: cardCount),
     );
@@ -149,7 +149,7 @@ class EmptyScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppShell(
       title: title,
-      currentRoute: currentRoute,
+      currentRoute: currentRoute ?? '',
       backgroundColor: backgroundColor ?? dsBackground,
       child: EnhancedEmptyState(
         type: type,
@@ -190,7 +190,7 @@ class ErrorScaffold extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppShell(
       title: title,
-      currentRoute: currentRoute,
+      currentRoute: currentRoute ?? '',
       backgroundColor: backgroundColor ?? dsBackground,
       child: ErrorState(
         title: errorTitle,
@@ -230,7 +230,7 @@ class AsyncScaffold<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppShell(
       title: title,
-      currentRoute: currentRoute,
+      currentRoute: currentRoute ?? '',
       backgroundColor: backgroundColor ?? dsBackground,
       child: FutureBuilder<T>(
         future: future,
@@ -303,7 +303,7 @@ class StreamScaffold<T> extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppShell(
       title: title,
-      currentRoute: currentRoute,
+      currentRoute: currentRoute ?? '',
       backgroundColor: backgroundColor ?? dsBackground,
       child: StreamBuilder<T>(
         stream: stream,

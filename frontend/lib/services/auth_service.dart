@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -68,6 +69,12 @@ class AuthService {
     return token;
   }
 
+  static AuthException _buildConnectionException() {
+    return AuthException(
+      'Cannot connect to the server. Check that the backend is running and the app is using the correct API URL.',
+    );
+  }
+
   /* -------------------- REGISTER -------------------- */
 
   static Future<void> register(
@@ -104,8 +111,14 @@ class AuthService {
           field: data['error'],
         );
       }
-    } catch (e) {
+    } on AuthException {
       rethrow;
+    } on SocketException {
+      throw _buildConnectionException();
+    } on http.ClientException {
+      throw _buildConnectionException();
+    } on FormatException {
+      throw AuthException('Invalid response received from the server');
     }
   }
 
@@ -126,40 +139,66 @@ class AuthService {
       } else {
         throw AuthException(data['msg'] ?? 'Invalid email or password');
       }
-    } catch (e) {
+    } on AuthException {
       rethrow;
+    } on SocketException {
+      throw _buildConnectionException();
+    } on http.ClientException {
+      throw _buildConnectionException();
+    } on FormatException {
+      throw AuthException('Invalid response received from the server');
     }
   }
 
   /* -------------------- OTP LOGIN -------------------- */
 
   static Future<void> requestOtp(String phoneNumber) async {
-    final response = await http.post(
-      Uri.parse('$_baseUrl/auth/otp/request'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({'phone_number': phoneNumber}),
-    );
-
-    if (response.statusCode != 200) {
-      throw AuthException(
-        json.decode(response.body)['msg'] ?? 'OTP request failed',
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/auth/otp/request'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'phone_number': phoneNumber}),
       );
+
+      if (response.statusCode != 200) {
+        throw AuthException(
+          json.decode(response.body)['msg'] ?? 'OTP request failed',
+        );
+      }
+    } on AuthException {
+      rethrow;
+    } on SocketException {
+      throw _buildConnectionException();
+    } on http.ClientException {
+      throw _buildConnectionException();
+    } on FormatException {
+      throw AuthException('Invalid response received from the server');
     }
   }
 
   static Future<void> verifyOtp(String phoneNumber, String otp) async {
-    final response = await http.post(
-      Uri.parse('$_baseUrl/auth/otp/verify'),
-      headers: {'Content-Type': 'application/json'},
-      body: json.encode({'phone_number': phoneNumber, 'otp': otp}),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/auth/otp/verify'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'phone_number': phoneNumber, 'otp': otp}),
+      );
 
-    final data = json.decode(response.body);
+      final data = json.decode(response.body);
 
-    if (response.statusCode == 200) {
-      await _setTokenFromResponse(data);
-    } else {
-      throw AuthException(data['msg'] ?? 'OTP verification failed');
+      if (response.statusCode == 200) {
+        await _setTokenFromResponse(data);
+      } else {
+        throw AuthException(data['msg'] ?? 'OTP verification failed');
+      }
+    } on AuthException {
+      rethrow;
+    } on SocketException {
+      throw _buildConnectionException();
+    } on http.ClientException {
+      throw _buildConnectionException();
+    } on FormatException {
+      throw AuthException('Invalid response received from the server');
     }
   }
 

@@ -9,8 +9,8 @@ enum AppButtonSize { small, medium, large }
 class AppButton extends StatelessWidget {
   const AppButton({
     super.key,
-    String? label,
-    String? text,
+    this.label,
+    this.text,
     required this.onPressed,
     this.icon,
     this.backgroundColor,
@@ -19,10 +19,10 @@ class AppButton extends StatelessWidget {
     this.isLoading = false,
     this.variant = AppButtonVariant.filled,
     this.size = AppButtonSize.medium,
-  })  : assert(label != null || text != null, 'Provide label or text'),
-        _label = label ?? text!;
+  }) : assert(label != null || text != null, 'Provide label or text');
 
-  final String _label;
+  final String? label;
+  final String? text;
   final VoidCallback? onPressed;
   final IconData? icon;
   final Color? backgroundColor;
@@ -31,6 +31,8 @@ class AppButton extends StatelessWidget {
   final bool isLoading;
   final AppButtonVariant variant;
   final AppButtonSize size;
+
+  String get _label => label ?? text!;
 
   double get _height {
     if (size == AppButtonSize.small)  return 44;

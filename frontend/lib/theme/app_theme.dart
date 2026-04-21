@@ -439,15 +439,15 @@ extension AppThemeContext on BuildContext {
 // BACKWARD-COMPATIBLE aliases for screens that used dsXxx globals
 // These delegate to AppTheme constants so screens don't need big rewrites.
 // ─────────────────────────────────────────────────────────────────────────────
-Color get dsBackground   => const Color(0xFF0B1628);
-Color get dsSurface      => const Color(0xFF132136);
-Color get dsSurfaceAlt   => const Color(0xFF1A2F4A);
-Color get dsAccent       => const Color(0xFF3B82F6);
-Color get dsAccentSoft   => const Color(0xFF60A5FA);
-Color get dsAccentDim    => const Color(0xFF1D4ED8);
-Color get dsTextPrimary  => const Color(0xFFE2E8F0);
-Color get dsTextSecondary=> const Color(0xFF94A3B8);
-Color get dsBorder       => const Color(0xFF1E3A5F);
+const Color dsBackground = Color(0xFF0B1628);
+const Color dsSurface = Color(0xFF132136);
+const Color dsSurfaceAlt = Color(0xFF1A2F4A);
+const Color dsAccent = Color(0xFF3B82F6);
+const Color dsAccentSoft = Color(0xFF60A5FA);
+const Color dsAccentDim = Color(0xFF1D4ED8);
+const Color dsTextPrimary = Color(0xFFE2E8F0);
+const Color dsTextSecondary = Color(0xFF94A3B8);
+const Color dsBorder = Color(0xFF1E3A5F);
 
 BoxDecoration dsPanelDecoration({Color? color, double radius = 16}) =>
     BoxDecoration(
