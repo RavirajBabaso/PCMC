@@ -31,6 +31,7 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
 
   // Form state
   int _currentStep = 0;
+  int _maxUnlockedStep = 0;
   int? _selectedSubjectId;
   int? _selectedAreaId;
   final List<PlatformFile> _attachments = [];
@@ -167,11 +168,18 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
   }
 
   void _nextStep() {
-    // Validate current step before proceeding
     if (!_validateCurrentStep()) {
       return;
     }
-    setState(() => _currentStep++);
+
+    if (_currentStep >= 3) return;
+
+    setState(() {
+      _currentStep++;
+      if (_currentStep > _maxUnlockedStep) {
+        _maxUnlockedStep = _currentStep;
+      }
+    });
   }
 
   void _previousStep() {
@@ -522,7 +530,7 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
         title: 'Attachments',
         subtitle: 'Add supporting media',
         content: _buildAttachmentsStep(localizations),
-        isValidated: true,
+        isValidated: false,
       ),
     ];
 
@@ -535,7 +543,7 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
       isSubmitting: _isSubmitting,
       canProceedToNext: _canProceedToNextStep,
       onStepChanged: (newStep) {
-        if (newStep < _currentStep || steps[newStep].isValidated) {
+        if (newStep <= _maxUnlockedStep) {
           setState(() => _currentStep = newStep);
         }
       },

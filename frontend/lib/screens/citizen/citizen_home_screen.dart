@@ -211,7 +211,7 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
               childAspectRatio: 1.1,
               children: [
                 _QuickActionCard(
-                  icon: Icons.add_task_rounded,
+                  icon: Icons.assignment_turned_in_outlined,
                   title: l10n.submitGrievance,
                   subtitle: l10n.submitGrievanceSubtitle,
                   tint: scheme.primaryContainer,
@@ -219,7 +219,7 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                   onTap: () => Navigator.pushNamed(context, '/citizen/submit').then((_) { ref.invalidate(citizenHistoryProvider(userId!)); }),
                 ),
                 _QuickActionCard(
-                  icon: Icons.track_changes_rounded,
+                  icon: Icons.timeline_rounded,
                   title: l10n.track_grievances,
                   subtitle: 'Follow status updates and open details fast.',
                   tint: scheme.secondaryContainer,
@@ -261,28 +261,28 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                 _MetricCard(
                   title: 'Total',
                   value: '${stats.total}',
-                  icon: Icons.folder_copy_outlined,
+                  icon: Icons.folder_open_rounded,
                   accent: scheme.primary,
                   tone: scheme.primaryContainer,
                 ),
                 _MetricCard(
                   title: 'Active',
                   value: '${stats.active}',
-                  icon: Icons.pending_actions_rounded,
+                  icon: Icons.hourglass_top_rounded,
                   accent: scheme.secondary,
                   tone: scheme.secondaryContainer,
                 ),
                 _MetricCard(
                   title: 'Resolved',
                   value: '${stats.resolved}',
-                  icon: Icons.verified_rounded,
+                  icon: Icons.check_circle_outline_rounded,
                   accent: AppTheme.success,
                   tone: AppTheme.success.withOpacity(0.12),
                 ),
                 _MetricCard(
                   title: 'High Priority',
                   value: '${stats.highPriority}',
-                  icon: Icons.priority_high_rounded,
+                  icon: Icons.error_outline_rounded,
                   accent: AppTheme.error,
                   tone: AppTheme.error.withOpacity(0.12),
                 ),
@@ -535,7 +535,7 @@ class _HeroPanel extends StatelessWidget {
                 Expanded(
                   child: AppButton(
                     text: 'My Updates',
-                    icon: Icons.track_changes_rounded,
+                    icon: Icons.timeline_rounded,
                     onPressed: () => Navigator.pushNamed(context, '/citizen/track'),
                     variant: AppButtonVariant.outlined,
                     backgroundColor: Colors.transparent,
