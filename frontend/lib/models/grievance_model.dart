@@ -1,7 +1,8 @@
 import 'package:main_ui/models/comment_model.dart';
-import 'package:main_ui/models/user_model.dart';
 import 'package:main_ui/models/master_data_model.dart';
+import 'package:main_ui/models/user_model.dart';
 import 'package:main_ui/models/workproof_model.dart';
+
 class Assignee {
   final String? name;
 
@@ -42,8 +43,8 @@ class Grievance {
   final MasterSubject? subject;
   final MasterArea? area;
   String? get areaName => area?.name;
-  final List<GrievanceAttachment>? attachments; // From old version
-  final List<Comment>? comments; // From old version
+  final List<GrievanceAttachment>? attachments;
+  final List<Comment>? comments;
   final List<Workproof>? workproofs;
 
   Grievance({
@@ -78,56 +79,78 @@ class Grievance {
     this.workproofs,
   });
 
+  static int _parseInt(dynamic value, {int fallback = 0}) {
+    if (value is int) return value;
+    return int.tryParse(value?.toString() ?? '') ?? fallback;
+  }
+
+  static double? _parseDouble(dynamic value) {
+    if (value is num) return value.toDouble();
+    return double.tryParse(value?.toString() ?? '');
+  }
+
+  static DateTime _parseDateTime(dynamic value) {
+    final parsed = DateTime.tryParse(value?.toString() ?? '');
+    return parsed ?? DateTime.now();
+  }
+
   factory Grievance.fromJson(Map<String, dynamic> json) {
-  
-  return Grievance(
-    id: json['id'] as int,
-    complaintId: json['complaint_id'] as String,
-    citizenId: json['citizen'] != null ? json['citizen']['id'] as int? : null,
-    subjectId: json['subject'] != null ? json['subject']['id'] as int? : null,
-    areaId: json['area'] != null ? json['area']['id'] as int? : null,
-    title: json['title'] as String? ?? 'Untitled', // Provide default if null
-    description: json['description'] as String? ?? '', // Provide default if null
-    wardNumber: json['ward_number'] as String?,
-    status: json['status'] as String?,
-    priority: json['priority'] as String?,
-    assignedTo: json['assignee'] != null ? json['assignee']['id'] as int? : null,
-    assignedBy: json['assigner'] != null ? json['assigner']['id'] as int? : null,
-    rejectionReason: json['rejection_reason'] as String?,
-    resolvedAt: json['resolved_at'] != null
-        ? DateTime.parse(json['resolved_at'] as String)
-        : null,
-    createdAt: DateTime.parse(json['created_at'] as String),
-    updatedAt: DateTime.parse(json['updated_at'] as String),
-    latitude: json['latitude'] is double ? json['latitude'] : null,
-    longitude: json['longitude'] is double ? json['longitude'] : null,
-    address: json['address'] as String?,
-    escalationLevel: json['escalation_level'] as int? ?? 0,
-    feedbackRating: json['feedback_rating'] as int?,
-    feedbackText: json['feedback_text'] as String?,
-    citizen: json['citizen'] != null
-        ? User.fromJson(json['citizen'] as Map<String, dynamic>)
-        : null,
-    assignee: json['assignee'] != null
-        ? User.fromJson(json['assignee'] as Map<String, dynamic>)
-        : null,
-    subject: json['subject'] != null
-        ? MasterSubject.fromJson(json['subject'] as Map<String, dynamic>)
-        : null,
-    area: json['area'] != null
-        ? MasterArea.fromJson(json['area'] as Map<String, dynamic>)
-        : null,
-    attachments: json['attachments'] != null
-        ? (json['attachments'] as List).map((a) => GrievanceAttachment.fromJson(a)).toList()
-        : null,
-    comments: json['comments'] != null
-        ? (json['comments'] as List).map((c) => Comment.fromJson(c)).toList()
-        : null,
-      workproofs: json['workproofs'] != null
-        ? (json['workproofs'] as List).map((wp) => Workproof.fromJson(wp)).toList()
-        : null,
-  );
-}
+    return Grievance(
+      id: _parseInt(json['id']),
+      complaintId: json['complaint_id']?.toString() ?? '',
+      citizenId: json['citizen'] != null ? _parseInt(json['citizen']['id']) : null,
+      subjectId: json['subject'] != null ? _parseInt(json['subject']['id']) : null,
+      areaId: json['area'] != null ? _parseInt(json['area']['id']) : null,
+      title: json['title']?.toString() ?? 'Untitled',
+      description: json['description']?.toString() ?? '',
+      wardNumber: json['ward_number']?.toString(),
+      status: json['status']?.toString(),
+      priority: json['priority']?.toString(),
+      assignedTo: json['assignee'] != null ? _parseInt(json['assignee']['id']) : null,
+      assignedBy: json['assigner'] != null ? _parseInt(json['assigner']['id']) : null,
+      rejectionReason: json['rejection_reason']?.toString(),
+      resolvedAt: json['resolved_at'] != null
+          ? DateTime.tryParse(json['resolved_at'].toString())
+          : null,
+      createdAt: _parseDateTime(json['created_at']),
+      updatedAt: _parseDateTime(json['updated_at']),
+      latitude: _parseDouble(json['latitude']),
+      longitude: _parseDouble(json['longitude']),
+      address: json['address']?.toString(),
+      escalationLevel: _parseInt(json['escalation_level']),
+      feedbackRating: json['feedback_rating'] is num
+          ? (json['feedback_rating'] as num).toInt()
+          : int.tryParse(json['feedback_rating']?.toString() ?? ''),
+      feedbackText: json['feedback_text']?.toString(),
+      citizen: json['citizen'] != null
+          ? User.fromJson(json['citizen'] as Map<String, dynamic>)
+          : null,
+      assignee: json['assignee'] != null
+          ? User.fromJson(json['assignee'] as Map<String, dynamic>)
+          : null,
+      subject: json['subject'] != null
+          ? MasterSubject.fromJson(json['subject'] as Map<String, dynamic>)
+          : null,
+      area: json['area'] != null
+          ? MasterArea.fromJson(json['area'] as Map<String, dynamic>)
+          : null,
+      attachments: json['attachments'] is List
+          ? (json['attachments'] as List)
+              .map((a) => GrievanceAttachment.fromJson(a as Map<String, dynamic>))
+              .toList()
+          : null,
+      comments: json['comments'] is List
+          ? (json['comments'] as List)
+              .map((c) => Comment.fromJson(c as Map<String, dynamic>))
+              .toList()
+          : null,
+      workproofs: json['workproofs'] is List
+          ? (json['workproofs'] as List)
+              .map((wp) => Workproof.fromJson(wp as Map<String, dynamic>))
+              .toList()
+          : null,
+    );
+  }
 
   Map<String, dynamic> toJson() {
     return {
@@ -180,12 +203,13 @@ class GrievanceAttachment {
   });
 
   factory GrievanceAttachment.fromJson(Map<String, dynamic> json) {
+    final rawPath = (json['file_path'] ?? json['path'] ?? json['url'] ?? json['attachment_url'])?.toString() ?? '';
     return GrievanceAttachment(
-      id: json['id'] ?? 0,
-      grievanceId: json['grievance_id'] ?? 0,
-      filePath: json['file_path'] ?? '',
-      fileType: json['file_type'] ?? '',
-      uploadedAt: DateTime.parse(json['uploaded_at'] ?? DateTime.now().toIso8601String()),
+      id: Grievance._parseInt(json['id']),
+      grievanceId: Grievance._parseInt(json['grievance_id']),
+      filePath: rawPath,
+      fileType: json['file_type']?.toString() ?? json['type']?.toString() ?? '',
+      uploadedAt: DateTime.tryParse(json['uploaded_at']?.toString() ?? '') ?? DateTime.now(),
     );
   }
 
