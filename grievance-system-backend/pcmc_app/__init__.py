@@ -212,6 +212,7 @@ def create_app(config_class=None):
             "http://localhost:51868",  # Flutter web dev server (current port)
             "https://pcmcapp.onrender.com",
             "https://pcmc-updated.onrender.com",
+            "https://pcmc.onrender.com"
             "https://www.nivaran.co.in",
         ])
     CORS(app, resources={r"/*": {
