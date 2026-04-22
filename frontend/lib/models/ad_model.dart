@@ -22,24 +22,26 @@ class Advertisement {
   });
 
   factory Advertisement.fromJson(Map<String, dynamic> json) {
-    // Helper to safely parse boolean values which might come as strings
-    bool _parseBool(dynamic value) {
+    bool parseBool(dynamic value) {
       if (value is bool) return value;
       if (value is String) return value.toLowerCase() == 'true';
       if (value is int) return value == 1;
-      return false; // Default to false if format is unknown
+      return false;
     }
+
+    final rawImagePath = (json['image_url'] ?? json['image'] ?? json['image_path'] ?? json['file_path'])?.toString();
+    final rawLink = json['link_url']?.toString();
 
     return Advertisement(
       id: json['id'] as int? ?? 0,
       title: json['title'] as String? ?? '',
       description: json['description'] as String?,
-      imageUrl: json['image_url'] != null
-          ? '${Constants.baseUrl}/uploads/${json['image_url']}'
+      imageUrl: Constants.resolveMediaUrl(rawImagePath),
+      linkUrl: Constants.resolveMediaUrl(rawLink, assumeUploadPath: false) ?? rawLink,
+      isActive: parseBool(json['is_active'] ?? false),
+      createdAt: json['created_at'] != null
+          ? DateTime.tryParse(json['created_at'].toString())
           : null,
-      linkUrl: json['link_url'] as String?,
-      isActive: _parseBool(json['is_active'] ?? false),
-      createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,
     );
   }
 
