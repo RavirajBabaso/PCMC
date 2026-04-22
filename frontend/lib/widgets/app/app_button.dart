@@ -35,21 +35,49 @@ class AppButton extends StatelessWidget {
   String get _label => label ?? text!;
 
   double get _height {
-    if (size == AppButtonSize.small)  return 44;
-    if (size == AppButtonSize.large)  return 56;
+    if (size == AppButtonSize.small) return 44;
+    if (size == AppButtonSize.large) return 56;
     return 52;
   }
 
   double get _fontSize {
-    if (size == AppButtonSize.small)  return 13;
-    if (size == AppButtonSize.large)  return 16;
+    if (size == AppButtonSize.small) return 13;
+    if (size == AppButtonSize.large) return 16;
     return 15;
   }
 
   EdgeInsets get _padding {
-    if (size == AppButtonSize.small)  return const EdgeInsets.symmetric(horizontal: AppSpacing.base, vertical: AppSpacing.sm);
-    if (size == AppButtonSize.large)  return const EdgeInsets.symmetric(horizontal: AppSpacing.xxl,  vertical: AppSpacing.base);
+    if (size == AppButtonSize.small) {
+      return const EdgeInsets.symmetric(horizontal: AppSpacing.base, vertical: AppSpacing.sm);
+    }
+    if (size == AppButtonSize.large) {
+      return const EdgeInsets.symmetric(horizontal: AppSpacing.xxl, vertical: AppSpacing.base);
+    }
     return const EdgeInsets.symmetric(horizontal: AppSpacing.xl, vertical: AppSpacing.base);
+  }
+
+  Color _resolvedForeground(ColorScheme scheme) {
+    switch (variant) {
+      case AppButtonVariant.filled:
+        return foregroundColor ?? scheme.onPrimary;
+      case AppButtonVariant.destructive:
+        return foregroundColor ?? scheme.onError;
+      case AppButtonVariant.outlined:
+      case AppButtonVariant.text:
+        return foregroundColor ?? scheme.primary;
+    }
+  }
+
+  Color _resolvedBackground(ColorScheme scheme) {
+    switch (variant) {
+      case AppButtonVariant.filled:
+        return backgroundColor ?? scheme.primary;
+      case AppButtonVariant.destructive:
+        return backgroundColor ?? scheme.error;
+      case AppButtonVariant.outlined:
+      case AppButtonVariant.text:
+        return backgroundColor ?? Colors.transparent;
+    }
   }
 
   @override
@@ -59,6 +87,8 @@ class AppButton extends StatelessWidget {
     final minSize = Size(fullWidth ? double.infinity : 0, _height);
     final shape = RoundedRectangleBorder(borderRadius: BorderRadius.circular(AppRadius.md));
     final textStyle = TextStyle(fontSize: _fontSize, fontWeight: FontWeight.w600);
+    final resolvedForeground = _resolvedForeground(scheme);
+    final resolvedBackground = _resolvedBackground(scheme);
 
     final child = isLoading
         ? SizedBox(
@@ -66,27 +96,33 @@ class AppButton extends StatelessWidget {
             height: 20,
             child: CircularProgressIndicator(
               strokeWidth: 2.5,
-              color: variant == AppButtonVariant.filled
-                  ? scheme.onPrimary
-                  : scheme.primary,
+              color: resolvedForeground,
             ),
           )
-        : Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              if (icon != null) ...[
-                Icon(icon, size: _fontSize + 4),
-                const SizedBox(width: AppSpacing.sm),
-              ],
-              Flexible(
-                child: Text(
-                  _label,
-                  overflow: TextOverflow.ellipsis,
-                  style: textStyle,
+        : IconTheme.merge(
+            data: IconThemeData(
+              color: effectivePressHandler == null
+                  ? resolvedForeground.withOpacity(0.6)
+                  : resolvedForeground,
+              size: _fontSize + 4,
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                if (icon != null) ...[
+                  Icon(icon),
+                  const SizedBox(width: AppSpacing.sm),
+                ],
+                Flexible(
+                  child: Text(
+                    _label,
+                    overflow: TextOverflow.ellipsis,
+                    style: textStyle,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           );
 
     return Semantics(
@@ -95,54 +131,56 @@ class AppButton extends StatelessWidget {
       enabled: effectivePressHandler != null,
       child: switch (variant) {
         AppButtonVariant.outlined => OutlinedButton(
-          onPressed: effectivePressHandler,
-          style: OutlinedButton.styleFrom(
-            foregroundColor: foregroundColor ?? scheme.primary,
-            side: BorderSide(color: foregroundColor ?? scheme.primary),
-            minimumSize: minSize,
-            padding: _padding,
-            shape: shape,
-            textStyle: textStyle,
+            onPressed: effectivePressHandler,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: resolvedForeground,
+              side: BorderSide(color: resolvedForeground),
+              minimumSize: minSize,
+              padding: _padding,
+              shape: shape,
+              textStyle: textStyle,
+              backgroundColor: resolvedBackground,
+            ),
+            child: child,
           ),
-          child: child,
-        ),
         AppButtonVariant.text => TextButton(
-          onPressed: effectivePressHandler,
-          style: TextButton.styleFrom(
-            foregroundColor: foregroundColor ?? scheme.primary,
-            minimumSize: minSize,
-            padding: _padding,
-            shape: shape,
-            textStyle: textStyle,
+            onPressed: effectivePressHandler,
+            style: TextButton.styleFrom(
+              foregroundColor: resolvedForeground,
+              minimumSize: minSize,
+              padding: _padding,
+              shape: shape,
+              textStyle: textStyle,
+              backgroundColor: resolvedBackground,
+            ),
+            child: child,
           ),
-          child: child,
-        ),
         AppButtonVariant.destructive => ElevatedButton(
-          onPressed: effectivePressHandler,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: backgroundColor ?? scheme.error,
-            foregroundColor: foregroundColor ?? scheme.onError,
-            elevation: 0,
-            minimumSize: minSize,
-            padding: _padding,
-            shape: shape,
-            textStyle: textStyle,
+            onPressed: effectivePressHandler,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: resolvedBackground,
+              foregroundColor: resolvedForeground,
+              elevation: 0,
+              minimumSize: minSize,
+              padding: _padding,
+              shape: shape,
+              textStyle: textStyle,
+            ),
+            child: child,
           ),
-          child: child,
-        ),
         AppButtonVariant.filled => ElevatedButton(
-          onPressed: effectivePressHandler,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: backgroundColor ?? scheme.primary,
-            foregroundColor: foregroundColor ?? scheme.onPrimary,
-            elevation: 0,
-            minimumSize: minSize,
-            padding: _padding,
-            shape: shape,
-            textStyle: textStyle,
+            onPressed: effectivePressHandler,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: resolvedBackground,
+              foregroundColor: resolvedForeground,
+              elevation: 0,
+              minimumSize: minSize,
+              padding: _padding,
+              shape: shape,
+              textStyle: textStyle,
+            ),
+            child: child,
           ),
-          child: child,
-        ),
       },
     );
   }
