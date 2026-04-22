@@ -14,11 +14,17 @@ class Constants {
     final parsed = Uri.tryParse(value);
     if (parsed != null && parsed.hasScheme) {
       if (_isLoopbackHost(parsed.host)) {
-        return _baseUri
+        return _encodeUrl(_baseUri
             .replace(path: parsed.path, query: parsed.query.isEmpty ? null : parsed.query)
-            .toString();
+            .toString());
       }
-      return parsed.toString();
+
+      if (parsed.scheme == 'http' && _baseUri.scheme == 'https') {
+        final upgraded = parsed.replace(scheme: 'https');
+        return _encodeUrl(upgraded.toString());
+      }
+
+      return _encodeUrl(parsed.toString());
     }
 
     var normalized = value.replaceAll('\\', '/');
@@ -29,18 +35,25 @@ class Constants {
       if (!normalized.startsWith('/')) {
         normalized = '/$normalized';
       }
-      return _baseUri.resolve(normalized).toString();
+      return _encodeUrl(_baseUri.resolve(normalized).toString());
     }
 
     if (normalized.startsWith('/')) {
-      return _baseUri.resolve(normalized).toString();
+      return _encodeUrl(_baseUri.resolve(normalized).toString());
     }
 
     if (assumeUploadPath) {
-      return _baseUri.resolve('/uploads/$normalized').toString();
+      return _encodeUrl(_baseUri.resolve('/uploads/$normalized').toString());
     }
 
-    return _baseUri.resolve('/$normalized').toString();
+    return _encodeUrl(_baseUri.resolve('/$normalized').toString());
+  }
+
+
+  static String _encodeUrl(String input) {
+    final uri = Uri.tryParse(input);
+    if (uri == null) return input.replaceAll(' ', '%20');
+    return uri.toString();
   }
 
   static bool _isLoopbackHost(String host) {
