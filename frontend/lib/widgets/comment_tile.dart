@@ -2,10 +2,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../models/comment_model.dart';
-import '../utils/constants.dart';
-import '../../providers/user_provider.dart';
 
+import '../models/comment_model.dart';
+import '../providers/user_provider.dart';
+import '../utils/constants.dart';
 
 class CommentTile extends ConsumerWidget {
   final Comment comment;
@@ -23,7 +23,7 @@ class CommentTile extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final currentUser = ref.watch(userNotifierProvider);
     final isCurrentUser = currentUser != null && currentUser.id == comment.userId;
-    
+
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
       child: Row(
@@ -39,12 +39,10 @@ class CommentTile extends ConsumerWidget {
               onTap: onTap,
               onLongPress: onLongPress,
               child: Container(
-                constraints: BoxConstraints(
-                  maxWidth: MediaQuery.of(context).size.width * 0.7,
-                ),
+                constraints: BoxConstraints(maxWidth: MediaQuery.of(context).size.width * 0.7),
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
-                  color: isCurrentUser 
+                  color: isCurrentUser
                       ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
                       : Theme.of(context).colorScheme.surfaceVariant,
                   borderRadius: _getBorderRadius(isCurrentUser),
@@ -87,14 +85,11 @@ class CommentTile extends ConsumerWidget {
           ? Theme.of(context).colorScheme.primary
           : Theme.of(context).colorScheme.secondary,
       child: Text(
-        comment.userName?.isNotEmpty == true 
-            ? comment.userName![0].toUpperCase()
-            : 'U',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 12.0,
-          fontWeight: FontWeight.bold,
-        ),
+        comment.userName?.isNotEmpty == true ? comment.userName![0].toUpperCase() : '?',
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
       ),
     );
   }
@@ -103,45 +98,37 @@ class CommentTile extends ConsumerWidget {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        if (!isCurrentUser) ...[
-          Icon(
-            Icons.comment_outlined,
-            size: 14.0,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: 6.0),
-        ],
+        Icon(
+          Icons.comment_outlined,
+          size: 16.0,
+          color: isCurrentUser
+              ? Theme.of(context).colorScheme.primary
+              : Theme.of(context).colorScheme.secondary,
+        ),
+        const SizedBox(width: 6.0),
         Flexible(
           child: Text(
-            comment.userName ?? 'User ${comment.userId}',
+            comment.userName ?? 'Unknown User',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              fontWeight: FontWeight.w600,
-              color: isCurrentUser 
-                  ? Theme.of(context).colorScheme.primary
-                  : Theme.of(context).colorScheme.onSurface,
-            ),
+                  fontWeight: FontWeight.w600,
+                  color: isCurrentUser
+                      ? Theme.of(context).colorScheme.primary
+                      : Theme.of(context).colorScheme.secondary,
+                ),
             overflow: TextOverflow.ellipsis,
           ),
         ),
-        if (isCurrentUser) ...[
-          const SizedBox(width: 6.0),
-          Icon(
-            Icons.comment_outlined,
-            size: 14.0,
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.7),
-          ),
-        ],
       ],
     );
   }
 
   Widget _buildCommentText(BuildContext context) {
     return Text(
-      comment.commentText ?? "",
+      comment.commentText ?? '',
       style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-        color: Theme.of(context).colorScheme.onSurface,
-        height: 1.4,
-      ),
+            color: Theme.of(context).colorScheme.onSurface,
+            height: 1.4,
+          ),
       textAlign: TextAlign.start,
     );
   }
@@ -150,9 +137,9 @@ class CommentTile extends ConsumerWidget {
     return Text(
       _formatDateTime(comment.createdAt),
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-        fontSize: 11.0,
-      ),
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            fontSize: 11.0,
+          ),
     );
   }
 
@@ -161,16 +148,17 @@ class CommentTile extends ConsumerWidget {
     return Padding(
       padding: const EdgeInsets.only(top: 8.0),
       child: Column(
-        crossAxisAlignment:
-            isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+        crossAxisAlignment: isCurrentUser ? CrossAxisAlignment.end : CrossAxisAlignment.start,
         children: comment.attachments!.map((attachment) {
           final fileName = attachment.filePath.split('/').last;
-          final isImage = fileName.endsWith('.jpg') ||
-              fileName.endsWith('.jpeg') ||
-              fileName.endsWith('.png') ||
-              fileName.endsWith('.gif')||
-              fileName.endsWith('.bmp')||
-              fileName.endsWith('.webp');
+          final lowerName = fileName.toLowerCase();
+          final isImage = lowerName.endsWith('.jpg') ||
+              lowerName.endsWith('.jpeg') ||
+              lowerName.endsWith('.png') ||
+              lowerName.endsWith('.gif') ||
+              lowerName.endsWith('.bmp') ||
+              lowerName.endsWith('.webp');
+          final imageUrl = Constants.resolveMediaUrl(attachment.filePath);
 
           return GestureDetector(
             onTap: () => _launchURL(context, attachment.filePath),
@@ -191,21 +179,26 @@ class CommentTile extends ConsumerWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  isImage
+                  (isImage && imageUrl != null)
                       ? ClipRRect(
                           borderRadius: BorderRadius.circular(4.0),
                           child: Image.network(
-                            '${Constants.baseUrl}/uploads/${attachment.filePath}',
+                            imageUrl,
                             width: 40,
                             height: 40,
                             fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.broken_image, size: 30),
+                            errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 30),
                           ),
                         )
                       : Icon(Icons.insert_drive_file, size: 30, color: theme.colorScheme.onSurface.withOpacity(0.7)),
                   const SizedBox(width: 12),
-                  Expanded(child: Text(fileName, style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13), overflow: TextOverflow.ellipsis)),
+                  Expanded(
+                    child: Text(
+                      fileName,
+                      style: theme.textTheme.bodyMedium?.copyWith(fontSize: 13),
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -225,42 +218,26 @@ class CommentTile extends ConsumerWidget {
   }
 
   String _formatDateTime(DateTime dateTime) {
-  final now = DateTime.now();
-  final difference = now.difference(dateTime.toLocal());
+    final now = DateTime.now();
+    final difference = now.difference(dateTime.toLocal());
 
-  print('DEBUG: now=$now, dateTime=$dateTime');
-  print('DEBUG: difference=$difference '
-      '(minutes=${difference.inMinutes}, hours=${difference.inHours}, days=${difference.inDays})');
+    if (difference.inMinutes < 1) return 'Just now';
+    if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
+    if (difference.inHours < 24) return '${difference.inHours}h ago';
+    if (difference.inDays < 7) return '${difference.inDays}d ago';
 
-  if (difference.inMinutes < 1) {
-    print('DEBUG: Returning → Just now');
-    return 'Just now';
-  } else if (difference.inMinutes < 60) {
-    print('DEBUG: Returning → ${difference.inMinutes}m ago');
-    return '${difference.inMinutes}m ago';
-  } else if (difference.inHours < 24) {
-    print('DEBUG: Returning → ${difference.inHours}h ago');
-    return '${difference.inHours}h ago';
-  } else if (difference.inDays < 7) {
-    print('DEBUG: Returning → ${difference.inDays}d ago');
-    return '${difference.inDays}d ago';
-  } else {
-    final formatted = '${dateTime.day}/${dateTime.month}/${dateTime.year}';
-    print('DEBUG: Returning → $formatted');
-    return formatted;
+    return '${dateTime.day}/${dateTime.month}/${dateTime.year}';
   }
-}
 
   Future<void> _launchURL(BuildContext context, String path) async {
-    final String url = '${Constants.baseUrl}/uploads/$path';
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Could not launch $url')),
-        );
-      }
+    final url = Constants.resolveMediaUrl(path);
+    if (url == null) return;
+
+    final uri = Uri.parse(url);
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication) && context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Could not launch $url')),
+      );
     }
   }
-
 }

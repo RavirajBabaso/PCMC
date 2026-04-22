@@ -1003,24 +1003,30 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
             ),
           ),
           const SizedBox(height: 16),
-          SizedBox(
-            height: 180,
-            child: PageView.builder(
-              controller: _promoController,
-              itemCount: cards.length,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentPromoPage = index;
-                });
-              },
-              itemBuilder: (context, index) {
-                final card = cards[index];
-                return Padding(
-                  padding: const EdgeInsets.only(right: 8),
-                  child: _buildPromoCard(card),
-                );
-              },
-            ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              final width = constraints.maxWidth;
+              final cardHeight = width < 340 ? 228.0 : 194.0;
+              return SizedBox(
+                height: cardHeight,
+                child: PageView.builder(
+                  controller: _promoController,
+                  itemCount: cards.length,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentPromoPage = index;
+                    });
+                  },
+                  itemBuilder: (context, index) {
+                    final card = cards[index];
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8),
+                      child: _buildPromoCard(card),
+                    );
+                  },
+                ),
+              );
+            },
           ),
           const SizedBox(height: 12),
           _buildPageIndicator(cards.length, _currentPromoPage),
@@ -1082,13 +1088,21 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
             ),
           ),
           const SizedBox(height: 14),
-          OutlinedButton.icon(
-            onPressed: card.onTap,
-            icon: const Icon(Icons.arrow_forward_rounded),
-            label: Text(card.buttonLabel),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: card.accent,
-              side: BorderSide(color: card.accent.withOpacity(0.35)),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: OutlinedButton.icon(
+              onPressed: card.onTap,
+              icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+              label: Text(
+                card.buttonLabel,
+                overflow: TextOverflow.ellipsis,
+              ),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: card.accent,
+                side: BorderSide(color: card.accent.withOpacity(0.35)),
+                visualDensity: VisualDensity.compact,
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
             ),
           ),
         ],

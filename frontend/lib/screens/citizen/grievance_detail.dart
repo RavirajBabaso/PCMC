@@ -199,10 +199,14 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
 
   Future<void> _launchURL(String path) async {
     final l10n = AppLocalizations.of(context)!;
-    final String url = '${Constants.baseUrl}/uploads/$path';
-    final Uri uri = Uri.parse(url);
+    final resolvedUrl = Constants.resolveMediaUrl(path);
+    if (resolvedUrl == null) {
+      _showToast(l10n.couldNotLaunchUrl(path), color: _danger);
+      return;
+    }
+    final Uri uri = Uri.parse(resolvedUrl);
     if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      _showToast(l10n.couldNotLaunchUrl(url), color: _danger);
+      _showToast(l10n.couldNotLaunchUrl(resolvedUrl), color: _danger);
     }
   }
 
@@ -2055,6 +2059,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     required Color accent,
   }) {
     final isImage = _isImageFile(path);
+    final resolvedImageUrl = Constants.resolveMediaUrl(path);
 
     return Material(
       color: Colors.transparent,
@@ -2077,9 +2082,9 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                   width: 62,
                   height: 62,
                   color: dsBackground,
-                  child: isImage
+                  child: (isImage && resolvedImageUrl != null)
                       ? Image.network(
-                          '${Constants.baseUrl}/uploads/$path',
+                          resolvedImageUrl,
                           fit: BoxFit.cover,
                           errorBuilder: (_, __, ___) => Icon(
                             Icons.broken_image_outlined,
