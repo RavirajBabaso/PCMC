@@ -1,4 +1,4 @@
-package com.example.main_ui
+package com.nevaran.app
 
 import io.flutter.embedding.android.FlutterActivity
 
