@@ -21,7 +21,7 @@ class UserSchema(Schema):
     is_active = fields.Boolean(dump_only=True)
 
     @validates('name')
-    def validate_name(self, value):
+    def validate_name(self, value, **kwargs):
         if value is None or value.strip() == '':
             raise ValidationError('Name cannot be empty or null')
 
@@ -147,9 +147,9 @@ class AnnouncementSchema(Schema):
     target_role = fields.Str(allow_none=True, validate=validate.OneOf([r.value for r in Role]))
     is_active = fields.Boolean()  
     @validates("target_role")
-    def validate_role(self, value):
+    def validate_role(self, value, **kwargs):
         if value is None:
-            return  
+            return
         allowed = ["CITIZEN", "MEMBER_HEAD", "FIELD_STAFF", "ADMIN"]
         if value.upper() not in allowed:
             raise ValidationError(f"Invalid target_role. Must be one of {allowed}")

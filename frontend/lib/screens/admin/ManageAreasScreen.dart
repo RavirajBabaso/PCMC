@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:main_ui/layouts/app_shell.dart';
 import 'package:main_ui/services/master_data_service.dart';
 import 'package:dio/dio.dart';
 import 'package:main_ui/models/master_data_model.dart';
+import 'package:main_ui/theme/app_theme.dart';
 import 'package:main_ui/widgets/loading_indicator.dart';
 
 class ManageAreasScreen extends StatefulWidget {
@@ -70,37 +72,38 @@ class _ManageAreasScreenState extends State<ManageAreasScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FBFF), // soft background
-      appBar: AppBar(
-        title: const Text(
-          'Manage Areas',
-          style: TextStyle(fontWeight: FontWeight.bold),
+    return AppShell(
+      title: 'Manage Areas',
+      currentRoute: '/admin/areas',
+      backgroundColor: dsBackground,
+      appBarBackgroundColor: dsSurface,
+      appBarForegroundColor: dsTextPrimary,
+      actions: [
+        IconButton(
+          icon: const Icon(Icons.add, color: dsAccentSoft),
+          onPressed: () => _showAreaDialog(),
+          tooltip: 'Add Area',
         ),
-        elevation: 0,
-        backgroundColor: Colors.blue.shade600,
-      ),
-      /* floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blue.shade600,
-        onPressed: () => _showAreaDialog(),
-        child: const Icon(Icons.add),
-      ), */
-      body: FutureBuilder<List<MasterArea>>(
+      ],
+      child: FutureBuilder<List<MasterArea>>(
         future: _areasFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
             return const LoadingIndicator();
           }
           if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
+            return Center(
+              child: Text('Error: ${snapshot.error}',
+                  style: const TextStyle(color: Colors.redAccent)),
+            );
           }
 
           final areas = snapshot.data ?? [];
           if (areas.isEmpty) {
             return const Center(
               child: Text(
-                "No areas found",
-                style: TextStyle(fontSize: 16, color: Colors.black54),
+                'No areas found',
+                style: TextStyle(fontSize: 16, color: dsTextSecondary),
               ),
             );
           }
@@ -110,41 +113,37 @@ class _ManageAreasScreenState extends State<ManageAreasScreen> {
             itemCount: areas.length,
             itemBuilder: (context, index) {
               final area = areas[index];
-              return Card(
-                color: const Color(0xFFECF2FE), // card background
-                elevation: 2,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                margin: const EdgeInsets.symmetric(vertical: 8),
+              return Container(
+                margin: const EdgeInsets.symmetric(vertical: 6),
+                decoration: dsPanelDecoration(color: dsSurfaceAlt),
                 child: ListTile(
                   contentPadding:
-                      const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                   title: Text(
                     area.name,
                     style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black87,
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                      color: dsTextPrimary,
                     ),
                   ),
                   subtitle: Text(
                     area.description ?? 'No description',
-                    style: const TextStyle(color: Colors.black54),
+                    style: const TextStyle(color: dsTextSecondary),
                   ),
                   trailing: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      /* IconButton(
-                        icon: Icon(Icons.edit, color: Colors.blue.shade800),
+                      IconButton(
+                        icon: const Icon(Icons.edit_outlined, color: dsAccentSoft),
                         onPressed: () => _showAreaDialog(area: area),
                         tooltip: 'Edit Area',
-                      ), */
-                      /* IconButton(
-                        icon: Icon(Icons.delete, color: Colors.red.shade700),
+                      ),
+                      IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Colors.redAccent),
                         onPressed: () => _confirmDeleteArea(area),
                         tooltip: 'Delete Area',
-                      ), */
+                      ),
                     ],
                   ),
                   onTap: () => _showAreaDialog(area: area),

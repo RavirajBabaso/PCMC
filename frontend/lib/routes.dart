@@ -18,6 +18,7 @@ import 'screens/common/settings_screen.dart';
 import 'screens/admin/manage_configs.dart';
 import 'screens/admin/all_users_history.dart';
 import 'screens/admin/ManageAreasScreen.dart';
+import 'screens/admin/admin_grievance_detail.dart';
 import 'screens/common/announcements_screen.dart';
 import 'screens/admin/reports_screen.dart';
 import 'screens/common/notifications_screen.dart';
@@ -83,5 +84,12 @@ Map<String, WidgetBuilder> appRoutes = {
   '/citizen/edit': (context) {
     final args = ModalRoute.of(context)!.settings.arguments as int;
     return EditGrievance(id: args);
+  },
+  '/admin/detail': (context) {
+    final args = ModalRoute.of(context)!.settings.arguments as int?;
+    if (args == null || args <= 0) {
+      return const Scaffold(body: Center(child: Text('Invalid grievance ID')));
+    }
+    return AdminGrievanceDetail(id: args);
   },
 };

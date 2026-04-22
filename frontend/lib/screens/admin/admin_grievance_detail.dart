@@ -1,11 +1,9 @@
-import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../l10n/app_localizations.dart';
 import '../../models/comment_model.dart';
 import '../../models/grievance_model.dart';
 import '../../models/user_model.dart';
@@ -15,14 +13,41 @@ import '../../services/grievance_service.dart';
 import '../../theme/app_theme.dart';
 import '../../utils/constants.dart';
 
-const Color _success = Color(0xFF10B981);
-const Color _warning = Color(0xFFF59E0B);
-const Color _danger = Color(0xFFEF4444);
-const Color _purple = Color(0xFF8B5CF6);
-const Color _slateBorder = Color(0xFF223750);
+const Color _bg = Color(0xFF050B18);
+const Color _surface = Color(0xFF0D1829);
+const Color _surfaceAlt = Color(0xFF10213C);
+const Color _surfaceSoft = Color(0xFF14294A);
+const Color _cyan = Color(0xFF00E5FF);
+const Color _amber = Color(0xFFFFB300);
+const Color _green = Color(0xFF00E676);
+const Color _red = Color(0xFFFF5252);
+const Color _orange = Color(0xFFFF8A00);
+const Color _purple = Color(0xFF9C6BFF);
+const Color _text1 = Color(0xFFE8F4FD);
+const Color _text2 = Color(0xFF8BA3BE);
+const Color _border = Color(0xFF1A3050);
 
 final DateFormat _detailDateFormat = DateFormat('dd MMM yyyy, hh:mm a');
 final DateFormat _shortDateFormat = DateFormat('dd MMM yyyy');
+
+List<String> _allowedTransitions(String current) {
+  switch (current.toLowerCase()) {
+    case 'new':
+      return ['in_progress', 'rejected'];
+    case 'in_progress':
+      return ['on_hold', 'resolved', 'rejected'];
+    case 'on_hold':
+      return ['in_progress', 'rejected'];
+    case 'resolved':
+      return ['closed'];
+    case 'closed':
+      return [];
+    case 'rejected':
+      return [];
+    default:
+      return ['in_progress'];
+  }
+}
 
 Color _statusColor(String status) => AppStatus.fromStatus(status);
 IconData _statusIcon(String status) => AppStatus.iconFromStatus(status);
@@ -31,13 +56,13 @@ String _statusLabel(String status) => AppStatus.labelFromStatus(status);
 Color _priorityColor(String? priority) {
   switch ((priority ?? '').toLowerCase()) {
     case 'high':
-      return _danger;
+      return _red;
     case 'medium':
-      return _warning;
+      return _amber;
     case 'low':
-      return _success;
+      return _green;
     default:
-      return dsTextSecondary;
+      return _text2;
   }
 }
 
@@ -62,17 +87,6 @@ String _formatDate(DateTime? value) {
   return _shortDateFormat.format(value.toLocal());
 }
 
-String _initials(String? name) {
-  final value = (name ?? '').trim();
-  if (value.isEmpty) return 'U';
-  final parts = value.split(RegExp(r'\s+'));
-  if (parts.length == 1) {
-    return parts.first.substring(0, 1).toUpperCase();
-  }
-  return '${parts.first.substring(0, 1)}${parts.last.substring(0, 1)}'
-      .toUpperCase();
-}
-
 String _roleLabel(String? role) {
   final value = (role ?? '').trim();
   if (value.isEmpty) return 'User';
@@ -82,6 +96,17 @@ String _roleLabel(String? role) {
           ? part
           : '${part[0].toUpperCase()}${part.substring(1).toLowerCase()}')
       .join(' ');
+}
+
+String _initials(String? name) {
+  final value = (name ?? '').trim();
+  if (value.isEmpty) return 'U';
+  final parts = value.split(RegExp(r'\s+'));
+  if (parts.length == 1) {
+    return parts.first.substring(0, 1).toUpperCase();
+  }
+  return '${parts.first.substring(0, 1)}${parts.last.substring(0, 1)}'
+      .toUpperCase();
 }
 
 bool _isImageFile(String path) {
@@ -94,20 +119,20 @@ bool _isImageFile(String path) {
       lower.endsWith('.webp');
 }
 
-BoxDecoration _cardDecoration({
-  Color accent = dsAccent,
+BoxDecoration _panelDecoration({
+  Color glow = _cyan,
   double radius = 20,
   bool elevated = true,
 }) {
   return BoxDecoration(
-    color: dsSurfaceAlt,
+    color: _surfaceAlt,
     borderRadius: BorderRadius.circular(radius),
-    border: Border.all(color: accent.withOpacity(0.16)),
+    border: Border.all(color: glow.withOpacity(0.18)),
     boxShadow: elevated
         ? [
             BoxShadow(
-              color: accent.withOpacity(0.08),
-              blurRadius: 22,
+              color: glow.withOpacity(0.08),
+              blurRadius: 24,
               offset: const Offset(0, 10),
             ),
           ]
@@ -119,34 +144,24 @@ final grievanceProvider = FutureProvider.family<Grievance, int>((ref, id) async 
   return GrievanceService().getGrievanceDetails(id);
 });
 
-class GrievanceDetail extends ConsumerStatefulWidget {
+class AdminGrievanceDetail extends ConsumerStatefulWidget {
   final int id;
 
-  const GrievanceDetail({super.key, required this.id});
+  const AdminGrievanceDetail({super.key, required this.id});
 
   @override
-  ConsumerState<GrievanceDetail> createState() => _GrievanceDetailState();
+  ConsumerState<AdminGrievanceDetail> createState() =>
+      _AdminGrievanceDetailState();
 }
 
-class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
-  final TextEditingController _feedbackController = TextEditingController();
+class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
   final TextEditingController _commentController = TextEditingController();
-  List<PlatformFile> _selectedFiles = <PlatformFile>[];
-  int? _rating;
+  bool _isUpdatingStatus = false;
   bool _isPostingComment = false;
-  bool _isSubmittingFeedback = false;
-
-  @override
-  void initState() {
-    super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      ref.invalidate(grievanceProvider(widget.id));
-    });
-  }
+  String? _selectedStatus;
 
   @override
   void dispose() {
-    _feedbackController.dispose();
     _commentController.dispose();
     super.dispose();
   }
@@ -156,19 +171,19 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     try {
       await ref.read(grievanceProvider(widget.id).future);
     } catch (_) {
-      // Error UI is already handled by the provider.
+      // The error state is already surfaced by the provider.
     }
   }
 
-  void _showToast(String message, {Color color = dsAccent}) {
+  void _showToast(String message, {Color color = _cyan}) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        backgroundColor: dsSurfaceAlt,
+        backgroundColor: _surfaceAlt,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(14),
-          side: BorderSide(color: color.withOpacity(0.35)),
+          borderRadius: BorderRadius.circular(12),
+          side: BorderSide(color: color.withOpacity(0.4)),
         ),
         content: Row(
           children: [
@@ -185,7 +200,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
               child: Text(
                 message,
                 style: const TextStyle(
-                  color: dsTextPrimary,
+                  color: _text1,
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
                 ),
@@ -197,57 +212,64 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     );
   }
 
-  Future<void> _launchURL(String path) async {
-    final l10n = AppLocalizations.of(context)!;
-    final String url = '${Constants.baseUrl}/uploads/$path';
-    final Uri uri = Uri.parse(url);
-    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
-      _showToast(l10n.couldNotLaunchUrl(url), color: _danger);
+  Future<void> _copyComplaintId(String complaintId) async {
+    await Clipboard.setData(ClipboardData(text: complaintId));
+    _showToast('Complaint ID copied', color: _cyan);
+  }
+
+  Future<void> _openUpload(String path) async {
+    final uri = Uri.parse('${Constants.baseUrl}/uploads/$path');
+    final opened = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!opened) {
+      _showToast('Could not open file', color: _red);
     }
   }
 
-  Future<void> _copyComplaintId(String complaintId) async {
-    await Clipboard.setData(ClipboardData(text: complaintId));
-    _showToast('Complaint ID copied', color: dsAccent);
-  }
-
-  Future<void> _pickCommentAttachments() async {
-    final result = await FilePicker.platform.pickFiles(allowMultiple: true);
-    if (result == null || result.files.isEmpty || !mounted) return;
+  Future<void> _updateStatus(
+    int grievanceId,
+    String currentStatus,
+    String nextStatus,
+  ) async {
+    if (_isUpdatingStatus || nextStatus == currentStatus) return;
     setState(() {
-      _selectedFiles = [..._selectedFiles, ...result.files];
+      _isUpdatingStatus = true;
+      _selectedStatus = nextStatus;
     });
+
+    try {
+      await GrievanceService().updateGrievanceStatus(grievanceId, nextStatus);
+      _showToast(
+        'Status updated to ${_statusLabel(nextStatus)}',
+        color: _statusColor(nextStatus),
+      );
+      await _refreshGrievance();
+    } catch (e) {
+      _showToast('Failed to update status: $e', color: _red);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isUpdatingStatus = false;
+          _selectedStatus = null;
+        });
+      }
+    }
   }
 
   Future<void> _addComment() async {
-    final l10n = AppLocalizations.of(context)!;
     final text = _commentController.text.trim();
-    if (text.isEmpty) {
-      _showToast(l10n.commentCannotBeEmpty, color: _warning);
-      return;
-    }
-    if (_isPostingComment) return;
+    if (text.isEmpty || _isPostingComment) return;
 
     setState(() {
       _isPostingComment = true;
     });
 
     try {
-      await GrievanceService().addComment(
-        widget.id,
-        text,
-        attachments: _selectedFiles,
-      );
+      await GrievanceService().addComment(widget.id, text);
       _commentController.clear();
-      if (mounted) {
-        setState(() {
-          _selectedFiles = <PlatformFile>[];
-        });
-      }
-      _showToast(l10n.commentAddedSuccess, color: _success);
+      _showToast('Comment added', color: _green);
       await _refreshGrievance();
     } catch (e) {
-      _showToast('${l10n.failedToAddComment}: $e', color: _danger);
+      _showToast('Failed to add comment: $e', color: _red);
     } finally {
       if (mounted) {
         setState(() {
@@ -257,179 +279,49 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     }
   }
 
-  Future<void> _submitFeedback() async {
-    final l10n = AppLocalizations.of(context)!;
-    if (_rating == null) {
-      _showToast(l10n.pleaseProvideRating, color: _warning);
-      return;
-    }
-    if (_isSubmittingFeedback) return;
-
-    setState(() {
-      _isSubmittingFeedback = true;
-    });
-
-    try {
-      await GrievanceService().submitFeedback(
-        widget.id,
-        _rating!,
-        _feedbackController.text.trim(),
-      );
-      _feedbackController.clear();
-      if (mounted) {
-        setState(() {
-          _rating = null;
-        });
-      }
-      _showToast(l10n.feedbackSubmitted, color: _success);
-      await _refreshGrievance();
-    } catch (e) {
-      _showToast('${l10n.error}: $e', color: _danger);
-    } finally {
-      if (mounted) {
-        setState(() {
-          _isSubmittingFeedback = false;
-        });
-      }
-    }
-  }
-
-  Future<void> _deleteGrievance() async {
-    final l10n = AppLocalizations.of(context)!;
-    try {
-      await GrievanceService().deleteGrievance(widget.id);
-      if (!mounted) return;
-      _showToast(l10n.grievanceDeletedSuccessfully, color: _success);
-      Navigator.of(context).pop(true);
-    } catch (e) {
-      _showToast('${l10n.failedToDeleteGrievance}: $e', color: _danger);
-    }
-  }
-
-  void _onMenuSelected(String value) {
-    final l10n = AppLocalizations.of(context)!;
-    if (value == 'edit') {
-      Navigator.pushNamed(context, '/citizen/edit', arguments: widget.id).then((_) {
-        _refreshGrievance();
-      });
-      return;
-    }
-
-    if (value == 'delete') {
-      showDialog<void>(
-        context: context,
-        builder: (dialogContext) => AlertDialog(
-          backgroundColor: dsSurfaceAlt,
-          title: Text(
-            l10n.confirmDelete,
-            style: const TextStyle(color: dsTextPrimary),
-          ),
-          content: Text(
-            l10n.areYouSureDeleteGrievance,
-            style: const TextStyle(color: dsTextSecondary),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: Text(l10n.cancel),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.of(dialogContext).pop();
-                _deleteGrievance();
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: _danger.withOpacity(0.18),
-                foregroundColor: _danger,
-                side: BorderSide(color: _danger.withOpacity(0.4)),
-              ),
-              child: Text(l10n.delete),
-            ),
-          ],
-        ),
-      );
-    }
-  }
-
-  bool _canManageGrievance(User? currentUser, Grievance? grievance) {
-    if (currentUser == null || grievance == null) return false;
-    final role = currentUser.role?.toLowerCase();
-    return grievance.citizenId == currentUser.id || role == 'admin';
-  }
-
-  bool _canSubmitFeedback(User? currentUser, Grievance grievance) {
-    return (grievance.status ?? '').toLowerCase() == 'resolved' &&
-        grievance.feedbackRating == null &&
-        currentUser?.role?.toLowerCase() == 'citizen' &&
-        grievance.citizenId == currentUser?.id;
-  }
-
-  bool _canViewFeedback(User? currentUser, Grievance grievance) {
-    if ((grievance.feedbackRating ?? 0) <= 0) return false;
-    final role = currentUser?.role?.toLowerCase();
-    return role == 'admin' ||
-        role == 'member_head' ||
-        (role == 'citizen' && grievance.citizenId == currentUser?.id);
-  }
-
   @override
   Widget build(BuildContext context) {
     final grievanceAsync = ref.watch(grievanceProvider(widget.id));
-    final l10n = AppLocalizations.of(context)!;
     final currentUser = ref.watch(userNotifierProvider);
 
     return Scaffold(
-      backgroundColor: dsBackground,
-      appBar: _buildAppBar(l10n, currentUser, grievanceAsync.value),
+      backgroundColor: _bg,
+      appBar: _buildAppBar(),
       body: grievanceAsync.when(
         loading: _buildLoadingState,
-        error: (error, _) => _buildErrorState(l10n, error),
-        data: (grievance) => Column(
-          children: [
-            Expanded(
-              child: _buildBody(
-                grievance: grievance,
-                currentUser: currentUser,
-                l10n: l10n,
-              ),
-            ),
-            _buildCommentComposer(l10n),
-          ],
-        ),
+        error: (error, _) => _buildErrorState(error),
+        data: (grievance) => _buildBody(grievance, currentUser?.id),
       ),
     );
   }
 
-  PreferredSizeWidget _buildAppBar(
-    AppLocalizations l10n,
-    User? currentUser,
-    Grievance? grievance,
-  ) {
+  PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: dsSurface,
-      foregroundColor: dsAccent,
+      backgroundColor: _surface,
       elevation: 0,
+      iconTheme: const IconThemeData(color: _cyan),
       titleSpacing: 0,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(height: 1, color: dsAccent.withOpacity(0.2)),
+        child: Container(height: 1, color: _cyan.withOpacity(0.2)),
       ),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+        children: const [
           Text(
-            l10n.grievanceDetails,
-            style: const TextStyle(
-              color: dsTextPrimary,
-              fontSize: 16,
-              fontWeight: FontWeight.w700,
+            'ADMIN GRIEVANCE',
+            style: TextStyle(
+              color: _text1,
+              fontSize: 15,
+              fontWeight: FontWeight.w800,
+              letterSpacing: 1.6,
             ),
           ),
-          const SizedBox(height: 2),
-          const Text(
-            'Live citizen case view',
+          SizedBox(height: 2),
+          Text(
+            'Case command center',
             style: TextStyle(
-              color: dsTextSecondary,
+              color: _text2,
               fontSize: 11,
               fontWeight: FontWeight.w500,
             ),
@@ -438,32 +330,10 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
       ),
       actions: [
         IconButton(
-          tooltip: l10n.refresh,
+          tooltip: 'Refresh',
           onPressed: _refreshGrievance,
-          icon: const Icon(Icons.refresh_rounded, color: dsAccent),
+          icon: const Icon(Icons.refresh_rounded, color: _cyan),
         ),
-        if (_canManageGrievance(currentUser, grievance))
-          PopupMenuButton<String>(
-            onSelected: _onMenuSelected,
-            color: dsSurfaceAlt,
-            icon: const Icon(Icons.more_vert_rounded, color: dsTextPrimary),
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'edit',
-                child: Text(
-                  l10n.edit,
-                  style: const TextStyle(color: dsTextPrimary),
-                ),
-              ),
-              PopupMenuItem(
-                value: 'delete',
-                child: Text(
-                  l10n.delete,
-                  style: const TextStyle(color: _danger),
-                ),
-              ),
-            ],
-          ),
       ],
     );
   }
@@ -472,7 +342,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     return Center(
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-        decoration: _cardDecoration(accent: dsAccent),
+        decoration: _panelDecoration(glow: _cyan),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: const [
@@ -481,15 +351,15 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
               height: 48,
               child: CircularProgressIndicator(
                 strokeWidth: 3,
-                color: dsAccent,
-                backgroundColor: _slateBorder,
+                color: _cyan,
+                backgroundColor: _border,
               ),
             ),
             SizedBox(height: 16),
             Text(
-              'Loading your grievance details...',
+              'Loading complaint intelligence...',
               style: TextStyle(
-                color: dsTextPrimary,
+                color: _text1,
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
               ),
@@ -500,23 +370,23 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     );
   }
 
-  Widget _buildErrorState(AppLocalizations l10n, Object error) {
+  Widget _buildErrorState(Object error) {
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(24),
         child: Container(
           constraints: const BoxConstraints(maxWidth: 480),
           padding: const EdgeInsets.all(24),
-          decoration: _cardDecoration(accent: _danger),
+          decoration: _panelDecoration(glow: _red),
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Icon(Icons.error_outline_rounded, color: _danger, size: 48),
+              const Icon(Icons.error_outline_rounded, color: _red, size: 48),
               const SizedBox(height: 14),
-              Text(
-                l10n.failedToLoadGrievance,
-                style: const TextStyle(
-                  color: dsTextPrimary,
+              const Text(
+                'Failed to load grievance details',
+                style: TextStyle(
+                  color: _text1,
                   fontSize: 18,
                   fontWeight: FontWeight.w700,
                 ),
@@ -526,21 +396,21 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
               Text(
                 '$error',
                 style: const TextStyle(
-                  color: dsTextSecondary,
+                  color: _text2,
                   fontSize: 13,
                   height: 1.5,
                 ),
                 textAlign: TextAlign.center,
               ),
-              const SizedBox(height: 18),
+              const SizedBox(height: 20),
               ElevatedButton.icon(
                 onPressed: _refreshGrievance,
                 icon: const Icon(Icons.refresh_rounded),
-                label: Text(l10n.refresh),
+                label: const Text('Retry'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _danger.withOpacity(0.18),
-                  foregroundColor: _danger,
-                  side: BorderSide(color: _danger.withOpacity(0.4)),
+                  backgroundColor: _red.withOpacity(0.16),
+                  foregroundColor: _red,
+                  side: BorderSide(color: _red.withOpacity(0.45)),
                 ),
               ),
             ],
@@ -550,56 +420,56 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     );
   }
 
-  Widget _buildBody({
-    required Grievance grievance,
-    required User? currentUser,
-    required AppLocalizations l10n,
-  }) {
+  Widget _buildBody(Grievance grievance, int? currentUserId) {
+    final liveStatus = grievance.status ?? 'new';
+    final displayStatus =
+        _isUpdatingStatus ? (_selectedStatus ?? liveStatus) : liveStatus;
+
     return RefreshIndicator(
       onRefresh: _refreshGrievance,
-      color: dsAccent,
-      backgroundColor: dsSurface,
+      color: _cyan,
+      backgroundColor: _surface,
       child: SingleChildScrollView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
         child: Center(
           child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 1280),
+            constraints: const BoxConstraints(maxWidth: 1320),
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final isWide = constraints.maxWidth >= 1040;
 
                 final mainColumn = Column(
                   children: [
-                    _buildDescriptionCard(grievance, l10n),
+                    _buildDescriptionCard(grievance),
                     const SizedBox(height: 16),
-                    _buildAttachmentsSection(grievance, l10n),
+                    _buildAttachmentsSection(grievance),
                     const SizedBox(height: 16),
                     _buildWorkproofSection(grievance),
-                    if (_canSubmitFeedback(currentUser, grievance) ||
-                        _canViewFeedback(currentUser, grievance)) ...[
+                    if (grievance.feedbackRating != null &&
+                        grievance.feedbackRating! > 0) ...[
                       const SizedBox(height: 16),
-                      _buildFeedbackSection(grievance, currentUser, l10n),
+                      _buildFeedbackSection(grievance),
                     ],
                     const SizedBox(height: 16),
-                    _buildCommentsSection(grievance, currentUser?.id, l10n),
+                    _buildCommentsSection(grievance, currentUserId),
                   ],
                 );
 
                 final sideColumn = Column(
                   children: [
-                    _buildStatusCard(grievance),
+                    _buildWorkflowCard(grievance, displayStatus),
                     const SizedBox(height: 16),
-                    _buildPeopleCard(grievance, l10n),
+                    _buildPeopleCard(grievance),
                     const SizedBox(height: 16),
-                    _buildCaseDetailsCard(grievance, l10n),
+                    _buildCaseDetailsCard(grievance),
                     const SizedBox(height: 16),
-                    _buildTimelineCard(grievance, l10n),
+                    _buildTimelineCard(grievance),
                     if (grievance.address != null ||
                         grievance.latitude != null ||
                         grievance.longitude != null) ...[
                       const SizedBox(height: 16),
-                      _buildLocationCard(grievance, l10n),
+                      _buildLocationCard(grievance),
                     ],
                   ],
                 );
@@ -607,7 +477,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildHeroSection(grievance),
+                    _buildHeroSection(grievance, displayStatus),
                     const SizedBox(height: 16),
                     _buildStatsGrid(grievance),
                     const SizedBox(height: 16),
@@ -635,28 +505,27 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     );
   }
 
-  Widget _buildHeroSection(Grievance grievance) {
-    final status = grievance.status ?? 'new';
+  Widget _buildHeroSection(Grievance grievance, String status) {
     final statusColor = _statusColor(status);
     final priorityColor = _priorityColor(grievance.priority);
 
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: statusColor.withOpacity(0.2)),
+        border: Border.all(color: statusColor.withOpacity(0.28)),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            dsSurface,
-            dsSurfaceAlt,
-            dsAccent.withOpacity(0.12),
+            _surface,
+            _surfaceAlt,
+            statusColor.withOpacity(0.15),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: dsAccent.withOpacity(0.08),
-            blurRadius: 28,
+            color: statusColor.withOpacity(0.1),
+            blurRadius: 32,
             offset: const Offset(0, 16),
           ),
         ],
@@ -664,26 +533,26 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
       child: Stack(
         children: [
           Positioned(
-            right: -24,
-            top: -30,
+            right: -28,
+            top: -36,
             child: Container(
-              width: 170,
-              height: 170,
+              width: 180,
+              height: 180,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: dsAccent.withOpacity(0.08),
+                color: statusColor.withOpacity(0.12),
               ),
             ),
           ),
           Positioned(
-            left: -36,
-            bottom: -52,
+            left: -40,
+            bottom: -56,
             child: Container(
-              width: 150,
-              height: 150,
+              width: 160,
+              height: 160,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: statusColor.withOpacity(0.08),
+                color: _cyan.withOpacity(0.05),
               ),
             ),
           ),
@@ -703,18 +572,19 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                           _buildTopChip(
                             icon: Icons.confirmation_number_rounded,
                             label: grievance.complaintId,
-                            color: dsAccent,
+                            color: _cyan,
                           ),
                           _buildTopChip(
-                            icon: _statusIcon(status),
-                            label: _statusLabel(status),
-                            color: statusColor,
-                          ),
-                          _buildTopChip(
-                            icon: Icons.flag_rounded,
+                            icon: Icons.priority_high_rounded,
                             label: _priorityLabel(grievance.priority),
                             color: priorityColor,
                           ),
+                          if (grievance.area != null)
+                            _buildTopChip(
+                              icon: Icons.location_on_rounded,
+                              label: _safeText(grievance.area?.name),
+                              color: _purple,
+                            ),
                         ],
                       ),
                     ),
@@ -730,7 +600,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                 Text(
                   grievance.title,
                   style: const TextStyle(
-                    color: dsTextPrimary,
+                    color: _text1,
                     fontSize: 28,
                     fontWeight: FontWeight.w800,
                     height: 1.15,
@@ -744,7 +614,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                   maxLines: 3,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
-                    color: dsTextSecondary,
+                    color: _text2,
                     fontSize: 14,
                     height: 1.6,
                   ),
@@ -755,22 +625,22 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                   runSpacing: 12,
                   children: [
                     _buildHeroMetric(
+                      icon: _statusIcon(status),
+                      title: 'Current Status',
+                      value: _statusLabel(status),
+                      color: statusColor,
+                    ),
+                    _buildHeroMetric(
                       icon: Icons.schedule_rounded,
                       title: 'Created',
                       value: _formatDate(grievance.createdAt),
-                      color: dsAccent,
+                      color: _cyan,
                     ),
                     _buildHeroMetric(
                       icon: Icons.engineering_rounded,
                       title: 'Assigned To',
-                      value: grievance.assignee?.name ?? 'Awaiting assignment',
-                      color: _purple,
-                    ),
-                    _buildHeroMetric(
-                      icon: Icons.trending_up_rounded,
-                      title: 'Escalation',
-                      value: 'Level ${grievance.escalationLevel}',
-                      color: _warning,
+                      value: grievance.assignee?.name ?? 'Unassigned',
+                      color: _orange,
                     ),
                   ],
                 ),
@@ -783,32 +653,30 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
   }
 
   Widget _buildStatsGrid(Grievance grievance) {
-    final stats = <_MetricItem>[
-      _MetricItem(
+    final stats = [
+      _StatItem(
         icon: Icons.comment_rounded,
         label: 'Comments',
         value: '${grievance.comments?.length ?? 0}',
         color: _purple,
       ),
-      _MetricItem(
+      _StatItem(
         icon: Icons.attach_file_rounded,
         label: 'Attachments',
         value: '${grievance.attachments?.length ?? 0}',
-        color: dsAccent,
+        color: _cyan,
       ),
-      _MetricItem(
+      _StatItem(
         icon: Icons.verified_rounded,
         label: 'Work Proofs',
         value: '${grievance.workproofs?.length ?? 0}',
-        color: _success,
+        color: _green,
       ),
-      _MetricItem(
-        icon: Icons.star_rounded,
-        label: 'Feedback',
-        value: grievance.feedbackRating != null
-            ? '${grievance.feedbackRating}/5'
-            : 'Pending',
-        color: _warning,
+      _StatItem(
+        icon: Icons.trending_up_rounded,
+        label: 'Escalation',
+        value: 'L${grievance.escalationLevel}',
+        color: _amber,
       ),
     ];
 
@@ -836,24 +704,25 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     );
   }
 
-  Widget _buildStatusCard(Grievance grievance) {
-    final status = grievance.status ?? 'new';
-    final statusColor = _statusColor(status);
+  Widget _buildWorkflowCard(Grievance grievance, String displayStatus) {
+    final currentStatus = grievance.status ?? 'new';
+    final allowed = _allowedTransitions(currentStatus);
+    final currentColor = _statusColor(displayStatus);
 
     return _buildSectionShell(
-      icon: Icons.track_changes_rounded,
-      title: 'Case Status',
-      subtitle: 'Current tracking state and what it means for the complaint.',
-      accent: statusColor,
+      icon: Icons.alt_route_rounded,
+      title: 'Workflow Control',
+      subtitle: 'Advance the grievance through approved state transitions.',
+      accent: currentColor,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.1),
+              color: currentColor.withOpacity(0.1),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: statusColor.withOpacity(0.25)),
+              border: Border.all(color: currentColor.withOpacity(0.28)),
             ),
             child: Row(
               children: [
@@ -862,9 +731,9 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                   height: 44,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: statusColor.withOpacity(0.15),
+                    color: currentColor.withOpacity(0.16),
                   ),
-                  child: Icon(_statusIcon(status), color: statusColor),
+                  child: Icon(_statusIcon(displayStatus), color: currentColor),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
@@ -872,18 +741,19 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Current Status',
+                        'Live Status',
                         style: TextStyle(
-                          color: dsTextSecondary,
+                          color: _text2,
                           fontSize: 11,
                           fontWeight: FontWeight.w600,
+                          letterSpacing: 0.8,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        _statusLabel(status),
+                        _statusLabel(displayStatus),
                         style: const TextStyle(
-                          color: dsTextPrimary,
+                          color: _text1,
                           fontSize: 17,
                           fontWeight: FontWeight.w800,
                         ),
@@ -891,105 +761,118 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                     ],
                   ),
                 ),
+                if (_isUpdatingStatus)
+                  SizedBox(
+                    width: 22,
+                    height: 22,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.2,
+                      color: currentColor,
+                      backgroundColor: _border,
+                    ),
+                  ),
               ],
             ),
           ),
           const SizedBox(height: 14),
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: dsSurface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: _slateBorder),
+          if (allowed.isEmpty)
+            _buildEmptyMessage(
+              icon: Icons.lock_outline_rounded,
+              message:
+                  'This complaint is in a terminal state, so no further transitions are available.',
+            )
+          else
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: allowed
+                  .map(
+                    (nextStatus) => _buildTransitionButton(
+                      grievance.id,
+                      currentStatus,
+                      nextStatus,
+                    ),
+                  )
+                  .toList(),
             ),
-            child: Text(
-              'You can use this page to follow updates, review field proofs, and add comments to the thread as your complaint progresses.',
-              style: const TextStyle(
-                color: dsTextSecondary,
-                fontSize: 13,
-                height: 1.55,
-              ),
-            ),
-          ),
         ],
       ),
     );
   }
 
-  Widget _buildPeopleCard(Grievance grievance, AppLocalizations l10n) {
+  Widget _buildPeopleCard(Grievance grievance) {
     return _buildSectionShell(
       icon: Icons.people_alt_rounded,
-      title: 'People',
-      subtitle: 'Owner and assigned staff linked to this grievance.',
-      accent: _purple,
+      title: 'People & Ownership',
+      subtitle: 'Citizen and assignee context for this case.',
+      accent: _orange,
       child: Column(
         children: [
           _buildPersonPanel(
-            title: l10n.citizenName,
+            title: 'Citizen',
             subtitle: 'Complaint owner',
             user: grievance.citizen,
-            accent: dsAccent,
+            accent: _cyan,
             emptyMessage: 'Citizen details are not available for this grievance.',
           ),
           const SizedBox(height: 12),
           _buildPersonPanel(
-            title: l10n.assignedToLabel,
-            subtitle: 'Current handling staff',
+            title: 'Assigned Staff',
+            subtitle: 'Current operator',
             user: grievance.assignee,
-            accent: _purple,
-            emptyMessage: 'Your grievance has not been assigned yet.',
+            accent: _orange,
+            emptyMessage: 'No staff member has been assigned yet.',
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCaseDetailsCard(Grievance grievance, AppLocalizations l10n) {
+  Widget _buildCaseDetailsCard(Grievance grievance) {
     final tiles = [
       _buildDetailTile(
         icon: Icons.category_rounded,
-        label: l10n.filterBySubject,
+        label: 'Subject',
         value: grievance.subject?.name ?? 'Not mapped',
         accent: _purple,
       ),
       _buildDetailTile(
         icon: Icons.map_rounded,
-        label: l10n.filterByArea,
+        label: 'Area',
         value: grievance.area?.name ?? 'Not mapped',
-        accent: dsAccent,
+        accent: _cyan,
       ),
       _buildDetailTile(
         icon: Icons.grid_view_rounded,
         label: 'Ward',
         value: grievance.wardNumber ?? 'Not specified',
-        accent: _warning,
+        accent: _amber,
       ),
       _buildDetailTile(
         icon: Icons.flag_rounded,
-        label: l10n.filterByPriority,
+        label: 'Priority',
         value: _priorityLabel(grievance.priority),
         accent: _priorityColor(grievance.priority),
       ),
       _buildDetailTile(
         icon: Icons.badge_rounded,
-        label: l10n.citizenId,
+        label: 'Citizen ID',
         value: grievance.citizenId?.toString() ?? 'Unknown',
-        accent: _success,
+        accent: _green,
       ),
       _buildDetailTile(
         icon: Icons.confirmation_number_rounded,
         label: 'Record ID',
         value: grievance.id.toString(),
-        accent: dsTextSecondary,
+        accent: _text2,
       ),
     ];
 
     return _buildSectionShell(
       icon: Icons.dashboard_customize_rounded,
-      title: l10n.description,
-      subtitle: 'Reference fields and routing information for the complaint.',
-      accent: dsAccent,
+      title: 'Case Details',
+      subtitle: 'Core grievance metadata and routing information.',
+      accent: _cyan,
       child: LayoutBuilder(
         builder: (context, constraints) {
           final columns = constraints.maxWidth >= 420 ? 2 : 1;
@@ -1009,17 +892,17 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     );
   }
 
-  Widget _buildTimelineCard(Grievance grievance, AppLocalizations l10n) {
+  Widget _buildTimelineCard(Grievance grievance) {
     final items = <_TimelineItem>[
       _TimelineItem(
         icon: Icons.add_circle_outline_rounded,
-        label: l10n.created,
+        label: 'Created',
         value: _formatDateTime(grievance.createdAt),
-        color: dsAccent,
+        color: _cyan,
       ),
       _TimelineItem(
         icon: Icons.update_rounded,
-        label: l10n.lastUpdated,
+        label: 'Last Updated',
         value: _formatDateTime(grievance.updatedAt),
         color: _purple,
       ),
@@ -1028,14 +911,14 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
           icon: Icons.task_alt_rounded,
           label: 'Resolved',
           value: _formatDateTime(grievance.resolvedAt),
-          color: _success,
+          color: _green,
         ),
     ];
 
     return _buildSectionShell(
       icon: Icons.timeline_rounded,
       title: 'Timeline',
-      subtitle: 'Key milestones recorded as this complaint moves forward.',
+      subtitle: 'Operational milestones recorded on this grievance.',
       accent: _purple,
       child: Column(
         children: [
@@ -1046,7 +929,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                 margin: const EdgeInsets.symmetric(vertical: 8),
                 width: double.infinity,
                 height: 1,
-                color: _slateBorder,
+                color: _border,
               ),
           ],
           if ((grievance.rejectionReason ?? '').trim().isNotEmpty) ...[
@@ -1055,9 +938,9 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: _danger.withOpacity(0.08),
+                color: _red.withOpacity(0.08),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: _danger.withOpacity(0.22)),
+                border: Border.all(color: _red.withOpacity(0.24)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1065,16 +948,17 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                   const Text(
                     'Rejection Reason',
                     style: TextStyle(
-                      color: _danger,
+                      color: _red,
                       fontSize: 12,
                       fontWeight: FontWeight.w700,
+                      letterSpacing: 0.8,
                     ),
                   ),
                   const SizedBox(height: 6),
                   Text(
                     grievance.rejectionReason!,
                     style: const TextStyle(
-                      color: dsTextPrimary,
+                      color: _text1,
                       fontSize: 13,
                       height: 1.5,
                     ),
@@ -1088,12 +972,12 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     );
   }
 
-  Widget _buildLocationCard(Grievance grievance, AppLocalizations l10n) {
+  Widget _buildLocationCard(Grievance grievance) {
     return _buildSectionShell(
       icon: Icons.place_rounded,
-      title: l10n.locationDetails,
-      subtitle: 'Address and coordinates submitted with the complaint.',
-      accent: _success,
+      title: 'Location',
+      subtitle: 'Reported address and coordinates.',
+      accent: _green,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1102,20 +986,20 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: dsSurface,
+                color: _surfaceSoft,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: _success.withOpacity(0.2)),
+                border: Border.all(color: _green.withOpacity(0.18)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Icon(Icons.home_work_rounded, color: _success, size: 18),
+                  const Icon(Icons.home_work_rounded, color: _green, size: 18),
                   const SizedBox(width: 10),
                   Expanded(
                     child: Text(
                       grievance.address!,
                       style: const TextStyle(
-                        color: dsTextPrimary,
+                        color: _text1,
                         fontSize: 13,
                         height: 1.5,
                       ),
@@ -1148,37 +1032,74 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     );
   }
 
-  Widget _buildDescriptionCard(Grievance grievance, AppLocalizations l10n) {
+  Widget _buildDescriptionCard(Grievance grievance) {
     return _buildSectionShell(
       icon: Icons.notes_rounded,
-      title: l10n.details,
-      subtitle: 'The full complaint description and important notes.',
-      accent: dsAccent,
-      child: Text(
-        grievance.description.isEmpty
-            ? 'No description was entered for this grievance.'
-            : grievance.description,
-        style: const TextStyle(
-          color: dsTextPrimary,
-          fontSize: 14,
-          height: 1.7,
-        ),
+      title: 'Description',
+      subtitle: 'Complaint summary and operational notes.',
+      accent: _cyan,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            grievance.description.isEmpty
+                ? 'No description was entered for this grievance.'
+                : grievance.description,
+            style: const TextStyle(
+              color: _text1,
+              fontSize: 14,
+              height: 1.7,
+            ),
+          ),
+          if ((grievance.rejectionReason ?? '').trim().isNotEmpty) ...[
+            const SizedBox(height: 16),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: _red.withOpacity(0.08),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: _red.withOpacity(0.24)),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    'Escalation Note',
+                    style: TextStyle(
+                      color: _red,
+                      fontSize: 12,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.7,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    grievance.rejectionReason!,
+                    style: const TextStyle(
+                      color: _text1,
+                      fontSize: 13,
+                      height: 1.5,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
       ),
     );
   }
 
-  Widget _buildAttachmentsSection(
-    Grievance grievance,
-    AppLocalizations l10n,
-  ) {
+  Widget _buildAttachmentsSection(Grievance grievance) {
     final List<GrievanceAttachment> attachments =
         grievance.attachments ?? const <GrievanceAttachment>[];
 
     return _buildSectionShell(
       icon: Icons.attach_file_rounded,
-      title: l10n.attachments,
-      subtitle: 'Files and visual evidence shared with your complaint.',
-      accent: dsAccent,
+      title: 'Citizen Attachments',
+      subtitle: 'Uploaded documents and visual evidence from the complaint.',
+      accent: _cyan,
       child: attachments.isEmpty
           ? _buildEmptyMessage(
               icon: Icons.attach_file_rounded,
@@ -1194,7 +1115,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                         title: attachment.filePath.split('/').last,
                         subtitle:
                             'Type: ${_safeText(attachment.fileType, fallback: 'Unknown')}',
-                        accent: dsAccent,
+                        accent: _cyan,
                       ),
                     ),
                   )
@@ -1210,8 +1131,8 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     return _buildSectionShell(
       icon: Icons.verified_rounded,
       title: 'Work Proofs',
-      subtitle: 'Completion proof and updates uploaded by field staff.',
-      accent: _success,
+      subtitle: 'Field evidence and closure materials uploaded by staff.',
+      accent: _green,
       child: workproofs.isEmpty
           ? _buildEmptyMessage(
               icon: Icons.verified_outlined,
@@ -1230,304 +1151,173 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     );
   }
 
-  Widget _buildFeedbackSection(
-    Grievance grievance,
-    User? currentUser,
-    AppLocalizations l10n,
-  ) {
-    final canSubmit = _canSubmitFeedback(currentUser, grievance);
-    final canView = _canViewFeedback(currentUser, grievance);
+  Widget _buildFeedbackSection(Grievance grievance) {
+    final rating = grievance.feedbackRating ?? 0;
 
     return _buildSectionShell(
       icon: Icons.star_rounded,
-      title: canSubmit ? l10n.submitFeedback : l10n.submittedFeedback,
-      subtitle: canSubmit
-          ? 'Share your satisfaction after the grievance is resolved.'
-          : 'Your submitted rating and feedback for this complaint.',
-      accent: _warning,
-      child: canSubmit
-          ? Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.selectRating,
-                  style: const TextStyle(
-                    color: dsTextPrimary,
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
+      title: 'Citizen Feedback',
+      subtitle: 'Submitted satisfaction score and optional remarks.',
+      accent: _amber,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              ...List.generate(
+                5,
+                (index) => Padding(
+                  padding: const EdgeInsets.only(right: 4),
+                  child: Icon(
+                    index < rating
+                        ? Icons.star_rounded
+                        : Icons.star_border_rounded,
+                    color: _amber,
+                    size: 22,
                   ),
                 ),
-                const SizedBox(height: 12),
-                Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: List.generate(5, (index) {
-                    final rating = index + 1;
-                    final selected = _rating == rating;
-                    return ChoiceChip(
-                      label: Text('$rating'),
-                      selected: selected,
-                      onSelected: (value) {
-                        setState(() {
-                          _rating = value ? rating : null;
-                        });
-                      },
-                      labelStyle: TextStyle(
-                        color: selected ? dsSurface : dsTextPrimary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                      selectedColor: _warning,
-                      backgroundColor: dsSurface,
-                      side: BorderSide(
-                        color: selected
-                            ? _warning
-                            : _warning.withOpacity(0.24),
-                      ),
-                    );
-                  }),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                '$rating / 5',
+                style: const TextStyle(
+                  color: _text1,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
                 ),
-                const SizedBox(height: 16),
-                TextField(
-                  controller: _feedbackController,
-                  minLines: 3,
-                  maxLines: 4,
-                  style: const TextStyle(color: dsTextPrimary),
-                  decoration: dsFormFieldDecoration(label: l10n.feedback),
+              ),
+            ],
+          ),
+          if ((grievance.feedbackText ?? '').trim().isNotEmpty) ...[
+            const SizedBox(height: 14),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(14),
+              decoration: BoxDecoration(
+                color: _surfaceSoft,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: _amber.withOpacity(0.2)),
+              ),
+              child: Text(
+                grievance.feedbackText!,
+                style: const TextStyle(
+                  color: _text1,
+                  fontSize: 13,
+                  height: 1.6,
                 ),
-                const SizedBox(height: 16),
-                ElevatedButton.icon(
-                  onPressed: _isSubmittingFeedback ? null : _submitFeedback,
-                  icon: _isSubmittingFeedback
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: dsTextPrimary,
-                          ),
-                        )
-                      : const Icon(Icons.send_rounded),
-                  label: Text(
-                    _isSubmittingFeedback ? 'Submitting...' : l10n.submit,
-                  ),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _warning.withOpacity(0.18),
-                    foregroundColor: dsTextPrimary,
-                    side: BorderSide(color: _warning.withOpacity(0.45)),
-                    minimumSize: const Size.fromHeight(48),
-                  ),
-                ),
-              ],
-            )
-          : canView
-              ? Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        ...List.generate(
-                          5,
-                          (index) => Padding(
-                            padding: const EdgeInsets.only(right: 4),
-                            child: Icon(
-                              index < (grievance.feedbackRating ?? 0)
-                                  ? Icons.star_rounded
-                                  : Icons.star_border_rounded,
-                              color: _warning,
-                              size: 22,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          '${grievance.feedbackRating}/5',
-                          style: const TextStyle(
-                            color: dsTextPrimary,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w700,
-                          ),
-                        ),
-                      ],
-                    ),
-                    if ((grievance.feedbackText ?? '').trim().isNotEmpty) ...[
-                      const SizedBox(height: 14),
-                      Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.all(14),
-                        decoration: BoxDecoration(
-                          color: dsSurface,
-                          borderRadius: BorderRadius.circular(16),
-                          border: Border.all(color: _warning.withOpacity(0.2)),
-                        ),
-                        child: Text(
-                          grievance.feedbackText!,
-                          style: const TextStyle(
-                            color: dsTextPrimary,
-                            fontSize: 13,
-                            height: 1.6,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ],
-                )
-              : const SizedBox.shrink(),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 
-  Widget _buildCommentsSection(
-    Grievance grievance,
-    int? currentUserId,
-    AppLocalizations l10n,
-  ) {
+  Widget _buildCommentsSection(Grievance grievance, int? currentUserId) {
     final List<Comment> comments = grievance.comments ?? const <Comment>[];
 
     return _buildSectionShell(
       icon: Icons.forum_rounded,
-      title: l10n.comments,
-      subtitle: 'Conversation history and updates related to this grievance.',
+      title: 'Discussion',
+      subtitle: 'Internal updates and coordination notes for the case thread.',
       accent: _purple,
-      child: comments.isEmpty
-          ? _buildEmptyMessage(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (comments.isEmpty)
+            _buildEmptyMessage(
               icon: Icons.chat_bubble_outline_rounded,
-              message: l10n.noCommentsMessage,
+              message:
+                  'No comments yet. Add the first operational note below.',
             )
-          : Column(
-              children: comments
-                  .map(
-                    (comment) => Padding(
-                      padding: const EdgeInsets.only(bottom: 12),
-                      child: _buildCommentCard(comment, currentUserId),
-                    ),
-                  )
-                  .toList(),
-            ),
-    );
-  }
-
-  Widget _buildCommentComposer(AppLocalizations l10n) {
-    return Container(
-      padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
-      decoration: BoxDecoration(
-        color: dsSurface,
-        border: Border(top: BorderSide(color: dsAccent.withOpacity(0.16))),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 14,
-            offset: const Offset(0, -4),
-          ),
-        ],
-      ),
-      child: SafeArea(
-        top: false,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            if (_selectedFiles.isNotEmpty)
-              Container(
-                width: double.infinity,
-                margin: const EdgeInsets.only(bottom: 12),
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: dsSurfaceAlt,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: dsAccent.withOpacity(0.14)),
-                ),
-                child: Wrap(
-                  spacing: 8,
-                  runSpacing: 8,
-                  children: _selectedFiles
-                      .map(
-                        (file) => InputChip(
-                          label: Text(
-                            file.name,
-                            overflow: TextOverflow.ellipsis,
-                            style: const TextStyle(color: dsTextPrimary),
-                          ),
-                          backgroundColor: dsSurface,
-                          side: BorderSide(color: dsAccent.withOpacity(0.2)),
-                          onDeleted: () {
-                            setState(() {
-                              _selectedFiles.remove(file);
-                            });
-                          },
-                        ),
-                      )
-                      .toList(),
-                ),
+          else
+            ...comments.map(
+              (comment) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: _buildCommentCard(comment, currentUserId),
               ),
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.end,
+            ),
+          const SizedBox(height: 8),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: _surfaceSoft,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: _purple.withOpacity(0.22)),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Expanded(
-                  child: TextField(
-                    controller: _commentController,
-                    minLines: 1,
-                    maxLines: 4,
-                    textCapitalization: TextCapitalization.sentences,
-                    style: const TextStyle(color: dsTextPrimary),
-                    decoration: dsFormFieldDecoration(label: l10n.addComment),
+                TextField(
+                  controller: _commentController,
+                  minLines: 2,
+                  maxLines: 4,
+                  textCapitalization: TextCapitalization.sentences,
+                  style: const TextStyle(color: _text1, fontSize: 14),
+                  decoration: InputDecoration(
+                    hintText: 'Add an operational update or staff note...',
+                    hintStyle: const TextStyle(color: _text2, fontSize: 13),
+                    filled: true,
+                    fillColor: _surface,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide.none,
+                    ),
+                    enabledBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: _border),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(14),
+                      borderSide: BorderSide(color: _purple.withOpacity(0.55)),
+                    ),
+                    contentPadding: const EdgeInsets.all(14),
                   ),
                 ),
-                const SizedBox(width: 10),
-                _buildComposerAction(
-                  icon: Icons.attach_file_rounded,
-                  tooltip: l10n.attachments,
-                  onTap: _pickCommentAttachments,
-                ),
-                const SizedBox(width: 10),
-                ElevatedButton(
-                  onPressed: _isPostingComment ? null : _addComment,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: dsAccent.withOpacity(0.18),
-                    foregroundColor: dsTextPrimary,
-                    side: BorderSide(color: dsAccent.withOpacity(0.45)),
-                    minimumSize: const Size(54, 54),
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                  ),
-                  child: _isPostingComment
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: dsTextPrimary,
-                          ),
-                        )
-                      : const Icon(Icons.send_rounded),
+                const SizedBox(height: 12),
+                Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        'Comments are visible in the grievance discussion thread.',
+                        style: TextStyle(
+                          color: _text2,
+                          fontSize: 12,
+                          height: 1.4,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    ElevatedButton.icon(
+                      onPressed: _isPostingComment ? null : _addComment,
+                      icon: _isPostingComment
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: _text1,
+                              ),
+                            )
+                          : const Icon(Icons.send_rounded),
+                      label: Text(_isPostingComment ? 'Posting...' : 'Post'),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _purple.withOpacity(0.2),
+                        foregroundColor: _text1,
+                        side: BorderSide(color: _purple.withOpacity(0.5)),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildComposerAction({
-    required IconData icon,
-    required String tooltip,
-    required VoidCallback onTap,
-  }) {
-    return Tooltip(
-      message: tooltip,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(16),
-          child: Ink(
-            width: 54,
-            height: 54,
-            decoration: BoxDecoration(
-              color: dsSurfaceAlt,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: dsAccent.withOpacity(0.18)),
-            ),
-            child: Icon(icon, color: dsAccent),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -1542,7 +1332,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
       decoration: BoxDecoration(
         color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withOpacity(0.3)),
+        border: Border.all(color: color.withOpacity(0.32)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1578,11 +1368,11 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
             width: 42,
             height: 42,
             decoration: BoxDecoration(
-              color: dsSurface,
+              color: _surfaceSoft,
               shape: BoxShape.circle,
-              border: Border.all(color: _slateBorder),
+              border: Border.all(color: _border),
             ),
-            child: Icon(icon, color: dsTextPrimary, size: 18),
+            child: Icon(icon, color: _text1, size: 18),
           ),
         ),
       ),
@@ -1596,12 +1386,12 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     required Color color,
   }) {
     return Container(
-      constraints: const BoxConstraints(minWidth: 180),
       padding: const EdgeInsets.all(14),
+      constraints: const BoxConstraints(minWidth: 180),
       decoration: BoxDecoration(
-        color: dsSurface.withOpacity(0.92),
+        color: _surfaceSoft.withOpacity(0.9),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.2)),
+        border: Border.all(color: color.withOpacity(0.22)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1610,7 +1400,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: color.withOpacity(0.14),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 18),
@@ -1622,7 +1412,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
               Text(
                 title,
                 style: const TextStyle(
-                  color: dsTextSecondary,
+                  color: _text2,
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
                 ),
@@ -1631,7 +1421,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
               Text(
                 value,
                 style: const TextStyle(
-                  color: dsTextPrimary,
+                  color: _text1,
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
@@ -1643,17 +1433,17 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     );
   }
 
-  Widget _buildStatCard(_MetricItem item) {
+  Widget _buildStatCard(_StatItem item) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: _cardDecoration(accent: item.color, radius: 18),
+      decoration: _panelDecoration(glow: item.color, radius: 18),
       child: Row(
         children: [
           Container(
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: item.color.withOpacity(0.12),
+              color: item.color.withOpacity(0.14),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(item.icon, color: item.color),
@@ -1666,7 +1456,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                 Text(
                   item.label,
                   style: const TextStyle(
-                    color: dsTextSecondary,
+                    color: _text2,
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1675,7 +1465,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                 Text(
                   item.value,
                   style: const TextStyle(
-                    color: dsTextPrimary,
+                    color: _text1,
                     fontSize: 18,
                     fontWeight: FontWeight.w800,
                   ),
@@ -1697,7 +1487,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
   }) {
     return Container(
       width: double.infinity,
-      decoration: _cardDecoration(accent: accent),
+      decoration: _panelDecoration(glow: accent),
       child: Padding(
         padding: const EdgeInsets.all(18),
         child: Column(
@@ -1710,7 +1500,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: accent.withOpacity(0.12),
+                    color: accent.withOpacity(0.14),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(icon, color: accent),
@@ -1723,7 +1513,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                       Text(
                         title,
                         style: const TextStyle(
-                          color: dsTextPrimary,
+                          color: _text1,
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
                         ),
@@ -1732,7 +1522,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                       Text(
                         subtitle,
                         style: const TextStyle(
-                          color: dsTextSecondary,
+                          color: _text2,
                           fontSize: 12,
                           height: 1.4,
                         ),
@@ -1750,6 +1540,47 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     );
   }
 
+  Widget _buildTransitionButton(
+    int grievanceId,
+    String currentStatus,
+    String nextStatus,
+  ) {
+    final color = _statusColor(nextStatus);
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: _isUpdatingStatus
+            ? null
+            : () => _updateStatus(grievanceId, currentStatus, nextStatus),
+        borderRadius: BorderRadius.circular(12),
+        child: Ink(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: color.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: color.withOpacity(0.38)),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(_statusIcon(nextStatus), color: color, size: 16),
+              const SizedBox(width: 8),
+              Text(
+                _statusLabel(nextStatus),
+                style: TextStyle(
+                  color: color,
+                  fontSize: 12,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   Widget _buildPersonPanel({
     required String title,
     required String subtitle,
@@ -1762,9 +1593,9 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
         width: double.infinity,
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: dsSurface,
+          color: _surfaceSoft,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: _slateBorder),
+          border: Border.all(color: _border),
         ),
         child: Row(
           children: [
@@ -1774,7 +1605,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
               child: Text(
                 emptyMessage,
                 style: const TextStyle(
-                  color: dsTextSecondary,
+                  color: _text2,
                   fontSize: 13,
                   height: 1.5,
                 ),
@@ -1789,9 +1620,9 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: dsSurface,
+        color: _surfaceSoft,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accent.withOpacity(0.18)),
+        border: Border.all(color: accent.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1800,7 +1631,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
             children: [
               CircleAvatar(
                 radius: 22,
-                backgroundColor: accent.withOpacity(0.16),
+                backgroundColor: accent.withOpacity(0.18),
                 child: Text(
                   _initials(user.name),
                   style: TextStyle(
@@ -1818,16 +1649,17 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                     Text(
                       title,
                       style: const TextStyle(
-                        color: dsTextSecondary,
+                        color: _text2,
                         fontSize: 11,
                         fontWeight: FontWeight.w600,
+                        letterSpacing: 0.8,
                       ),
                     ),
                     const SizedBox(height: 4),
                     Text(
                       _safeText(user.name),
                       style: const TextStyle(
-                        color: dsTextPrimary,
+                        color: _text1,
                         fontSize: 15,
                         fontWeight: FontWeight.w700,
                       ),
@@ -1851,13 +1683,13 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                 _buildInlineInfoChip(
                   icon: Icons.mail_outline_rounded,
                   text: user.email!,
-                  color: dsAccent,
+                  color: _cyan,
                 ),
               if ((user.phoneNumber ?? '').trim().isNotEmpty)
                 _buildInlineInfoChip(
                   icon: Icons.phone_rounded,
                   text: user.phoneNumber!,
-                  color: _success,
+                  color: _green,
                 ),
             ],
           ),
@@ -1865,7 +1697,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
           Text(
             subtitle,
             style: const TextStyle(
-              color: dsTextSecondary,
+              color: _text2,
               fontSize: 12,
               height: 1.4,
             ),
@@ -1885,7 +1717,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
       decoration: BoxDecoration(
         color: color.withOpacity(0.12),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withOpacity(0.22)),
+        border: Border.all(color: color.withOpacity(0.24)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1914,9 +1746,9 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     return Container(
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: dsSurface,
+        color: _surfaceSoft,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: accent.withOpacity(0.16)),
+        border: Border.all(color: accent.withOpacity(0.18)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1929,7 +1761,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                 child: Text(
                   label,
                   style: const TextStyle(
-                    color: dsTextSecondary,
+                    color: _text2,
                     fontSize: 11,
                     fontWeight: FontWeight.w600,
                   ),
@@ -1941,7 +1773,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
           Text(
             value,
             style: const TextStyle(
-              color: dsTextPrimary,
+              color: _text1,
               fontSize: 13,
               fontWeight: FontWeight.w700,
               height: 1.4,
@@ -1960,7 +1792,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: item.color.withOpacity(0.12),
+            color: item.color.withOpacity(0.14),
             shape: BoxShape.circle,
           ),
           child: Icon(item.icon, color: item.color, size: 18),
@@ -1973,16 +1805,17 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
               Text(
                 item.label,
                 style: const TextStyle(
-                  color: dsTextSecondary,
+                  color: _text2,
                   fontSize: 11,
                   fontWeight: FontWeight.w600,
+                  letterSpacing: 0.8,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 item.value,
                 style: const TextStyle(
-                  color: dsTextPrimary,
+                  color: _text1,
                   fontSize: 13,
                   fontWeight: FontWeight.w700,
                 ),
@@ -2001,14 +1834,14 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: dsSurface,
+        color: _surfaceSoft,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: _success.withOpacity(0.2)),
+        border: Border.all(color: _green.withOpacity(0.2)),
       ),
       child: Text(
         '$label: $value',
         style: const TextStyle(
-          color: dsTextPrimary,
+          color: _text1,
           fontSize: 12,
           fontWeight: FontWeight.w600,
         ),
@@ -2024,20 +1857,20 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
       width: double.infinity,
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: dsSurface,
+        color: _surfaceSoft,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _slateBorder),
+        border: Border.all(color: _border),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, color: dsTextSecondary, size: 18),
+          Icon(icon, color: _text2, size: 18),
           const SizedBox(width: 10),
           Expanded(
             child: Text(
               message,
               style: const TextStyle(
-                color: dsTextSecondary,
+                color: _text2,
                 fontSize: 13,
                 height: 1.5,
               ),
@@ -2059,15 +1892,15 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () => _launchURL(path),
+        onTap: () => _openUpload(path),
         borderRadius: BorderRadius.circular(16),
         child: Ink(
           width: double.infinity,
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            color: dsSurface,
+            color: _surfaceSoft,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: accent.withOpacity(0.16)),
+            border: Border.all(color: accent.withOpacity(0.18)),
           ),
           child: Row(
             children: [
@@ -2076,7 +1909,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                 child: Container(
                   width: 62,
                   height: 62,
-                  color: dsBackground,
+                  color: _surface,
                   child: isImage
                       ? Image.network(
                           '${Constants.baseUrl}/uploads/$path',
@@ -2103,7 +1936,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: dsTextPrimary,
+                        color: _text1,
                         fontSize: 13,
                         fontWeight: FontWeight.w700,
                         height: 1.4,
@@ -2113,7 +1946,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                     Text(
                       subtitle,
                       style: const TextStyle(
-                        color: dsTextSecondary,
+                        color: _text2,
                         fontSize: 12,
                         height: 1.4,
                       ),
@@ -2133,9 +1966,9 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
   Widget _buildWorkproofCard(Workproof workproof) {
     return Container(
       decoration: BoxDecoration(
-        color: dsSurfaceAlt,
+        color: _surfaceSoft,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _success.withOpacity(0.16)),
+        border: Border.all(color: _green.withOpacity(0.18)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -2146,7 +1979,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
               title: workproof.filePath.split('/').last,
               subtitle:
                   'Uploaded by ${_safeText(workproof.uploader?.name, fallback: 'Unknown staff')} on ${_formatDate(workproof.uploadedAt)}',
-              accent: _success,
+              accent: _green,
             ),
             if ((workproof.notes ?? '').trim().isNotEmpty) ...[
               const SizedBox(height: 12),
@@ -2154,14 +1987,14 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: dsSurface,
+                  color: _surface,
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: _slateBorder),
+                  border: Border.all(color: _border),
                 ),
                 child: Text(
                   workproof.notes!,
                   style: const TextStyle(
-                    color: dsTextPrimary,
+                    color: _text1,
                     fontSize: 13,
                     height: 1.5,
                   ),
@@ -2176,15 +2009,15 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
 
   Widget _buildCommentCard(Comment comment, int? currentUserId) {
     final isCurrentUser = currentUserId != null && currentUserId == comment.userId;
-    final accent = isCurrentUser ? dsAccent : _purple;
+    final accent = isCurrentUser ? _cyan : _purple;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: isCurrentUser ? dsSurface : dsSurfaceAlt,
+        color: isCurrentUser ? _surfaceSoft : _surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accent.withOpacity(0.16)),
+        border: Border.all(color: accent.withOpacity(0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2194,7 +2027,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
             children: [
               CircleAvatar(
                 radius: 18,
-                backgroundColor: accent.withOpacity(0.16),
+                backgroundColor: accent.withOpacity(0.18),
                 child: Text(
                   _initials(comment.userName),
                   style: TextStyle(
@@ -2218,7 +2051,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                               fallback: 'User ${comment.userId}',
                             ),
                             style: const TextStyle(
-                              color: dsTextPrimary,
+                              color: _text1,
                               fontSize: 13,
                               fontWeight: FontWeight.w700,
                             ),
@@ -2231,13 +2064,13 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: dsAccent.withOpacity(0.14),
+                              color: _cyan.withOpacity(0.14),
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: const Text(
                               'You',
                               style: TextStyle(
-                                color: dsAccent,
+                                color: _cyan,
                                 fontSize: 10,
                                 fontWeight: FontWeight.w700,
                               ),
@@ -2249,7 +2082,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
                     Text(
                       _formatDateTime(comment.createdAt),
                       style: const TextStyle(
-                        color: dsTextSecondary,
+                        color: _text2,
                         fontSize: 11,
                         fontWeight: FontWeight.w500,
                       ),
@@ -2263,7 +2096,7 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
           Text(
             _safeText(comment.commentText, fallback: 'No comment text'),
             style: const TextStyle(
-              color: dsTextPrimary,
+              color: _text1,
               fontSize: 13,
               height: 1.6,
             ),
@@ -2289,13 +2122,13 @@ class _GrievanceDetailState extends ConsumerState<GrievanceDetail> {
   }
 }
 
-class _MetricItem {
+class _StatItem {
   final IconData icon;
   final String label;
   final String value;
   final Color color;
 
-  const _MetricItem({
+  const _StatItem({
     required this.icon,
     required this.label,
     required this.value,

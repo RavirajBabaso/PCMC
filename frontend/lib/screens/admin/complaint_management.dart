@@ -371,11 +371,22 @@ class _ComplaintManagementState extends ConsumerState<ComplaintManagement>
                 ),
               ],
 
-              // ── Assign / Comment actions ──────────────────────────
+              // ── Assign / Comment / Details actions ────────────
               const SizedBox(height: 10),
               Row(children: [
-                Expanded(child: _actionBtn(Icons.person_add, 'ASSIGN', _cyan, () => _showAssignDialog(g))),
-                const SizedBox(width: 8),
+                Expanded(child: _actionBtn(
+                  Icons.open_in_new, 'DETAILS', _cyanDim,
+                  () => Navigator.pushNamed(context, '/admin/detail',
+                      arguments: g.id).then((_) => _fetchData()),
+                )),
+                const SizedBox(width: 6),
+                Expanded(child: _actionBtn(
+                  Icons.person_add,
+                  g.assignee != null ? 'REASSIGN' : 'ASSIGN',
+                  g.assignee != null ? _cyanDim : _cyan,
+                  () => _showAssignDialog(g),
+                )),
+                const SizedBox(width: 6),
                 Expanded(child: _actionBtn(Icons.comment, 'COMMENT', _text2, () => _showCommentDialog(g))),
               ]),
             ]),

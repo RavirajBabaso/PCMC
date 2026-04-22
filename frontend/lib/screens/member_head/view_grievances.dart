@@ -80,7 +80,7 @@ class _ViewGrievancesState extends State<ViewGrievances> {
               .toSet() // removes duplicates
               .toList() ?? [];
 
-      final staffResponse = await ApiService.get('/fieldStaff/fieldStaff?role=field_staff');
+      final staffResponse = await ApiService.get('/fieldStaff/?role=field_staff');
       fieldStaff = (staffResponse.data as List?)
               ?.map((s) => {"id": s["id"].toString(), "name": s["name"] ?? "Unknown"})
               .toSet() // removes duplicates

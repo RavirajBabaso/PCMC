@@ -1,6 +1,8 @@
+from datetime import datetime, timezone
+
 from flask import Blueprint, jsonify, current_app
 from .. import db
-from ..models import MasterSubjects, MasterAreas
+from ..models import Advertisement, MasterSubjects, MasterAreas
 from ..schemas import MasterSubjectsSchema, MasterAreasSchema
 
 public_bp = Blueprint('public', __name__)
@@ -51,4 +53,35 @@ def get_areas():
         return jsonify(areas_schema.dump(areas)), 200
     except Exception as e:
         current_app.logger.exception('Failed to fetch areas')
+        return jsonify([]), 200
+
+
+@public_bp.route('/areas/<int:area_id>', methods=['GET'])
+def get_area_by_id(area_id):
+    """Get a single area by ID — used by frontend getMasterArea()."""
+    area = db.session.get(MasterAreas, area_id)
+    if not area:
+        return jsonify({"error": "Area not found"}), 404
+    return jsonify(MasterAreasSchema().dump(area)), 200
+
+
+@public_bp.route('/advertisements', methods=['GET'])
+def get_public_advertisements():
+    """
+    Public endpoint — returns active, non-expired advertisements.
+    Used by the citizen home screen (ApiService.fetchAds).
+    No authentication required.
+    """
+    try:
+        now = datetime.now(timezone.utc)
+        ads = Advertisement.query.filter(
+            Advertisement.is_active == True,
+            db.or_(
+                Advertisement.expires_at == None,
+                Advertisement.expires_at > now,
+            ),
+        ).order_by(Advertisement.created_at.desc()).all()
+        return jsonify([ad.to_dict() for ad in ads]), 200
+    except Exception as e:
+        current_app.logger.exception('Failed to fetch public advertisements')
         return jsonify([]), 200

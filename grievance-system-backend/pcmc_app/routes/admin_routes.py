@@ -9,8 +9,9 @@ from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 from werkzeug.utils import secure_filename
 
 from ..models import (
-    Announcement, Advertisement, AuditLog, Grievance, MasterAreas,
-    MasterCategories, MasterConfig, MasterSubjects, NearbyPlace, Role, User,
+    Announcement, Advertisement, AuditLog, Grievance, GrievanceStatus,
+    MasterAreas, MasterCategories, MasterConfig, MasterSubjects,
+    NearbyPlace, Priority, Role, User,
 )
 from ..schemas import (
     AnnouncementSchema, AuditLogSchema, GrievanceSchema, MasterAreasSchema,
@@ -239,9 +240,15 @@ def get_all_grievances(user):
     try:
         query = Grievance.query
         if s := request.args.get('status'):
-            query = query.filter_by(status=s)
+            try:
+                query = query.filter_by(status=GrievanceStatus[s.upper()])
+            except KeyError:
+                pass  # ignore unknown status values
         if p := request.args.get('priority'):
-            query = query.filter_by(priority=p)
+            try:
+                query = query.filter_by(priority=Priority[p.upper()])
+            except KeyError:
+                pass
         if a := request.args.get('area_id', type=int):
             query = query.filter_by(area_id=a)
         if sub := request.args.get('subject_id', type=int):
@@ -304,6 +311,39 @@ def escalate(user, id):
         return jsonify({"success": False, "error": str(e)}), 500
 
 
+@admin_bp.route('/grievances/<int:id>/assign', methods=['PUT'])
+@admin_required
+def assign_grievance(user, id):
+    """
+    Assign a grievance to a field-staff member.
+    Accepts: {"assigned_to": <user_id>}
+    Also auto-advances status from NEW → IN_PROGRESS on assignment.
+    """
+    data = request.get_json() or {}
+    assignee_id = data.get('assigned_to')
+    if not assignee_id:
+        return jsonify({"success": False, "message": "assigned_to is required"}), 400
+    grievance = db.session.get(Grievance, id)
+    if not grievance:
+        return jsonify({"success": False, "message": "Grievance not found"}), 404
+    assignee = db.session.get(User, assignee_id)
+    if not assignee or assignee.role != Role.FIELD_STAFF:
+        return jsonify({"success": False, "message": "Assignee must be a field staff member"}), 400
+    grievance.assigned_to = assignee_id
+    grievance.assigned_by = user.id
+    # Auto-advance: NEW → IN_PROGRESS on first assignment
+    if grievance.status == GrievanceStatus.NEW:
+        grievance.status = GrievanceStatus.IN_PROGRESS
+    grievance.updated_at = datetime.now(timezone.utc)
+    db.session.commit()
+    return jsonify({
+        "success": True,
+        "message": "Grievance assigned",
+        "assigned_to": assignee_id,
+        "status": grievance.status.value,
+    }), 200
+
+
 # ── Audit Logs ───────────────────────────────────────────────────────────────
 
 @admin_bp.route('/audit-logs', methods=['GET'])
@@ -319,6 +359,31 @@ def audit_logs(user):
 @admin_required
 def reports(user):
     filter_type = request.args.get('filter_type', 'all')
+    fmt = request.args.get('format', 'pdf')
+    report_data = generate_report(filter_type, fmt)
+    mime_map = {
+        'pdf': ('application/pdf', 'report.pdf'),
+        'csv': ('text/csv', 'report.csv'),
+        'excel': ('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'report.xlsx'),
+    }
+    if fmt not in mime_map:
+        return jsonify({"error": "Invalid format. Supported: pdf, csv, excel"}), 400
+    mimetype, filename = mime_map[fmt]
+    return Response(report_data, mimetype=mimetype,
+                    headers={"Content-Disposition": f"attachment; filename={filename}"})
+
+
+@admin_bp.route('/reports/export', methods=['GET'])
+@admin_required
+def reports_export(user):
+    """
+    Alias for /admins/reports that accepts the query params the Flutter
+    dashboard export button sends: ?format=csv|pdf|excel&time_period=...
+
+    The backend generate_report() uses filter_type; time_period maps to it.
+    """
+    # time_period from Flutter maps to filter_type in generate_report()
+    filter_type = request.args.get('time_period', request.args.get('filter_type', 'all'))
     fmt = request.args.get('format', 'pdf')
     report_data = generate_report(filter_type, fmt)
     mime_map = {

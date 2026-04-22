@@ -216,7 +216,7 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                   subtitle: l10n.submitGrievanceSubtitle,
                   tint: scheme.primaryContainer,
                   accent: scheme.primary,
-                  onTap: () => Navigator.pushNamed(context, '/citizen/submit'),
+                  onTap: () => Navigator.pushNamed(context, '/citizen/submit').then((_) { ref.invalidate(citizenHistoryProvider(userId!)); }),
                 ),
                 _QuickActionCard(
                   icon: Icons.track_changes_rounded,
@@ -767,23 +767,32 @@ class _MetricCard extends StatelessWidget {
   }
 }
 
-class _RecentComplaintCard extends StatelessWidget {
+class _RecentComplaintCard extends ConsumerWidget {
   const _RecentComplaintCard({required this.grievance});
 
   final Grievance grievance;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
 
     return AppCard(
       color: scheme.surface,
-      onTap: () => Navigator.pushNamed(
-        context,
-        '/citizen/detail',
-        arguments: grievance.id,
-      ),
+      onTap: () {
+        final userId = ref.read(authProvider)?.id ??
+            ref.read(userNotifierProvider)?.id;
+        Navigator.pushNamed(
+          context,
+          '/citizen/detail',
+          arguments: grievance.id,
+        ).then((_) {
+          // Invalidate so deleted/updated grievances disappear on back-navigation
+          if (userId != null) {
+            ref.invalidate(citizenHistoryProvider(userId));
+          }
+        });
+      },
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [

@@ -195,19 +195,25 @@ def create_app(config_class=None):
     limiter.init_app(app)
 
     # ── CORS ──────────────────────────────────────────────────────────────────
-    cors_origins = app.config.get('CORS_ORIGINS', [
-        "http://localhost:3000",
-        "http://localhost:5000",
-        "http://localhost:62984",  # Flutter web dev server current port
-        "http://127.0.0.1:3000",
-        "http://127.0.0.1:5000",
-        "http://127.0.0.1:62984",
-        "http://localhost:50550",  # Flutter web dev server
-        "http://localhost:51868",  # Flutter web dev server (current port)
-        "https://pcmcapp.onrender.com",
-        "https://pcmc-updated.onrender.com",
-        "https://www.nivaran.co.in",
-    ])
+    # In development / Codespaces the origin is a dynamic forwarded URL.
+    # Set CORS_ORIGINS=* in your .env to allow any origin (dev only).
+    cors_origins_env = os.environ.get('CORS_ORIGINS', '')
+    if cors_origins_env == '*' or app.config.get('ENV') == 'development':
+        cors_origins = '*'
+    else:
+        cors_origins = app.config.get('CORS_ORIGINS', [
+            "http://localhost:3000",
+            "http://localhost:5000",
+            "http://localhost:62984",  # Flutter web dev server current port
+            "http://127.0.0.1:3000",
+            "http://127.0.0.1:5000",
+            "http://127.0.0.1:62984",
+            "http://localhost:50550",  # Flutter web dev server
+            "http://localhost:51868",  # Flutter web dev server (current port)
+            "https://pcmcapp.onrender.com",
+            "https://pcmc-updated.onrender.com",
+            "https://www.nivaran.co.in",
+        ])
     CORS(app, resources={r"/*": {
         "origins": cors_origins,
         "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
@@ -266,6 +272,7 @@ def create_app(config_class=None):
     from .routes.public import public_bp
     from .routes.settings_routes import settings_bp
     from .routes.field_routes import fieldStaff
+    from .routes.notifications_routes import notifications_bp
 
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(grievance_bp, url_prefix='/grievances')
@@ -274,6 +281,7 @@ def create_app(config_class=None):
     app.register_blueprint(settings_bp, url_prefix='/settings')
     app.register_blueprint(public_bp)
     app.register_blueprint(fieldStaff)
+    app.register_blueprint(notifications_bp, url_prefix='/notifications')
 
     # Ensure database tables and seed master data on startup for fresh deployments.
     try:

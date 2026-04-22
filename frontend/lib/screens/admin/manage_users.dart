@@ -109,7 +109,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                         DropdownMenuItem(value: 'CITIZEN',     child: Text('Citizen')),
                         DropdownMenuItem(value: 'FIELD_STAFF', child: Text('Field Staff')),
                         DropdownMenuItem(value: 'MEMBER_HEAD', child: Text('Member Head')),
-                        DropdownMenuItem(value: 'ADMIN',       child: Text('Admin')),
+                        // ADMIN intentionally excluded — admins are created via backend only
                       ],
                       onChanged: (v) => setDlg(() => role = v ?? 'CITIZEN'),
                     ),
@@ -185,7 +185,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                         DropdownMenuItem(value: 'CITIZEN',     child: Text('Citizen')),
                         DropdownMenuItem(value: 'FIELD_STAFF', child: Text('Field Staff')),
                         DropdownMenuItem(value: 'MEMBER_HEAD', child: Text('Member Head')),
-                        DropdownMenuItem(value: 'ADMIN',       child: Text('Admin')),
+                        // ADMIN intentionally excluded — admins are created via backend only
                       ],
                       onChanged: (v) => setDlg(() => role = v ?? 'CITIZEN'),
                     ),
@@ -308,10 +308,13 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
 
   Widget _buildList(List<User> users, User? currentUser, ThemeData theme, AppLocalizations l10n) {
     final query   = _searchController.text.toLowerCase();
-    final filtered = users.where((u) =>
-      (u.name?.toLowerCase().contains(query) ?? false) ||
-      (u.email?.toLowerCase().contains(query) ?? false),
-    ).toList();
+    // Exclude the currently logged-in admin from the list
+    final filtered = users.where((u) {
+      if (u.id == currentUser?.id) return false;  // hide self
+      if (query.isEmpty) return true;
+      return (u.name?.toLowerCase().contains(query) ?? false) ||
+             (u.email?.toLowerCase().contains(query) ?? false);
+    }).toList();
 
     if (filtered.isEmpty) {
       return EmptyState(

@@ -38,7 +38,7 @@ class ContactSupportScreen extends StatelessWidget {
       title: l10n.contactSupport,
       currentRoute: '/contact-support',
       bottomNavCurrentRoute: '/profile',
-      backgroundColor: const Color(0xFFf8fbff),
+      backgroundColor: dsBackground,
       appBarBackgroundColor: dsSurface,
       appBarForegroundColor: dsTextPrimary,
       child: SingleChildScrollView(
@@ -51,7 +51,7 @@ class ContactSupportScreen extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: dsSurface,
                   borderRadius: BorderRadius.circular(16),
                   boxShadow: [
                     BoxShadow(
@@ -112,7 +112,7 @@ class ContactSupportScreen extends StatelessWidget {
                 ],
               ),
               child: Card(
-                color: const Color(0xFFecf2fe),
+                color: dsSurfaceAlt,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -193,7 +193,7 @@ class ContactSupportScreen extends StatelessWidget {
                 ],
               ),
               child: Card(
-                color: const Color(0xFFecf2fe),
+                color: dsSurfaceAlt,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
@@ -274,7 +274,7 @@ class ContactSupportScreen extends StatelessWidget {
                 ],
               ),
               child: Card(
-                color: const Color(0xFFecf2fe),
+                color: dsSurfaceAlt,
                 elevation: 0,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),

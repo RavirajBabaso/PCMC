@@ -39,11 +39,21 @@ class _AssignedListState extends ConsumerState<AssignedList> {
 
   void _reload() {
     setState(() {
-      _future = ApiService.get('/grievances/assigned').then(
-        (res) => (res.data as List)
+      _future = ApiService.get('/grievances/assigned').then((res) {
+        // Backend returns a paginated map: {grievances: [...], total: ..., page: ..., per_page: ...}
+        final data = res.data;
+        List<dynamic> items;
+        if (data is List) {
+          items = data;
+        } else if (data is Map && data['grievances'] is List) {
+          items = data['grievances'] as List;
+        } else {
+          items = [];
+        }
+        return items
             .map((e) => Grievance.fromJson(e as Map<String, dynamic>))
-            .toList(),
-      );
+            .toList();
+      });
     });
   }
 

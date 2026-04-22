@@ -1,4 +1,3 @@
-// D:\Company_Data\PCMCApp\main_ui\lib\screens\common\announcements_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
@@ -16,12 +15,11 @@ final announcementsProvider = FutureProvider<List<Announcement>>((ref) async {
       .toList();
 });
 
-
 class AnnouncementsScreen extends ConsumerStatefulWidget {
   const AnnouncementsScreen({super.key});
 
   @override
-  _AnnouncementsScreenState createState() => _AnnouncementsScreenState();
+  ConsumerState<AnnouncementsScreen> createState() => _AnnouncementsScreenState();
 }
 
 class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
@@ -36,14 +34,14 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
     showDialog(
       context: context,
       builder: (context) {
+        final localizations = AppLocalizations.of(context)!;
+
         return Dialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(24),
           child: Container(
             padding: const EdgeInsets.all(24),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(16),
-            ),
+            decoration: dsPanelDecoration(color: dsSurface, radius: 20),
             child: Form(
               key: _formKey,
               child: SingleChildScrollView(
@@ -52,94 +50,134 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      AppLocalizations.of(context)!.addAnnouncement,
-                      style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+                      localizations.addAnnouncement,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: dsTextPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    const Text(
+                      'Share timely updates with the right audience using the same civic design language as the rest of the app.',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: dsTextSecondary,
+                        height: 1.5,
+                      ),
                     ),
                     const SizedBox(height: 20),
                     TextFormField(
                       controller: _titleController,
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.title,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                        filled: true,
-                        fillColor: const Color(0xFFf8fbff),
-                      ),
-                      validator: (value) => value!.isEmpty ? AppLocalizations.of(context)!.error : null,
+                      style: const TextStyle(color: dsTextPrimary),
+                      cursorColor: dsAccent,
+                      decoration: dsFormFieldDecoration(label: localizations.title),
+                      validator: (value) => value!.isEmpty ? localizations.error : null,
                     ),
                     const SizedBox(height: 16),
                     TextFormField(
                       controller: _messageController,
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.message,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                        filled: true,
-                        fillColor: const Color(0xFFf8fbff),
-                      ),
-                      validator: (value) => value!.isEmpty ? AppLocalizations.of(context)!.error : null,
+                      style: const TextStyle(color: dsTextPrimary),
+                      cursorColor: dsAccent,
+                      decoration: dsFormFieldDecoration(label: localizations.message),
+                      validator: (value) => value!.isEmpty ? localizations.error : null,
                       maxLines: 3,
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       initialValue: _type,
-                      items: ['general', 'emergency'].map((t) => DropdownMenuItem(
-                        value: t, 
-                        child: Text(t.capitalize(), style: const TextStyle(fontSize: 14)),
-                      )).toList(),
+                      dropdownColor: dsSurface,
+                      style: const TextStyle(fontSize: 14, color: dsTextPrimary),
+                      iconEnabledColor: dsAccentSoft,
+                      items: ['general', 'emergency']
+                          .map(
+                            (type) => DropdownMenuItem(
+                              value: type,
+                              child: Text(
+                                type.capitalize(),
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  color: dsTextPrimary,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
                       onChanged: (value) => setState(() => _type = value!),
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.type,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                        filled: true,
-                        fillColor: const Color(0xFFf8fbff),
-                      ),
-                      borderRadius: BorderRadius.circular(8),
+                      decoration: dsFormFieldDecoration(label: localizations.type),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     const SizedBox(height: 16),
                     Container(
-                      decoration: BoxDecoration(
-                        color: const Color(0xFFf8fbff),
-                        borderRadius: BorderRadius.circular(8),
-                        border: Border.all(color: Colors.grey.shade300),
-                      ),
+                      decoration: dsPanelDecoration(color: dsSurfaceAlt, radius: 12),
                       child: ListTile(
                         title: Text(
                           _expiresAt == null
-                              ? AppLocalizations.of(context)!.selectExpiration
+                              ? localizations.selectExpiration
                               : DateFormat('yyyy-MM-dd').format(_expiresAt!),
-                          style: const TextStyle(fontSize: 14),
+                          style: const TextStyle(fontSize: 14, color: dsTextPrimary),
                         ),
-                        trailing: const Icon(Icons.calendar_today, size: 20),
+                        trailing: const Icon(
+                          Icons.calendar_today_rounded,
+                          size: 20,
+                          color: dsAccentSoft,
+                        ),
                         onTap: () async {
                           final picked = await showDatePicker(
                             context: context,
                             initialDate: DateTime.now(),
                             firstDate: DateTime.now(),
                             lastDate: DateTime.now().add(const Duration(days: 365)),
+                            builder: (context, child) {
+                              return Theme(
+                                data: ThemeData.dark().copyWith(
+                                  dialogBackgroundColor: dsSurface,
+                                  colorScheme: const ColorScheme.dark(
+                                    primary: dsAccent,
+                                    secondary: dsAccentSoft,
+                                    surface: dsSurface,
+                                    onPrimary: dsBackground,
+                                    onSurface: dsTextPrimary,
+                                  ),
+                                ),
+                                child: child!,
+                              );
+                            },
                           );
-                          if (picked != null) setState(() => _expiresAt = picked);
+                          if (picked != null) {
+                            setState(() => _expiresAt = picked);
+                          }
                         },
                       ),
                     ),
                     const SizedBox(height: 16),
                     DropdownButtonFormField<String>(
                       initialValue: _targetRole,
-                      items: [
+                      dropdownColor: dsSurface,
+                      style: const TextStyle(fontSize: 14, color: dsTextPrimary),
+                      iconEnabledColor: dsAccentSoft,
+                      items: const [
                         {'label': 'CITIZEN', 'value': 'citizen'},
                         {'label': 'SUPERVISOR', 'value': 'member_head'},
                         {'label': 'FIELD_STAFF', 'value': 'field_staff'},
                         {'label': 'ADMIN', 'value': 'admin'},
-                      ].map((role) => DropdownMenuItem(
-                        value: role['value'],
-                        child: Text(role['label']!, style: const TextStyle(fontSize: 14)),
-                      )).toList(),
+                      ]
+                          .map(
+                            (role) => DropdownMenuItem(
+                              value: role['value'],
+                              child: Text(
+                                role['label']!,
+                                style: TextStyle(
+                                  fontSize: 14,
+                                  color: dsTextPrimary,
+                                ),
+                              ),
+                            ),
+                          )
+                          .toList(),
                       onChanged: (value) => setState(() => _targetRole = value),
-                      decoration: InputDecoration(
-                        labelText: AppLocalizations.of(context)!.targetRole,
-                        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
-                        filled: true,
-                        fillColor: const Color(0xFFf8fbff),
-                      ),
-                      borderRadius: BorderRadius.circular(8),
+                      decoration: dsFormFieldDecoration(label: localizations.targetRole),
+                      borderRadius: BorderRadius.circular(12),
                     ),
                     const SizedBox(height: 24),
                     Row(
@@ -147,10 +185,11 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
                       children: [
                         TextButton(
                           onPressed: () => Navigator.pop(context),
-                          child: Text(AppLocalizations.of(context)!.cancel),
+                          style: TextButton.styleFrom(foregroundColor: dsTextSecondary),
+                          child: Text(localizations.cancel),
                         ),
                         const SizedBox(width: 8),
-                        ElevatedButton(
+                        ElevatedButton.icon(
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               final data = {
@@ -161,9 +200,11 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
                                 'target_role': _targetRole,
                                 'is_active': true,
                               };
+
                               try {
                                 await ApiService.post('/admins/announcements', data);
                                 ref.refresh(announcementsProvider);
+                                if (!mounted) return;
                                 Navigator.pop(context);
                                 _titleController.clear();
                                 _messageController.clear();
@@ -172,26 +213,31 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
                                 _targetRole = null;
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
-                                    content: Text(AppLocalizations.of(context)!.announcementAdded),
-                                    backgroundColor: Colors.green,
+                                    content: Text(localizations.announcementAdded),
+                                    backgroundColor: AppTheme.success,
                                   ),
                                 );
                               } catch (e) {
+                                if (!mounted) return;
                                 ScaffoldMessenger.of(context).showSnackBar(
                                   SnackBar(
                                     content: Text('Error: $e'),
-                                    backgroundColor: Colors.red,
+                                    backgroundColor: AppTheme.error,
                                   ),
                                 );
                               }
                             }
                           },
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                            backgroundColor: dsAccent,
+                            foregroundColor: dsTextPrimary,
+                            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 14),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                           ),
-                          child: Text(AppLocalizations.of(context)!.submit),
+                          icon: const Icon(Icons.campaign_rounded, size: 18),
+                          label: Text(localizations.submit),
                         ),
                       ],
                     ),
@@ -210,16 +256,34 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(localizations.confirmDelete),
-        content: const Text('Are you sure you want to delete this announcement?'),
+        backgroundColor: dsSurface,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+        title: Text(
+          localizations.confirmDelete,
+          style: const TextStyle(
+            color: dsTextPrimary,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+        content: const Text(
+          'Are you sure you want to delete this announcement?',
+          style: TextStyle(
+            color: dsTextSecondary,
+            height: 1.5,
+          ),
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
+            style: TextButton.styleFrom(foregroundColor: dsTextSecondary),
             child: Text(localizations.cancel),
           ),
           ElevatedButton(
             onPressed: () => Navigator.of(context).pop(true),
-            style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.error,
+              foregroundColor: dsTextPrimary,
+            ),
             child: Text(localizations.delete),
           ),
         ],
@@ -232,16 +296,25 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
         ref.refresh(announcementsProvider);
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Announcement deleted successfully'), backgroundColor: Colors.green),
+            const SnackBar(
+              content: Text('Announcement deleted successfully'),
+              backgroundColor: AppTheme.success,
+            ),
           );
         }
       } catch (e) {
         if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red));
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: $e'),
+              backgroundColor: AppTheme.error,
+            ),
+          );
         }
       }
     }
   }
+
   @override
   Widget build(BuildContext context) {
     final localizations = AppLocalizations.of(context)!;
@@ -253,168 +326,327 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
       title: localizations.announcements,
       currentRoute: '/announcements',
       bottomNavCurrentRoute: '/profile',
-      backgroundColor: const Color(0xFFf8fbff),
+      backgroundColor: dsBackground,
       appBarBackgroundColor: dsSurface,
       appBarForegroundColor: dsTextPrimary,
       floatingActionButton: isAdmin
           ? FloatingActionButton(
               onPressed: _showAddAnnouncementDialog,
-              backgroundColor: Colors.blue,
-              foregroundColor: Colors.white,
+              backgroundColor: dsAccent,
+              foregroundColor: dsTextPrimary,
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               child: const Icon(Icons.add),
             )
           : null,
       child: announcementsAsync.when(
-        data: (announcements) => announcements.isEmpty
-            ? Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Icon(Icons.announcement, size: 64, color: Colors.grey.shade400),
-                    const SizedBox(height: 16),
-                    Text(
-                      localizations.noAnnouncements,
-                      style: TextStyle(color: Colors.grey.shade600, fontSize: 16),
-                    ),
-                  ],
-                ),
+        data: (announcements) => ListView(
+          padding: const EdgeInsets.all(20),
+          children: [
+            _buildHeader(localizations, announcements.length, isAdmin),
+            const SizedBox(height: 20),
+            if (announcements.isEmpty)
+              _buildStateCard(
+                icon: Icons.announcement_outlined,
+                title: localizations.noAnnouncements,
+                subtitle: 'New civic updates and department notices will appear here.',
               )
-            : ListView.builder(
-                padding: const EdgeInsets.all(16),
-                itemCount: announcements.length,
-                itemBuilder: (context, index) {
-                  final ann = announcements[index];
-                  return Container(
-                    margin: const EdgeInsets.only(bottom: 16),
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(12),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.grey.withOpacity(0.1),
-                          blurRadius: 6,
-                          offset: const Offset(0, 2),
-                        ),
-                      ],
-                    ),
-                    child: Card(
-                      color: const Color(0xFFecf2fe),
-                      elevation: 0,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding: const EdgeInsets.all(8),
-                                  decoration: BoxDecoration(
-                                    color: ann.type == 'emergency' ? Colors.red.withOpacity(0.1) : Colors.blue.withOpacity(0.1),
-                                    shape: BoxShape.circle,
-                                  ),
-                                  child: Icon(
-                                    ann.type == 'emergency' ? Icons.warning : Icons.info,
-                                    color: ann.type == 'emergency' ? Colors.red : Colors.blue,
-                                    size: 20,
-                                  ),
-                                ),
-                                const SizedBox(width: 12),
-                                Expanded(
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text(
-                                        ann.title,
-                                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                                      ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        ann.message,
-                                        style: TextStyle(fontSize: 14, color: Colors.grey.shade700),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                Row(
-                                  children: [
-                                    Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                      decoration: BoxDecoration(
-                                        color: ann.type == 'emergency' ? Colors.red.withOpacity(0.1) : Colors.blue.withOpacity(0.1),
-                                        borderRadius: BorderRadius.circular(12),
-                                      ),
-                                      child: Text(
-                                        ann.type.toUpperCase(),
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          fontWeight: FontWeight.w600,
-                                          color: ann.type == 'emergency' ? Colors.red : Colors.blue,
-                                        ),
-                                      ),
-                                    ),
-                                    if (isAdmin)
-                                      IconButton(
-                                        icon: const Icon(Icons.delete, color: Colors.red, size: 20),
-                                        onPressed: () => _deleteAnnouncement(ann.id),
-                                        tooltip: 'Delete Announcement',
-                                      ),
-                                  ],
-                                ),
-                              ],
-                            ),
-                            const SizedBox(height: 12),
-                            Divider(color: Colors.grey.shade300, height: 1),
-                            const SizedBox(height: 12),
-                            Row(
-                              children: [
-                                Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade600),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Posted on ${DateFormat('dd/MM/yyyy').format(ann.createdAt)}',
-                                  style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                                ),
-                                if (ann.expiresAt != null) ...[
-                                  const SizedBox(width: 16),
-                                  Icon(Icons.timer, size: 14, color: Colors.grey.shade600),
-                                  const SizedBox(width: 4),
-                                  Text(
-                                    'Expires on ${DateFormat('dd/MM/yyyy').format(ann.expiresAt!)}',
-                                    style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                                  ),
-                                ],
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
+            else
+              ...announcements.map(
+                (announcement) => Padding(
+                  padding: const EdgeInsets.only(bottom: 14),
+                  child: _buildAnnouncementCard(announcement, isAdmin),
+                ),
               ),
+          ],
+        ),
         loading: () => const Center(
-          child: CircularProgressIndicator(
-            valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-          ),
+          child: CircularProgressIndicator(color: dsAccent),
         ),
         error: (err, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.error_outline, size: 64, color: Colors.red),
-              const SizedBox(height: 16),
-              Text(
-                '${localizations.error}: $err',
-                style: const TextStyle(color: Colors.red),
-                textAlign: TextAlign.center,
-              ),
-            ],
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: _buildStateCard(
+              icon: Icons.error_outline_rounded,
+              title: localizations.error,
+              subtitle: '$err',
+              accent: AppTheme.error,
+            ),
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildHeader(AppLocalizations localizations, int count, bool isAdmin) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: dsPanelDecoration(color: dsSurface, radius: 22),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 58,
+            height: 58,
+            decoration: BoxDecoration(
+              color: dsAccent.withOpacity(0.14),
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: dsAccent.withOpacity(0.35)),
+            ),
+            child: const Icon(
+              Icons.campaign_rounded,
+              color: dsAccentSoft,
+              size: 30,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  localizations.announcements,
+                  style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.w700,
+                    color: dsTextPrimary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  isAdmin
+                      ? 'Publish civic notices, emergency alerts, and role-based updates from one consistent admin surface.'
+                      : 'Stay up to date with official notices, service alerts, and department updates.',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: dsTextSecondary,
+                    height: 1.5,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            decoration: BoxDecoration(
+              color: dsSurfaceAlt,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: dsBorder),
+            ),
+            child: Column(
+              children: [
+                Text(
+                  '$count',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.w700,
+                    color: dsTextPrimary,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                const Text(
+                  'Live',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: dsTextSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildAnnouncementCard(Announcement announcement, bool isAdmin) {
+    final accent = announcement.type == 'emergency' ? AppTheme.error : dsAccentSoft;
+
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: dsPanelDecoration(color: dsSurfaceAlt, radius: 18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 46,
+                height: 46,
+                decoration: BoxDecoration(
+                  color: accent.withOpacity(0.14),
+                  borderRadius: BorderRadius.circular(14),
+                  border: Border.all(color: accent.withOpacity(0.28)),
+                ),
+                child: Icon(
+                  announcement.type == 'emergency'
+                      ? Icons.warning_amber_rounded
+                      : Icons.info_outline_rounded,
+                  color: accent,
+                  size: 24,
+                ),
+              ),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      announcement.title,
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                        color: dsTextPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      announcement.message,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: dsTextSecondary,
+                        height: 1.55,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              if (isAdmin)
+                IconButton(
+                  icon: const Icon(
+                    Icons.delete_outline_rounded,
+                    color: AppTheme.error,
+                    size: 22,
+                  ),
+                  onPressed: () => _deleteAnnouncement(announcement.id),
+                  tooltip: 'Delete Announcement',
+                ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Wrap(
+            spacing: 8,
+            runSpacing: 8,
+            children: [
+              _buildMetaChip(
+                icon: announcement.type == 'emergency'
+                    ? Icons.priority_high_rounded
+                    : Icons.push_pin_outlined,
+                label: announcement.type.capitalize(),
+                color: accent,
+              ),
+              _buildMetaChip(
+                icon: Icons.calendar_today_rounded,
+                label: 'Posted ${DateFormat('dd MMM yyyy').format(announcement.createdAt)}',
+              ),
+              if (announcement.expiresAt != null)
+                _buildMetaChip(
+                  icon: Icons.timer_outlined,
+                  label: 'Expires ${DateFormat('dd MMM yyyy').format(announcement.expiresAt!)}',
+                  color: const Color(0xFFF59E0B),
+                ),
+              if (announcement.targetRole != null && announcement.targetRole!.isNotEmpty)
+                _buildMetaChip(
+                  icon: Icons.groups_rounded,
+                  label: _formatRole(announcement.targetRole!),
+                ),
+              _buildMetaChip(
+                icon: announcement.isActive
+                    ? Icons.check_circle_outline_rounded
+                    : Icons.block_outlined,
+                label: announcement.isActive ? 'Active' : 'Inactive',
+                color: announcement.isActive ? AppTheme.success : AppTheme.error,
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildMetaChip({
+    required IconData icon,
+    required String label,
+    Color color = dsTextSecondary,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+      decoration: BoxDecoration(
+        color: dsSurface.withOpacity(0.5),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: dsBorder),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 14, color: color),
+          const SizedBox(width: 6),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: color,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStateCard({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    Color accent = dsAccentSoft,
+  }) {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: dsPanelDecoration(color: dsSurface, radius: 20),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 64,
+            height: 64,
+            decoration: BoxDecoration(
+              color: accent.withOpacity(0.14),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: Icon(icon, size: 32, color: accent),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.w700,
+              color: dsTextPrimary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 8),
+          Text(
+            subtitle,
+            style: const TextStyle(
+              fontSize: 14,
+              color: dsTextSecondary,
+              height: 1.5,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _formatRole(String role) {
+    return role
+        .split('_')
+        .where((segment) => segment.isNotEmpty)
+        .map((segment) => segment.capitalize())
+        .join(' ');
   }
 
   @override
@@ -425,9 +657,9 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
   }
 }
 
-// Extension to capitalize strings
 extension StringExtension on String {
   String capitalize() {
-    return "${this[0].toUpperCase()}${substring(1)}";
+    if (isEmpty) return this;
+    return '${this[0].toUpperCase()}${substring(1)}';
   }
 }

@@ -34,7 +34,9 @@ class Advertisement {
       id: json['id'] as int? ?? 0,
       title: json['title'] as String? ?? '',
       description: json['description'] as String?,
-      imageUrl: json['image_url'] != null ? '${Constants.baseUrl}/${json['image_url']}' : null,
+      imageUrl: json['image_url'] != null
+          ? '${Constants.baseUrl}/uploads/${json['image_url']}'
+          : null,
       linkUrl: json['link_url'] as String?,
       isActive: _parseBool(json['is_active'] ?? false),
       createdAt: json['created_at'] != null ? DateTime.parse(json['created_at']) : null,

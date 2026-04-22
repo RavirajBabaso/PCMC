@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:main_ui/theme/app_theme.dart';
+import 'package:main_ui/widgets/navigation_drawer.dart';
 
 /// Represents a single step in a multi-step form
 class FormStep {
@@ -51,6 +52,7 @@ class MultiStepFormStepper extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: backgroundColor,
+      drawer: const CustomNavigationDrawer(),
       appBar: AppBar(
         backgroundColor: dsSurface,
         foregroundColor: dsAccent,

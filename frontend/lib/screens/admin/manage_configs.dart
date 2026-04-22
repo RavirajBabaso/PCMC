@@ -1,257 +1,138 @@
-import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../services/api_service.dart';
-
-import '../../l10n/app_localizations.dart';
-import '../../widgets/empty_state.dart';
-import '../../widgets/app/app_button.dart';
-
-// Define a Config model
-class Config {
-  final String key;
-  final String value;
-
-  Config({required this.key, required this.value});
-
-  factory Config.fromJson(Map<String, dynamic> json) {
-    return Config(
-      key: json['key'] ?? '',
-      value: json['value'] ?? '',
-    );
-  }
-}
-
-// AdminNotifier for managing configs
-class AdminNotifier extends StateNotifier<AsyncValue<List<Config>>> {
-  static final Dio _dio = ApiService.dio;
-  AdminNotifier() : super(const AsyncValue.loading()) {
-    getConfigs();
-  }
-
-  Future<void> getConfigs() async {
-    try {
-      state = const AsyncValue.loading();
-      final response = await _dio.get('/admins/configs');
-      final configs = (response.data as List).map((json) => Config.fromJson(json)).toList();
-      state = AsyncValue.data(configs);
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
-    }
-  }
-
-  Future<void> addConfig(String key, String value) async {
-    try {
-      state = const AsyncValue.loading();
-      await ApiService.post('/admins/configs', {'key': key, 'value': value});
-      await getConfigs(); // Refresh configs after adding
-    } catch (e, stack) {
-      state = AsyncValue.error(e, stack);
-    }
-  }
-}
-
-final adminProvider = StateNotifierProvider<AdminNotifier, AsyncValue<List<Config>>>((ref) => AdminNotifier());
+import 'package:main_ui/layouts/app_shell.dart';
+import 'package:main_ui/providers/admin_provider.dart';
+import 'package:main_ui/theme/app_theme.dart';
+import 'package:main_ui/widgets/app/app_button.dart';
+import 'package:main_ui/widgets/empty_state.dart';
 
 class ManageConfigs extends ConsumerStatefulWidget {
   const ManageConfigs({super.key});
-
   @override
   ConsumerState<ManageConfigs> createState() => _ManageConfigsState();
 }
 
 class _ManageConfigsState extends ConsumerState<ManageConfigs> {
-  final TextEditingController _keyController = TextEditingController();
-  final TextEditingController _valueController = TextEditingController();
+  final _keyCtrl   = TextEditingController();
+  final _valueCtrl = TextEditingController();
 
   @override
-  void dispose() {
-    _keyController.dispose();
-    _valueController.dispose();
-    super.dispose();
+  void dispose() { _keyCtrl.dispose(); _valueCtrl.dispose(); super.dispose(); }
+
+  void _showAddConfigDialog() {
+    _keyCtrl.clear(); _valueCtrl.clear();
+    _openDialog(title: 'Add Configuration', keyEditable: true,
+        onSave: (k, v) => ref.read(adminProvider.notifier).addConfig(k, v));
+  }
+
+  void _showEditConfigDialog(Config config) {
+    _keyCtrl.text = config.key; _valueCtrl.text = config.value;
+    _openDialog(title: 'Edit Configuration', keyEditable: false,
+        onSave: (k, v) => ref.read(adminProvider.notifier).addConfig(k, v));
+  }
+
+  void _openDialog({
+    required String title,
+    required bool keyEditable,
+    required Future<void> Function(String, String) onSave,
+  }) {
+    showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: dsSurface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: dsAccent.withOpacity(0.3)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+            Text(title, style: const TextStyle(color: dsTextPrimary, fontSize: 17, fontWeight: FontWeight.bold)),
+            const SizedBox(height: 20),
+            TextField(controller: _keyCtrl, enabled: keyEditable,
+                style: const TextStyle(color: dsTextPrimary),
+                decoration: const InputDecoration(labelText: 'Key')),
+            const SizedBox(height: 14),
+            TextField(controller: _valueCtrl,
+                style: const TextStyle(color: dsTextPrimary),
+                decoration: const InputDecoration(labelText: 'Value')),
+            const SizedBox(height: 24),
+            Row(mainAxisAlignment: MainAxisAlignment.end, children: [
+              TextButton(onPressed: () => Navigator.pop(ctx),
+                  child: const Text('Cancel', style: TextStyle(color: dsTextSecondary))),
+              const SizedBox(width: 12),
+              AppButton(text: 'Save', onPressed: () async {
+                final k = _keyCtrl.text.trim(); final v = _valueCtrl.text.trim();
+                if (k.isEmpty || v.isEmpty) {
+                  ScaffoldMessenger.of(ctx).showSnackBar(const SnackBar(content: Text('Both fields required')));
+                  return;
+                }
+                try {
+                  await onSave(k, v);
+                  if (ctx.mounted) Navigator.pop(ctx);
+                  if (mounted) ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Saved'), backgroundColor: Colors.green));
+                } catch (e) {
+                  if (ctx.mounted) ScaffoldMessenger.of(ctx).showSnackBar(
+                      SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red));
+                }
+              }),
+            ]),
+          ]),
+        ),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final configsAsync = ref.watch(adminProvider);
-    final l10n = AppLocalizations.of(context)!;
+    final state   = ref.watch(adminProvider);
+    final configs = state.configs;
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(l10n.settings),
-      ),
-      body: configsAsync.when(
-        data: (configs) => configs.isEmpty
-            ? EmptyState(
-                icon: Icons.settings_outlined,
-                title: l10n.noConfigs, // New localization key
-                message: l10n.noConfigsMessage, // New localization key
-                actionButton: AppButton(
-                  text: l10n.addConfig, // New localization key
-                  onPressed: () => _showAddConfigDialog(context),
-                ),
-              )
-            : ListView.builder(
-                padding: const EdgeInsets.all(16.0),
-                itemCount: configs.length,
-                itemBuilder: (context, index) {
-                  final config = configs[index];
-                  return Card(
-                    child: ListTile(
-                      title: Text(config.key, style: Theme.of(context).textTheme.titleMedium),
-                      subtitle: Text(config.value, style: Theme.of(context).textTheme.bodyMedium),
-                      trailing: IconButton(
-                        icon: const Icon(Icons.edit),
-                        onPressed: () => _showEditConfigDialog(context, config),
-                      ),
+    return AppShell(
+      title: 'Manage Configurations',
+      currentRoute: '/admin/configs',
+      backgroundColor: dsBackground,
+      appBarBackgroundColor: dsSurface,
+      appBarForegroundColor: dsTextPrimary,
+      actions: [
+        IconButton(icon: const Icon(Icons.add, color: dsAccentSoft),
+            onPressed: _showAddConfigDialog, tooltip: 'Add Config'),
+      ],
+      child: state.isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : state.error != null
+              ? Center(child: EmptyState(icon: Icons.error_outline, title: 'Error',
+                  message: state.error!,
+                  actionButton: AppButton(text: 'Retry',
+                      onPressed: () => ref.read(adminProvider.notifier).getConfigs(),
+                      icon: Icons.refresh)))
+              : configs.isEmpty
+                  ? Center(child: EmptyState(icon: Icons.settings_outlined,
+                      title: 'No Configurations', message: 'Add key-value configs to start.',
+                      actionButton: AppButton(text: 'Add Config',
+                          onPressed: _showAddConfigDialog, icon: Icons.add)))
+                  : ListView.separated(
+                      padding: const EdgeInsets.all(16),
+                      itemCount: configs.length,
+                      separatorBuilder: (_, __) => const SizedBox(height: 10),
+                      itemBuilder: (_, i) {
+                        final c = configs[i];
+                        return Container(
+                          decoration: dsPanelDecoration(color: dsSurfaceAlt),
+                          child: ListTile(
+                            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                            title: Text(c.key, style: const TextStyle(
+                                color: dsAccentSoft, fontWeight: FontWeight.w600, fontFamily: 'monospace')),
+                            subtitle: Text(c.value, style: const TextStyle(color: dsTextPrimary)),
+                            trailing: IconButton(
+                              icon: const Icon(Icons.edit_outlined, color: dsAccentSoft),
+                              onPressed: () => _showEditConfigDialog(c),
+                            ),
+                          ),
+                        );
+                      },
                     ),
-                  );
-                },
-              ),
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (error, stack) => EmptyState(
-          icon: Icons.error,
-          title: l10n.error,
-          message: error.toString(),
-          actionButton: AppButton(
-            text: l10n.retry,
-            onPressed: () => ref.read(adminProvider.notifier).getConfigs(),
-          ),
-        ),
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () => _showAddConfigDialog(context),
-        child: const Icon(Icons.add),
-      ),
-    );
-  }
-
-  void _showAddConfigDialog(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
-    _keyController.clear();
-    _valueController.clear();
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.addConfig), // New localization key
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _keyController,
-              decoration: InputDecoration(
-                labelText: l10n.configKey, // New localization key
-                border: const OutlineInputBorder(),
-              ),
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _valueController,
-              decoration: InputDecoration(
-                labelText: l10n.configValue, // New localization key
-                border: const OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
-          ),
-          AppButton(
-            text: l10n.submit,
-            onPressed: () async {
-              if (_keyController.text.trim().isEmpty || _valueController.text.trim().isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.configCannotBeEmpty)), // New localization key
-                );
-                return;
-              }
-              try {
-                await ref.read(adminProvider.notifier).addConfig(
-                      _keyController.text.trim(),
-                      _valueController.text.trim(),
-                    );
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.configAddedSuccess)), // New localization key
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${l10n.error}: $e')),
-                );
-              }
-            },
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showEditConfigDialog(BuildContext context, Config config) {
-    final l10n = AppLocalizations.of(context)!;
-    _keyController.text = config.key;
-    _valueController.text = config.value;
-
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(l10n.editConfig), // New localization key
-        content: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            TextField(
-              controller: _keyController,
-              decoration: InputDecoration(
-                labelText: l10n.configKey,
-                border: const OutlineInputBorder(),
-              ),
-              enabled: false, // Key remains non-editable
-            ),
-            const SizedBox(height: 16),
-            TextField(
-              controller: _valueController,
-              decoration: InputDecoration(
-                labelText: l10n.configValue,
-                border: const OutlineInputBorder(),
-              ),
-            ),
-          ],
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text(l10n.cancel),
-          ),
-          AppButton(
-            text: l10n.update,
-            onPressed: () async {
-              if (_valueController.text.trim().isEmpty) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.configValueCannotBeEmpty)), // New localization key
-                );
-                return;
-              }
-              try {
-                await ref.read(adminProvider.notifier).addConfig(
-                      _keyController.text.trim(),
-                      _valueController.text.trim(),
-                    );
-                Navigator.pop(context);
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text(l10n.configUpdatedSuccess)), // New localization key
-                );
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text('${l10n.error}: $e')),
-                );
-              }
-            },
-          ),
-        ],
-      ),
     );
   }
 }

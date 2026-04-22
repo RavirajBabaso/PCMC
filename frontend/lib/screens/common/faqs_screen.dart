@@ -11,39 +11,39 @@ class FaqsScreen extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final faqs = [
       {
-        "q": l10n.faq1_q,
-        "a": l10n.faq1_a,
-        "icon": Icons.report_problem_outlined
+        'q': l10n.faq1_q,
+        'a': l10n.faq1_a,
+        'icon': Icons.report_problem_outlined,
       },
       {
-        "q": l10n.faq2_q,
-        "a": l10n.faq2_a,
-        "icon": Icons.track_changes_outlined
+        'q': l10n.faq2_q,
+        'a': l10n.faq2_a,
+        'icon': Icons.track_changes_outlined,
       },
       {
-        "q": l10n.faq3_q,
-        "a": l10n.faq3_a,
-        "icon": Icons.attach_file_outlined
+        'q': l10n.faq3_q,
+        'a': l10n.faq3_a,
+        'icon': Icons.attach_file_outlined,
       },
       {
-        "q": l10n.faq4_q,
-        "a": l10n.faq4_a,
-        "icon": Icons.schedule_outlined
+        'q': l10n.faq4_q,
+        'a': l10n.faq4_a,
+        'icon': Icons.schedule_outlined,
       },
       {
-        "q": l10n.faq5_q,
-        "a": l10n.faq5_a,
-        "icon": Icons.list_alt_outlined
+        'q': l10n.faq5_q,
+        'a': l10n.faq5_a,
+        'icon': Icons.list_alt_outlined,
       },
       {
-        "q": l10n.faq6_q,
-        "a": l10n.faq6_a,
-        "icon": Icons.edit_outlined
+        'q': l10n.faq6_q,
+        'a': l10n.faq6_a,
+        'icon': Icons.edit_outlined,
       },
       {
-        "q": l10n.faq7_q,
-        "a": l10n.faq7_a,
-        "icon": Icons.notifications_outlined
+        'q': l10n.faq7_q,
+        'a': l10n.faq7_a,
+        'icon': Icons.notifications_outlined,
       },
     ];
 
@@ -51,7 +51,7 @@ class FaqsScreen extends StatelessWidget {
       title: l10n.faqs,
       currentRoute: '/faqs',
       bottomNavCurrentRoute: '/profile',
-      backgroundColor: const Color(0xFFf8fbff),
+      backgroundColor: dsBackground,
       appBarBackgroundColor: dsSurface,
       appBarForegroundColor: dsTextPrimary,
       child: SingleChildScrollView(
@@ -59,26 +59,25 @@ class FaqsScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header Section
             Container(
-              padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    blurRadius: 10,
-                    offset: const Offset(0, 4),
-                  ),
-                ],
-              ),
+              padding: const EdgeInsets.all(24),
+              decoration: dsPanelDecoration(color: dsSurface, radius: 20),
               child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Icon(
-                    Icons.help_outline_rounded,
-                    size: 40,
-                    color: Colors.blue.shade700,
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: dsAccent.withOpacity(0.14),
+                      borderRadius: BorderRadius.circular(18),
+                      border: Border.all(color: dsAccent.withOpacity(0.35)),
+                    ),
+                    child: const Icon(
+                      Icons.help_outline_rounded,
+                      size: 30,
+                      color: dsAccentSoft,
+                    ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
@@ -87,17 +86,19 @@ class FaqsScreen extends StatelessWidget {
                       children: [
                         Text(
                           l10n.needHelp,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 18,
                             fontWeight: FontWeight.bold,
+                            color: dsTextPrimary,
                           ),
                         ),
-                        const SizedBox(height: 4),
+                        const SizedBox(height: 6),
                         Text(
                           l10n.faqsHeaderSubtitle,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 14,
-                            color: Colors.grey.shade600,
+                            color: dsTextSecondary,
+                            height: 1.5,
                           ),
                         ),
                       ],
@@ -109,14 +110,13 @@ class FaqsScreen extends StatelessWidget {
             const SizedBox(height: 24),
             Text(
               l10n.faqsCommonQuestions,
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
+                color: dsTextPrimary,
               ),
             ),
             const SizedBox(height: 16),
-
-            // FAQ Items
             ListView.separated(
               physics: const NeverScrollableScrollPhysics(),
               shrinkWrap: true,
@@ -125,44 +125,55 @@ class FaqsScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final faq = faqs[index];
                 return Container(
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.grey.withOpacity(0.1),
-                        blurRadius: 6,
-                        offset: const Offset(0, 2),
-                      ),
-                    ],
-                  ),
-                  child: Card(
-                    color: const Color(0xFFecf2fe),
-                    elevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
+                  decoration: dsPanelDecoration(color: dsSurfaceAlt, radius: 16),
+                  child: Theme(
+                    data: Theme.of(context).copyWith(
+                      dividerColor: Colors.transparent,
+                      splashColor: Colors.transparent,
+                      highlightColor: Colors.transparent,
                     ),
                     child: ExpansionTile(
-                      leading: Icon(
-                        faq['icon'] as IconData,
-                        color: Colors.blue.shade700,
+                      iconColor: dsAccentSoft,
+                      collapsedIconColor: dsAccentSoft,
+                      tilePadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 4),
+                      childrenPadding: const EdgeInsets.fromLTRB(18, 0, 18, 18),
+                      shape: const RoundedRectangleBorder(side: BorderSide.none),
+                      collapsedShape: const RoundedRectangleBorder(side: BorderSide.none),
+                      leading: Container(
+                        width: 42,
+                        height: 42,
+                        decoration: BoxDecoration(
+                          color: dsAccent.withOpacity(0.12),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Icon(
+                          faq['icon']! as IconData,
+                          color: dsAccentSoft,
+                        ),
                       ),
                       title: Text(
-                        faq['q'] as String,
+                        faq['q']! as String,
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
+                          color: dsTextPrimary,
                         ),
                       ),
-                      tilePadding: const EdgeInsets.symmetric(horizontal: 16),
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(24, 0, 16, 16),
+                        Container(
+                          width: double.infinity,
+                          padding: const EdgeInsets.all(16),
+                          decoration: BoxDecoration(
+                            color: dsSurface.withOpacity(0.55),
+                            borderRadius: BorderRadius.circular(14),
+                            border: Border.all(color: dsBorder),
+                          ),
                           child: Text(
-                            faq['a'] as String,
-                            style: TextStyle(
+                            faq['a']! as String,
+                            style: const TextStyle(
                               fontSize: 15,
-                              color: Colors.grey.shade700,
-                              height: 1.4,
+                              color: dsTextSecondary,
+                              height: 1.55,
                             ),
                           ),
                         ),
@@ -172,66 +183,55 @@ class FaqsScreen extends StatelessWidget {
                 );
               },
             ),
-
             const SizedBox(height: 24),
-
-            // Contact Support Card
             Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(12),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
-                    blurRadius: 6,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Card(
-                color: Colors.white,
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.faqsStillNeedHelp,
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                        ),
+              decoration: dsPanelDecoration(color: dsSurface, radius: 16),
+              child: Padding(
+                padding: const EdgeInsets.all(20),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Row(
+                      children: [
+                        Icon(Icons.support_agent_rounded, color: dsAccentSoft),
+                        SizedBox(width: 10),
+                      ],
+                    ),
+                    Text(
+                      l10n.faqsStillNeedHelp,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: dsTextPrimary,
                       ),
-                      const SizedBox(height: 8),
-                      Text(
-                        l10n.faqsContactSupportMessage,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey.shade600,
-                        ),
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      l10n.faqsContactSupportMessage,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: dsTextSecondary,
+                        height: 1.5,
                       ),
-                      const SizedBox(height: 16),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed: () => Navigator.pushNamed(context, '/contact-support'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
-                            ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () => Navigator.pushNamed(context, '/contact-support'),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: dsAccent,
+                          foregroundColor: dsTextPrimary,
+                          padding: const EdgeInsets.symmetric(vertical: 14),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12),
                           ),
-                          icon: const Icon(Icons.support_agent, size: 20),
-                          label: Text(l10n.contactSupport),
                         ),
+                        icon: const Icon(Icons.support_agent, size: 20),
+                        label: Text(l10n.contactSupport),
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
               ),
             ),

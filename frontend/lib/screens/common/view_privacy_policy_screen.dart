@@ -13,13 +13,13 @@ class PrivacyPolicyScreen extends StatelessWidget {
       title: l10n.privacyPolicy,
       currentRoute: '/privacy-policy',
       bottomNavCurrentRoute: '/profile',
-      backgroundColor: const Color(0xFFF8FBFF), // Background color
+      backgroundColor: dsBackground,
       appBarBackgroundColor: dsSurface,
       appBarForegroundColor: dsTextPrimary,
       child: SingleChildScrollView(
         padding: const EdgeInsets.all(16.0),
         child: Card(
-          color: const Color(0xFFECF2FE), // Card background
+          color: dsSurfaceAlt,
           elevation: 2,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -34,13 +34,13 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Colors.black87,
+                    color: dsTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 10),
                 Text(
                   l10n.privacyPolicyCommitmentBody,
-                  style: const TextStyle(fontSize: 16, color: Colors.black87, height: 1.5),
+                  style: const TextStyle(fontSize: 16, color: dsTextPrimary, height: 1.5),
                 ),
                 const SizedBox(height: 20),
                 Text(
@@ -48,13 +48,13 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: dsTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   l10n.privacyPolicyDataCollectionBody,
-                  style: const TextStyle(fontSize: 15, height: 1.4),
+                  style: const TextStyle(fontSize: 15, color: dsTextSecondary, height: 1.4),
                 ),
                 const SizedBox(height: 20),
                 Text(
@@ -62,13 +62,13 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: dsTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   l10n.privacyPolicyDataUsageBody,
-                  style: const TextStyle(fontSize: 15, height: 1.4),
+                  style: const TextStyle(fontSize: 15, color: dsTextSecondary, height: 1.4),
                 ),
                 const SizedBox(height: 20),
                 Text(
@@ -76,13 +76,13 @@ class PrivacyPolicyScreen extends StatelessWidget {
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
-                    color: Colors.black87,
+                    color: dsTextPrimary,
                   ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   l10n.privacyPolicySecurityBody,
-                  style: const TextStyle(fontSize: 15, height: 1.4),
+                  style: const TextStyle(fontSize: 15, color: dsTextSecondary, height: 1.4),
                 ),
               ],
             ),
