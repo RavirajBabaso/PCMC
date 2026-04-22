@@ -155,7 +155,7 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
       actions: [
         IconButton(
           tooltip: l10n.notifications,
-          icon: const Icon(Icons.notifications_none),
+          icon: const Icon(Icons.notifications_none ),
           onPressed: () => Navigator.pushNamed(context, '/notifications'),
         ),
       ],
