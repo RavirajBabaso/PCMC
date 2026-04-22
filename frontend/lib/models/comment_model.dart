@@ -12,12 +12,13 @@ class CommentAttachment {
 
   factory CommentAttachment.fromJson(Map<String, dynamic> json) {
     return CommentAttachment(
-      id: json['id'] as int,
-      filePath: json['file_path'] as String,
-      fileType: json['file_type'] as String,
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      filePath: (json['file_path'] ?? json['path'] ?? json['url'])?.toString() ?? '',
+      fileType: (json['file_type'] ?? json['type'])?.toString() ?? '',
     );
   }
 }
+
 class Comment {
   final int id;
   final int grievanceId;
@@ -39,14 +40,16 @@ class Comment {
 
   factory Comment.fromJson(Map<String, dynamic> json) {
     return Comment(
-      id: json['id'] as int,
-      grievanceId: json['grievance_id'] ,
-      userId: json['user_id'],
-      userName: json['user']?['name'] as String?,
-      commentText: json['comment_text'] ?? '',
-      createdAt: DateTime.parse(json['created_at']),
-      attachments: json['attachments'] != null
-          ? (json['attachments'] as List).map((item) => CommentAttachment.fromJson(item)).toList()
+      id: (json['id'] as num?)?.toInt() ?? 0,
+      grievanceId: (json['grievance_id'] as num?)?.toInt() ?? 0,
+      userId: (json['user_id'] as num?)?.toInt() ?? 0,
+      userName: json['user']?['name']?.toString(),
+      commentText: json['comment_text']?.toString() ?? '',
+      createdAt: DateTime.tryParse(json['created_at']?.toString() ?? '') ?? DateTime.now(),
+      attachments: json['attachments'] is List
+          ? (json['attachments'] as List)
+              .map((item) => CommentAttachment.fromJson(item as Map<String, dynamic>))
+              .toList()
           : null,
     );
   }

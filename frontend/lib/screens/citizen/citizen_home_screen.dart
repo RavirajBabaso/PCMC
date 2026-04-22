@@ -155,7 +155,7 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
       actions: [
         IconButton(
           tooltip: l10n.notifications,
-          icon: const Icon(Icons.notifications_none_rounded),
+          icon: const Icon(Icons.notifications_none),
           onPressed: () => Navigator.pushNamed(context, '/notifications'),
         ),
       ],
@@ -211,7 +211,7 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
               childAspectRatio: 1.1,
               children: [
                 _QuickActionCard(
-                  icon: Icons.add_task_rounded,
+                  icon: Icons.assignment,
                   title: l10n.submitGrievance,
                   subtitle: l10n.submitGrievanceSubtitle,
                   tint: scheme.primaryContainer,
@@ -219,7 +219,7 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                   onTap: () => Navigator.pushNamed(context, '/citizen/submit').then((_) { ref.invalidate(citizenHistoryProvider(userId!)); }),
                 ),
                 _QuickActionCard(
-                  icon: Icons.track_changes_rounded,
+                  icon: Icons.track_changes,
                   title: l10n.track_grievances,
                   subtitle: 'Follow status updates and open details fast.',
                   tint: scheme.secondaryContainer,
@@ -227,7 +227,7 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                   onTap: () => Navigator.pushNamed(context, '/citizen/track'),
                 ),
                 _QuickActionCard(
-                  icon: Icons.place_rounded,
+                  icon: Icons.location_on,
                   title: 'Nearby Help',
                   subtitle: 'Locate useful nearby civic places and services.',
                   tint: scheme.tertiaryContainer,
@@ -235,7 +235,7 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                   onTap: () => Navigator.pushNamed(context, '/citizen/nearby'),
                 ),
                 _QuickActionCard(
-                  icon: Icons.campaign_rounded,
+                  icon: Icons.campaign,
                   title: l10n.announcements,
                   subtitle: 'See local notices, campaigns, and civic updates.',
                   tint: scheme.surfaceContainerHighest,
@@ -261,28 +261,28 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                 _MetricCard(
                   title: 'Total',
                   value: '${stats.total}',
-                  icon: Icons.folder_copy_outlined,
+                  icon: Icons.folder,
                   accent: scheme.primary,
                   tone: scheme.primaryContainer,
                 ),
                 _MetricCard(
                   title: 'Active',
                   value: '${stats.active}',
-                  icon: Icons.pending_actions_rounded,
+                  icon: Icons.pending_actions,
                   accent: scheme.secondary,
                   tone: scheme.secondaryContainer,
                 ),
                 _MetricCard(
                   title: 'Resolved',
                   value: '${stats.resolved}',
-                  icon: Icons.verified_rounded,
+                  icon: Icons.check_circle,
                   accent: AppTheme.success,
                   tone: AppTheme.success.withOpacity(0.12),
                 ),
                 _MetricCard(
                   title: 'High Priority',
                   value: '${stats.highPriority}',
-                  icon: Icons.priority_high_rounded,
+                  icon: Icons.priority_high,
                   accent: AppTheme.error,
                   tone: AppTheme.error.withOpacity(0.12),
                 ),
@@ -525,7 +525,7 @@ class _HeroPanel extends StatelessWidget {
                 Expanded(
                   child: AppButton(
                     text: 'Create Complaint',
-                    icon: Icons.add_circle_outline_rounded,
+                    icon: Icons.add_circle,
                     onPressed: () => Navigator.pushNamed(context, '/citizen/submit'),
                     backgroundColor: Colors.white,
                     foregroundColor: scheme.primary,
@@ -535,7 +535,7 @@ class _HeroPanel extends StatelessWidget {
                 Expanded(
                   child: AppButton(
                     text: 'My Updates',
-                    icon: Icons.track_changes_rounded,
+                    icon: Icons.track_changes,
                     onPressed: () => Navigator.pushNamed(context, '/citizen/track'),
                     variant: AppButtonVariant.outlined,
                     backgroundColor: Colors.transparent,
@@ -839,17 +839,17 @@ class _RecentComplaintCard extends ConsumerWidget {
             runSpacing: AppSpacing.sm,
             children: [
               _MetaChip(
-                icon: Icons.schedule_rounded,
+                icon: Icons.schedule,
                 label: DateFormat('dd MMM yyyy').format(grievance.createdAt),
               ),
               if (grievance.areaName != null && grievance.areaName!.isNotEmpty)
                 _MetaChip(
-                  icon: Icons.place_outlined,
+                  icon: Icons.place,
                   label: grievance.areaName!,
                 ),
               if (grievance.priority != null && grievance.priority!.isNotEmpty)
                 _MetaChip(
-                  icon: Icons.flag_outlined,
+                  icon: Icons.flag,
                   label: grievance.priority!.toUpperCase(),
                 ),
             ],
@@ -919,7 +919,7 @@ class _SupportPanel extends StatelessWidget {
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
                   child: Icon(
-                    Icons.support_agent_rounded,
+                    Icons.support_agent,
                     color: scheme.primary,
                   ),
                 ),
@@ -945,7 +945,7 @@ class _SupportPanel extends StatelessWidget {
                 Expanded(
                   child: AppButton(
                     text: supportLabel,
-                    icon: Icons.call_outlined,
+                    icon: Icons.call,
                     onPressed: () => Navigator.pushNamed(context, '/contact-support'),
                   ),
                 ),
@@ -953,7 +953,7 @@ class _SupportPanel extends StatelessWidget {
                 Expanded(
                   child: AppButton(
                     text: 'Profile',
-                    icon: Icons.person_outline_rounded,
+                    icon: Icons.person,
                     onPressed: () => Navigator.pushNamed(context, '/profile'),
                     variant: AppButtonVariant.outlined,
                   ),
