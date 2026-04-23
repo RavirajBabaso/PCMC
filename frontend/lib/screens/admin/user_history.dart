@@ -5,6 +5,7 @@ import '../../providers/grievance_provider.dart';
 import '../../widgets/grievance_card.dart';
 import '../../widgets/empty_state.dart';
 import '../../l10n/app_localizations.dart';
+import '../../theme/app_theme.dart';
 
 class UserHistoryScreen extends ConsumerStatefulWidget {
   final int? userId;
@@ -30,7 +31,6 @@ class _UserHistoryScreenState extends ConsumerState<UserHistoryScreen> {
     _debounce = Timer(const Duration(milliseconds: 300), () {
       setState(() {
         _searchText = _searchController.text;
-       
       });
     });
   }
@@ -46,19 +46,11 @@ class _UserHistoryScreenState extends ConsumerState<UserHistoryScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
 
     if (widget.userId == null) {
       return Scaffold(
-        backgroundColor: const Color(0xFFf8fbff),
-        appBar: AppBar(
-          title: Text(l10n.userHistory),
-          backgroundColor: Colors.white,
-          elevation: 2,
-          shadowColor: Colors.black12,
-          foregroundColor: theme.primaryColor,
-          centerTitle: true,
-        ),
+        backgroundColor: dsBackground,
+        appBar: _buildAppBar(l10n.userHistory),
         body: EmptyState(
           icon: Icons.error_outline,
           title: l10n.userNotFound,
@@ -70,154 +62,251 @@ class _UserHistoryScreenState extends ConsumerState<UserHistoryScreen> {
     final history = ref.watch(citizenHistoryProvider(widget.userId!));
 
     return Scaffold(
-      backgroundColor: const Color(0xFFf8fbff),
-      appBar: AppBar(
-        title: Text(
-          l10n.userHistory,
-          style: const TextStyle(
-            fontWeight: FontWeight.w600,
-            fontSize: 20,
-          ),
-        ),
-        backgroundColor: Colors.white,
-        elevation: 2,
-        shadowColor: Colors.black12,
-        foregroundColor: theme.primaryColor,
-        centerTitle: true,
-        shape: const RoundedRectangleBorder(
-          borderRadius: BorderRadius.vertical(
-            bottom: Radius.circular(12),
-          ),
-        ),
-      ),
-      body: SingleChildScrollView( // Added to handle potential overflow
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFFf8fbff),
-                Color(0xFFe8f1ff),
-              ],
+      backgroundColor: dsBackground,
+      appBar: _buildAppBar(l10n.userHistory),
+      body: Column(
+        children: [
+          // Search Field
+          _buildSearchField(l10n),
+          Expanded(
+            child: history.when(
+              data: (grievances) {
+                final filteredGrievances = grievances.where((grievance) {
+                  final name = grievance.citizen?.name?.toLowerCase() ?? '';
+                  final searchText = _searchText.toLowerCase();
+                  return name.contains(searchText);
+                }).toList();
+
+                if (filteredGrievances.isEmpty) {
+                  return _buildEmptyState(_searchText.isEmpty);
+                }
+
+                return RefreshIndicator(
+                  color: dsAccent,
+                  backgroundColor: dsSurface,
+                  onRefresh: () async {
+                    ref.refresh(citizenHistoryProvider(widget.userId!));
+                  },
+                  child: ListView.builder(
+                    padding: const EdgeInsets.all(16),
+                    itemCount: filteredGrievances.length,
+                    itemBuilder: (context, index) => Padding(
+                      padding: const EdgeInsets.only(bottom: 12),
+                      child: GrievanceCard(grievance: filteredGrievances[index]),
+                    ),
+                  ),
+                );
+              },
+              loading: () => _buildLoadingState(l10n),
+              error: (err, stack) => _buildErrorState(l10n, err.toString()),
             ),
           ),
-          child: Column(
-            children: [
-              // Search Field
-              Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
-                child: SizedBox(
-                  height: 56.0, // Ensure sufficient height
-                  child: TextField(
-                    controller: _searchController,
-                    decoration: InputDecoration(
-                      hintText: l10n.searchByName ?? 'Search by name', // Fallback
-                      prefixIcon: const Icon(Icons.search),
-                      suffixIcon: _searchText.isNotEmpty
-                          ? IconButton(
-                              icon: const Icon(Icons.clear),
-                              onPressed: () {
-                                _searchController.clear();
-                                setState(() {
-                                  _searchText = '';
-                                 
-                                });
-                              },
-                            )
-                          : null,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(8),
-                        borderSide: const BorderSide(color: Colors.blue), // Debug border
-                      ),
-                      filled: true,
-                      fillColor: Colors.white,
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: history.when(
-                  data: (grievances) {
-                    // Filter grievances based on search text
-                    final filteredGrievances = grievances.where((grievance) {
-                      final name = grievance.citizen?.name?.toLowerCase() ?? '';
-                      final searchText = _searchText.toLowerCase();
-                      // Debugging print to check data
-                     
-                      return name.contains(searchText);
-                    }).toList();
+        ],
+      ),
+    );
+  }
 
-                    if (filteredGrievances.isEmpty) {
-                      return Padding(
-                        padding: const EdgeInsets.all(20.0),
-                        child: EmptyState(
-                          icon: _searchText.isEmpty ? Icons.history_toggle_off : Icons.search_off,
-                          title: _searchText.isEmpty ? l10n.noGrievancesFound : l10n.noResultsFound,
-                          message: _searchText.isEmpty ? l10n.noGrievancesMessage : l10n.noMatchingGrievances,
-                        ),
-                      );
-                    }
+  PreferredSizeWidget _buildAppBar(String title) {
+    return AppBar(
+      title: Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 20,
+          color: dsTextPrimary,
+        ),
+      ),
+      backgroundColor: dsSurface,
+      foregroundColor: dsAccent,
+      elevation: 0,
+      centerTitle: true,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(1),
+        child: Container(height: 1, color: dsBorder),
+      ),
+    );
+  }
 
-                    return RefreshIndicator(
-                      backgroundColor: Colors.white,
-                      color: theme.primaryColor,
-                      onRefresh: () async {
-                        ref.refresh(citizenHistoryProvider(widget.userId!));
-                      },
-                      child: ListView.builder(
-                        padding: const EdgeInsets.all(16),
-                        itemCount: filteredGrievances.length,
-                        itemBuilder: (context, index) => Container(
-                          margin: const EdgeInsets.only(bottom: 16),
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(16),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 8,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: GrievanceCard(grievance: filteredGrievances[index]),
-                        ),
-                      ),
-                    );
+  Widget _buildSearchField(AppLocalizations l10n) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      decoration: BoxDecoration(
+        color: dsSurface,
+        border: Border(
+          bottom: BorderSide(color: dsBorder, width: 1),
+        ),
+      ),
+      child: TextField(
+        controller: _searchController,
+        style: const TextStyle(color: dsTextPrimary),
+        decoration: InputDecoration(
+          hintText: l10n.searchByName ?? 'Search by name',
+          hintStyle: const TextStyle(color: dsTextSecondary),
+          prefixIcon: const Icon(Icons.search, color: dsAccent),
+          suffixIcon: _searchText.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear, color: dsTextSecondary),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {
+                      _searchText = '';
+                    });
                   },
-                  loading: () => Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const CircularProgressIndicator(
-                          strokeWidth: 3,
-                          valueColor: AlwaysStoppedAnimation<Color>(Colors.blue),
-                        ),
-                        const SizedBox(height: 16),
-                        Text(
-                          l10n.loading,
-                          style: const TextStyle(
-                            color: Colors.black54,
-                            fontSize: 16,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  error: (err, stack) => Padding(
-                    padding: const EdgeInsets.all(20.0),
-                    child: EmptyState(
-                      icon: Icons.error_outline_rounded,
-                      title: l10n.error,
-                      message: '${l10n.error}: $err',
-                    ),
-                  ),
+                )
+              : null,
+          filled: true,
+          fillColor: dsSurfaceAlt,
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide.none,
+          ),
+          enabledBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: BorderSide(color: dsBorder),
+          ),
+          focusedBorder: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+            borderSide: const BorderSide(color: dsAccent, width: 2),
+          ),
+          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildEmptyState(bool isSearchEmpty) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: dsAccent.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                isSearchEmpty ? Icons.history_toggle_off : Icons.search_off,
+                color: dsAccent,
+                size: 40,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              isSearchEmpty ? 'No grievances found' : 'No results found',
+              style: const TextStyle(
+                color: dsTextPrimary,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              isSearchEmpty 
+                ? 'No grievances have been submitted by this user yet.'
+                : 'Try adjusting your search or clear the filter.',
+              style: const TextStyle(
+                color: dsTextSecondary,
+                fontSize: 14,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState(AppLocalizations l10n) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          const CircularProgressIndicator(
+            strokeWidth: 3,
+            color: dsAccent,
+          ),
+          const SizedBox(height: 16),
+          Text(
+            l10n.loading,
+            style: const TextStyle(
+              color: dsTextSecondary,
+              fontSize: 14,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(AppLocalizations l10n, String error) {
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.all(24),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: _danger.withOpacity(0.12),
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.error_outline_rounded,
+                color: _danger,
+                size: 40,
+              ),
+            ),
+            const SizedBox(height: 16),
+            Text(
+              l10n.error,
+              style: const TextStyle(
+                color: dsTextPrimary,
+                fontSize: 18,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              error,
+              style: const TextStyle(
+                color: dsTextSecondary,
+                fontSize: 14,
+                height: 1.5,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 20),
+            ElevatedButton.icon(
+              onPressed: () {
+                ref.refresh(citizenHistoryProvider(widget.userId!));
+              },
+              icon: const Icon(Icons.refresh_rounded),
+              label: const Text('Retry'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: dsAccent,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 }
+
+// Status colors matching theme
+const Color _success = Color(0xFF10B981);
+const Color _warning = Color(0xFFF59E0B);
+const Color _danger = Color(0xFFEF4444);
+const Color _purple = Color(0xFF8B5CF6);

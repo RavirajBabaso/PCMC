@@ -11,6 +11,12 @@ import 'package:main_ui/widgets/loading_indicator.dart';
 import 'package:main_ui/layouts/app_shell.dart';
 import 'package:main_ui/theme/app_theme.dart';
 
+// Status colors matching TrackGrievance
+const Color _success = Color(0xFF10B981);
+const Color _warning = Color(0xFFF59E0B);
+const Color _danger = Color(0xFFEF4444);
+const Color _purple = Color(0xFF8B5CF6);
+
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
 
@@ -81,6 +87,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
           content: Text('Settings saved successfully'),
           behavior: SnackBarBehavior.floating,
+          backgroundColor: _success,
         ));
       }
     } catch (e) {
@@ -88,7 +95,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(SnackBar(
           content: Text('Failed to save settings: $e'),
           behavior: SnackBarBehavior.floating,
-          backgroundColor: AppTheme.error,
+          backgroundColor: _danger,
         ));
       }
     } finally {
@@ -99,7 +106,6 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n   = AppLocalizations.of(context)!;
-    final theme  = Theme.of(context);
     final locale = ref.watch(localeNotifierProvider);
 
     return AppShell(
@@ -107,7 +113,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
       currentRoute: '/settings',
       bottomNavCurrentRoute: '/profile',
       appBarBackgroundColor: dsSurface,
-      appBarForegroundColor: dsTextPrimary,
+      appBarForegroundColor: dsAccent,
       child: _isLoading
           ? const LoadingIndicator()
           : SingleChildScrollView(
@@ -122,35 +128,29 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                   children: [
 
                     // ── Account details ─────────────────────────────────
-                    _SectionHeader(title: 'Account Details', icon: Icons.person_outline_rounded),
+                    const _SectionHeader(title: 'Account Details', icon: Icons.person_outline_rounded),
                     _SettingsCard(children: [
-                      TextFormField(
+                      _buildFormField(
                         controller: _nameController,
-                        decoration: const InputDecoration(
-                          labelText: 'Name',
-                          prefixIcon: Icon(Icons.badge_outlined),
-                        ),
+                        labelText: 'Name',
+                        prefixIcon: Icons.badge_outlined,
                         validator: validateRequired,
                         textCapitalization: TextCapitalization.words,
                       ),
                       const SizedBox(height: AppSpacing.base),
-                      TextFormField(
+                      _buildFormField(
                         controller: _emailController,
-                        decoration: const InputDecoration(
-                          labelText: 'Email',
-                          prefixIcon: Icon(Icons.email_outlined),
-                        ),
+                        labelText: 'Email',
+                        prefixIcon: Icons.email_outlined,
                         validator: validateEmail,
                         keyboardType: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: AppSpacing.base),
-                      TextFormField(
+                      _buildFormField(
                         controller: _passwordController,
-                        decoration: const InputDecoration(
-                          labelText: 'New Password (optional)',
-                          prefixIcon: Icon(Icons.lock_outline_rounded),
-                          hintText: 'Leave blank to keep current',
-                        ),
+                        labelText: 'New Password (optional)',
+                        prefixIcon: Icons.lock_outline_rounded,
+                        hintText: 'Leave blank to keep current',
                         obscureText: true,
                       ),
                     ]),
@@ -162,13 +162,16 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     _SettingsCard(children: [
                       SwitchListTile(
                         contentPadding: EdgeInsets.zero,
-                        title: Text(l10n.enableNotifications,
-                            style: theme.textTheme.bodyLarge),
-                        subtitle: Text('Receive push notifications for updates',
-                            style: theme.textTheme.bodySmall),
+                        title: const Text('Enable Notifications',
+                            style: TextStyle(color: dsTextPrimary, fontSize: 14)),
+                        subtitle: const Text('Receive push notifications for updates',
+                            style: TextStyle(color: dsTextSecondary, fontSize: 12)),
                         value: _notificationsEnabled,
                         onChanged: (v) => setState(() => _notificationsEnabled = v),
-                        activeColor: theme.colorScheme.primary,
+                        activeColor: dsAccent,
+                        activeTrackColor: dsAccent.withOpacity(0.4),
+                        inactiveThumbColor: dsTextSecondary,
+                        inactiveTrackColor: dsBorder,
                       ),
                     ]),
 
@@ -177,31 +180,45 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                     // ── Language ─────────────────────────────────────────
                     _SectionHeader(title: l10n.language, icon: Icons.language_outlined),
                     _SettingsCard(children: [
-                      DropdownButtonFormField<Locale>(
-                        value: locale,
-                        decoration: const InputDecoration(
-                          labelText: 'App Language',
-                          prefixIcon: Icon(Icons.translate_rounded),
-                          border: InputBorder.none,
-                          enabledBorder: InputBorder.none,
-                          focusedBorder: InputBorder.none,
-                          filled: false,
-                        ),
-                        items: const [
-                          DropdownMenuItem(value: Locale('en'), child: Text('English')),
-                          DropdownMenuItem(value: Locale('mr'), child: Text('मराठी (Marathi)')),
-                          DropdownMenuItem(value: Locale('hi'), child: Text('हिन्दी (Hindi)')),
-                        ],
-                        onChanged: (v) {
-                          if (v != null) ref.read(localeNotifierProvider.notifier).setLocale(v);
-                        },
-                      ),
+                     Container(
+  decoration: BoxDecoration(
+    color: dsSurfaceAlt,
+    borderRadius: BorderRadius.circular(12),
+    border: Border.all(color: dsBorder),
+  ),
+  child: DropdownButtonHideUnderline(
+    child: DropdownButtonFormField<Locale>(
+      value: locale,
+      decoration: const InputDecoration(
+        labelText: 'App Language',
+        labelStyle: TextStyle(color: dsTextSecondary),
+        prefixIcon: Icon(Icons.translate_rounded, color: dsAccent),
+        border: InputBorder.none,
+        enabledBorder: InputBorder.none,
+        focusedBorder: InputBorder.none,
+        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      ),
+      dropdownColor: dsSurface,
+      style: const TextStyle(color: dsTextPrimary), // This sets the selected item text color
+      iconEnabledColor: dsAccent,
+      isExpanded: true,
+      items: const [
+        DropdownMenuItem(value: Locale('en'), child: Text('English', style: TextStyle(color: dsTextPrimary))),
+        DropdownMenuItem(value: Locale('mr'), child: Text('मराठी (Marathi)', style: TextStyle(color: dsTextPrimary))),
+        DropdownMenuItem(value: Locale('hi'), child: Text('हिन्दी (Hindi)', style: TextStyle(color: dsTextPrimary))),
+      ],
+      onChanged: (v) {
+        if (v != null) ref.read(localeNotifierProvider.notifier).setLocale(v);
+      },
+    ),
+  ),
+),
                     ]),
 
                     const SizedBox(height: AppSpacing.xl),
 
                     // ── Privacy & Security ────────────────────────────────
-                    _SectionHeader(title: l10n.privacySecurity, icon: Icons.security_outlined),
+                    const _SectionHeader(title: 'Privacy & Security', icon: Icons.security_outlined),
                     _NavCard(items: [
                       _NavItem(
                         icon: Icons.privacy_tip_outlined,
@@ -261,13 +278,63 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                       },
                       fullWidth: true,
                       variant: AppButtonVariant.outlined,
-                      foregroundColor: AppTheme.error,
+                      foregroundColor: _danger,
                       icon: Icons.logout_rounded,
                     ),
                   ],
                 ),
               ),
             ),
+    );
+  }
+
+  Widget _buildFormField({
+    required TextEditingController controller,
+    required String labelText,
+    required IconData prefixIcon,
+    String? Function(String?)? validator,
+    TextInputType? keyboardType,
+    TextCapitalization textCapitalization = TextCapitalization.none,
+    String? hintText,
+    bool obscureText = false,
+  }) {
+    return TextFormField(
+      controller: controller,
+      style: const TextStyle(color: dsTextPrimary),
+      decoration: InputDecoration(
+        labelText: labelText,
+        labelStyle: const TextStyle(color: dsTextSecondary),
+        hintText: hintText,
+        hintStyle: const TextStyle(color: dsTextSecondary),
+        prefixIcon: Icon(prefixIcon, color: dsAccent),
+        filled: true,
+        fillColor: dsSurfaceAlt,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: dsBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: dsAccent, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _danger),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _danger, width: 2),
+        ),
+        errorStyle: const TextStyle(color: _danger, fontSize: 12),
+      ),
+      keyboardType: keyboardType,
+      textCapitalization: textCapitalization,
+      obscureText: obscureText,
+      validator: validator,
     );
   }
 }
@@ -283,17 +350,17 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: theme.colorScheme.primary),
+          Icon(icon, size: 16, color: dsAccent),
           const SizedBox(width: AppSpacing.sm),
           Text(
             title,
-            style: theme.textTheme.titleSmall?.copyWith(
-              color: theme.colorScheme.primary,
+            style: const TextStyle(
+              color: dsAccent,
+              fontSize: 13,
               fontWeight: FontWeight.w700,
               letterSpacing: 0.5,
             ),
@@ -313,9 +380,16 @@ class _SettingsCard extends StatelessWidget {
     return Container(
       padding: AppSpacing.card,
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: Theme.of(context).dividerColor),
+        color: dsSurface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: dsBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -333,9 +407,16 @@ class _NavCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        color: Theme.of(context).cardColor,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: Theme.of(context).dividerColor),
+        color: dsSurface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: dsBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Column(
         children: items.asMap().entries.map((entry) {
@@ -344,12 +425,13 @@ class _NavCard extends StatelessWidget {
           return Column(
             children: [
               ListTile(
-                leading: Icon(item.icon, size: 20, color: Theme.of(context).colorScheme.primary),
-                title: Text(item.title, style: Theme.of(context).textTheme.bodyLarge),
-                trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                leading: Icon(item.icon, size: 20, color: dsAccent),
+                title: Text(item.title, style: const TextStyle(color: dsTextPrimary, fontSize: 14)),
+                trailing: const Icon(Icons.chevron_right_rounded, size: 20, color: dsTextSecondary),
                 onTap: item.onTap,
+                tileColor: Colors.transparent,
               ),
-              if (!isLast) const Divider(height: 1, indent: 56),
+              if (!isLast) const Divider(height: 1, indent: 56, color: dsBorder),
             ],
           );
         }).toList(),

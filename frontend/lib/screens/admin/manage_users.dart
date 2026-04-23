@@ -34,13 +34,13 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
 
   // ─────────── Role UI helpers ─────────────────────────────────────────────
 
-  Color _roleColor(ColorScheme s, String? role) {
+  Color _roleColor(String? role) {
     switch (role?.toUpperCase()) {
-      case 'ADMIN':        return AppTheme.error;
-      case 'SUPER_USER':   return const Color(0xFF7C3AED);
-      case 'MEMBER_HEAD':  return AppTheme.warning;
-      case 'FIELD_STAFF':  return s.secondary;
-      default:             return s.primary; // CITIZEN
+      case 'ADMIN':        return _danger;
+      case 'SUPER_USER':   return _purple;
+      case 'MEMBER_HEAD':  return _warning;
+      case 'FIELD_STAFF':  return dsAccent;
+      default:             return _success; // CITIZEN
     }
   }
 
@@ -65,7 +65,8 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlg) => AlertDialog(
-          title: Text(l10n.addUser),
+          backgroundColor: dsSurface,
+          title: Text(l10n.addUser, style: const TextStyle(color: dsTextPrimary)),
           content: SizedBox(
             width: double.maxFinite,
             child: SingleChildScrollView(
@@ -74,29 +75,33 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextFormField(
-                      decoration: const InputDecoration(labelText: 'Name', prefixIcon: Icon(Icons.person_outline)),
+                    _buildDialogTextField(
+                      labelText: 'Name',
+                      prefixIcon: Icons.person_outline,
                       validator: validateRequired,
                       onChanged: (v) => name = v,
                       textCapitalization: TextCapitalization.words,
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    TextFormField(
-                      decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email_outlined)),
+                    _buildDialogTextField(
+                      labelText: 'Email',
+                      prefixIcon: Icons.email_outlined,
                       validator: validateEmail,
                       keyboardType: TextInputType.emailAddress,
                       onChanged: (v) => email = v,
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    TextFormField(
-                      decoration: const InputDecoration(labelText: 'Phone', prefixIcon: Icon(Icons.phone_outlined)),
+                    _buildDialogTextField(
+                      labelText: 'Phone',
+                      prefixIcon: Icons.phone_outlined,
                       validator: validateRequired,
                       keyboardType: TextInputType.phone,
                       onChanged: (v) => phone = v,
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    TextFormField(
-                      decoration: const InputDecoration(labelText: 'Password', prefixIcon: Icon(Icons.lock_outline)),
+                    _buildDialogTextField(
+                      labelText: 'Password',
+                      prefixIcon: Icons.lock_outline,
                       validator: validateRequired,
                       obscureText: true,
                       onChanged: (v) => password = v,
@@ -104,12 +109,30 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                     const SizedBox(height: AppSpacing.md),
                     DropdownButtonFormField<String>(
                       value: role,
-                      decoration: const InputDecoration(labelText: 'Role'),
+                      dropdownColor: dsSurface,
+                      style: const TextStyle(color: dsTextPrimary),
+                      decoration: InputDecoration(
+                        labelText: 'Role',
+                        labelStyle: const TextStyle(color: dsTextSecondary),
+                        filled: true,
+                        fillColor: dsSurfaceAlt,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: dsBorder),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: dsAccent, width: 2),
+                        ),
+                      ),
                       items: const [
-                        DropdownMenuItem(value: 'CITIZEN',     child: Text('Citizen')),
-                        DropdownMenuItem(value: 'FIELD_STAFF', child: Text('Field Staff')),
-                        DropdownMenuItem(value: 'MEMBER_HEAD', child: Text('Member Head')),
-                        // ADMIN intentionally excluded — admins are created via backend only
+                        DropdownMenuItem(value: 'CITIZEN',     child: Text('Citizen', style: TextStyle(color: dsTextPrimary))),
+                        DropdownMenuItem(value: 'FIELD_STAFF', child: Text('Field Staff', style: TextStyle(color: dsTextPrimary))),
+                        DropdownMenuItem(value: 'MEMBER_HEAD', child: Text('Member Head', style: TextStyle(color: dsTextPrimary))),
                       ],
                       onChanged: (v) => setDlg(() => role = v ?? 'CITIZEN'),
                     ),
@@ -121,6 +144,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(ctx),
+              style: TextButton.styleFrom(foregroundColor: dsTextSecondary),
               child: Text(l10n.cancel),
             ),
             ElevatedButton(
@@ -136,11 +160,61 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                   'department_id': departmentId,
                 });
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: dsAccent,
+                foregroundColor: Colors.white,
+              ),
               child: Text(l10n.addUser),
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildDialogTextField({
+    required String labelText,
+    required IconData prefixIcon,
+    required String? Function(String?)? validator,
+    TextInputType keyboardType = TextInputType.text,
+    TextCapitalization textCapitalization = TextCapitalization.none,
+    bool obscureText = false,
+    void Function(String)? onChanged,
+  }) {
+    return TextFormField(
+      style: const TextStyle(color: dsTextPrimary),
+      decoration: InputDecoration(
+        labelText: labelText,
+        labelStyle: const TextStyle(color: dsTextSecondary),
+        prefixIcon: Icon(prefixIcon, color: dsAccent),
+        filled: true,
+        fillColor: dsSurfaceAlt,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: dsBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: dsAccent, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _danger),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: _danger, width: 2),
+        ),
+      ),
+      keyboardType: keyboardType,
+      textCapitalization: textCapitalization,
+      obscureText: obscureText,
+      validator: validator,
+      onChanged: onChanged,
     );
   }
 
@@ -155,7 +229,8 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
       context: context,
       builder: (ctx) => StatefulBuilder(
         builder: (ctx, setDlg) => AlertDialog(
-          title: Text(l10n.editUser),
+          backgroundColor: dsSurface,
+          title: Text(l10n.editUser, style: const TextStyle(color: dsTextPrimary)),
           content: SizedBox(
             width: double.maxFinite,
             child: SingleChildScrollView(
@@ -164,28 +239,46 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    TextFormField(
-                      controller: nameCtrl,
-                      decoration: const InputDecoration(labelText: 'Name', prefixIcon: Icon(Icons.person_outline)),
+                    _buildDialogTextField(
+                      labelText: 'Name',
+                      prefixIcon: Icons.person_outline,
                       validator: validateRequired,
                       textCapitalization: TextCapitalization.words,
                     ),
                     const SizedBox(height: AppSpacing.md),
-                    TextFormField(
-                      controller: emailCtrl,
-                      decoration: const InputDecoration(labelText: 'Email', prefixIcon: Icon(Icons.email_outlined)),
+                    _buildDialogTextField(
+                      labelText: 'Email',
+                      prefixIcon: Icons.email_outlined,
                       validator: validateEmail,
                       keyboardType: TextInputType.emailAddress,
                     ),
                     const SizedBox(height: AppSpacing.md),
                     DropdownButtonFormField<String>(
                       value: role,
-                      decoration: const InputDecoration(labelText: 'Role'),
+                      dropdownColor: dsSurface,
+                      style: const TextStyle(color: dsTextPrimary),
+                      decoration: InputDecoration(
+                        labelText: 'Role',
+                        labelStyle: const TextStyle(color: dsTextSecondary),
+                        filled: true,
+                        fillColor: dsSurfaceAlt,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide.none,
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: BorderSide(color: dsBorder),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: dsAccent, width: 2),
+                        ),
+                      ),
                       items: const [
-                        DropdownMenuItem(value: 'CITIZEN',     child: Text('Citizen')),
-                        DropdownMenuItem(value: 'FIELD_STAFF', child: Text('Field Staff')),
-                        DropdownMenuItem(value: 'MEMBER_HEAD', child: Text('Member Head')),
-                        // ADMIN intentionally excluded — admins are created via backend only
+                        DropdownMenuItem(value: 'CITIZEN',     child: Text('Citizen', style: TextStyle(color: dsTextPrimary))),
+                        DropdownMenuItem(value: 'FIELD_STAFF', child: Text('Field Staff', style: TextStyle(color: dsTextPrimary))),
+                        DropdownMenuItem(value: 'MEMBER_HEAD', child: Text('Member Head', style: TextStyle(color: dsTextPrimary))),
                       ],
                       onChanged: (v) => setDlg(() => role = v ?? 'CITIZEN'),
                     ),
@@ -195,7 +288,11 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(ctx), child: Text(l10n.cancel)),
+            TextButton(
+              onPressed: () => Navigator.pop(ctx),
+              style: TextButton.styleFrom(foregroundColor: dsTextSecondary),
+              child: Text(l10n.cancel),
+            ),
             ElevatedButton(
               onPressed: () async {
                 if (!formKey.currentState!.validate()) return;
@@ -210,6 +307,10 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                   },
                 );
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: dsAccent,
+                foregroundColor: Colors.white,
+              ),
               child: Text(l10n.update),
             ),
           ],
@@ -224,12 +325,20 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(l10n.deleteUser),
-        content: Text(l10n.deleteUserConfirmation),
+        backgroundColor: dsSurface,
+        title: Text(l10n.deleteUser, style: const TextStyle(color: dsTextPrimary)),
+        content: Text(l10n.deleteUserConfirmation, style: const TextStyle(color: dsTextSecondary)),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx, false), child: Text(l10n.cancel)),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            style: TextButton.styleFrom(foregroundColor: dsTextSecondary),
+            child: Text(l10n.cancel),
+          ),
           ElevatedButton(
-            style: ElevatedButton.styleFrom(backgroundColor: AppTheme.error),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: _danger,
+              foregroundColor: Colors.white,
+            ),
             onPressed: () => Navigator.pop(ctx, true),
             child: Text(l10n.delete),
           ),
@@ -245,7 +354,6 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
   Widget build(BuildContext context) {
     final l10n        = AppLocalizations.of(context)!;
     final users       = ref.watch(usersProvider);
-    final theme       = Theme.of(context);
     final currentUser = ref.watch(userNotifierProvider);
 
     return AppShell(
@@ -253,7 +361,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
       currentRoute: '/admin/users',
       actions: [
         IconButton(
-          icon: const Icon(Icons.refresh_rounded),
+          icon: const Icon(Icons.refresh_rounded, color: dsAccent),
           onPressed: () => ref.read(usersProvider.notifier).fetchUsers(),
           tooltip: l10n.retry,
         ),
@@ -261,6 +369,8 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
       floatingActionButton: FloatingActionButton(
         onPressed: _showAddUserDialog,
         tooltip: l10n.addUser,
+        backgroundColor: dsAccent,
+        foregroundColor: Colors.white,
         child: const Icon(Icons.person_add_outlined),
       ),
       child: Column(
@@ -271,20 +381,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
               AppSpacing.base, AppSpacing.base,
               AppSpacing.base, AppSpacing.xs,
             ),
-            child: TextField(
-              controller: _searchController,
-              decoration: InputDecoration(
-                hintText: l10n.searchByNameOrEmail,
-                prefixIcon: const Icon(Icons.search_rounded),
-                suffixIcon: _searchController.text.isNotEmpty
-                    ? IconButton(
-                        icon: const Icon(Icons.clear_rounded),
-                        onPressed: () => setState(() => _searchController.clear()),
-                      )
-                    : null,
-              ),
-              onChanged: (_) => setState(() {}),
-            ),
+            child: _buildSearchField(l10n),
           ),
 
           // ── List ──────────────────────────────────────────────────────
@@ -299,18 +396,50 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                       onPressed: _showAddUserDialog,
                     ),
                   )
-                : _buildList(users, currentUser, theme, l10n),
+                : _buildList(users, currentUser, l10n),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildList(List<User> users, User? currentUser, ThemeData theme, AppLocalizations l10n) {
-    final query   = _searchController.text.toLowerCase();
-    // Exclude the currently logged-in admin from the list
+  Widget _buildSearchField(AppLocalizations l10n) {
+    return TextField(
+      controller: _searchController,
+      style: const TextStyle(color: dsTextPrimary),
+      decoration: InputDecoration(
+        hintText: l10n.searchByNameOrEmail,
+        hintStyle: const TextStyle(color: dsTextSecondary),
+        prefixIcon: const Icon(Icons.search_rounded, color: dsAccent),
+        suffixIcon: _searchController.text.isNotEmpty
+            ? IconButton(
+                icon: const Icon(Icons.clear_rounded, color: dsTextSecondary),
+                onPressed: () => setState(() => _searchController.clear()),
+              )
+            : null,
+        filled: true,
+        fillColor: dsSurfaceAlt,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: BorderSide(color: dsBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: dsAccent, width: 2),
+        ),
+      ),
+      onChanged: (_) => setState(() {}),
+    );
+  }
+
+  Widget _buildList(List<User> users, User? currentUser, AppLocalizations l10n) {
+    final query = _searchController.text.toLowerCase();
     final filtered = users.where((u) {
-      if (u.id == currentUser?.id) return false;  // hide self
+      if (u.id == currentUser?.id) return false;
       if (query.isEmpty) return true;
       return (u.name?.toLowerCase().contains(query) ?? false) ||
              (u.email?.toLowerCase().contains(query) ?? false);
@@ -340,7 +469,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
       itemBuilder: (_, i) => _UserCard(
         user: filtered[i],
         isSelf: currentUser?.id == filtered[i].id,
-        roleColor: _roleColor(theme.colorScheme, filtered[i].role),
+        roleColor: _roleColor(filtered[i].role),
         roleLabel: _roleLabel(filtered[i].role, l10n),
         onEdit: () => _showEditUserDialog(filtered[i]),
         onDelete: () => _confirmDelete(filtered[i].id),
@@ -373,42 +502,69 @@ class _UserCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme   = Theme.of(context);
-    final primary = theme.colorScheme.primary;
-
     return Container(
       decoration: BoxDecoration(
-        color: theme.cardColor,
-        borderRadius: BorderRadius.circular(AppRadius.lg),
-        border: Border.all(color: theme.dividerColor),
+        color: dsSurface,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: dsBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: ListTile(
         contentPadding: const EdgeInsets.fromLTRB(AppSpacing.base, AppSpacing.sm, AppSpacing.sm, AppSpacing.sm),
-        leading: CircleAvatar(
-          backgroundColor: primary.withOpacity(0.12),
-          child: Text(
-            (user.name?.isNotEmpty == true ? user.name![0] : '?').toUpperCase(),
-            style: TextStyle(color: primary, fontWeight: FontWeight.w700),
+        leading: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: roleColor.withOpacity(0.12),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Center(
+            child: Text(
+              (user.name?.isNotEmpty == true ? user.name![0] : '?').toUpperCase(),
+              style: TextStyle(
+                color: roleColor,
+                fontWeight: FontWeight.w700,
+                fontSize: 18,
+              ),
+            ),
           ),
         ),
-        title: Text(user.name ?? '', style: theme.textTheme.titleMedium),
+        title: Text(
+          user.name ?? '',
+          style: const TextStyle(
+            color: dsTextPrimary,
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
         subtitle: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const SizedBox(height: 2),
-            Text(user.email ?? l10n.noEmail, style: theme.textTheme.bodySmall),
+            Text(
+              user.email ?? l10n.noEmail,
+              style: const TextStyle(color: dsTextSecondary, fontSize: 13),
+            ),
             const SizedBox(height: 6),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
                 color: roleColor.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(AppRadius.full),
+                borderRadius: BorderRadius.circular(999),
               ),
               child: Text(
                 roleLabel,
                 style: TextStyle(
-                  color: roleColor, fontSize: 10,
-                  fontWeight: FontWeight.w700, letterSpacing: 0.5,
+                  color: roleColor,
+                  fontSize: 10,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 0.5,
                 ),
               ),
             ),
@@ -418,14 +574,14 @@ class _UserCard extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             IconButton(
-              icon: Icon(Icons.edit_outlined, color: primary, size: 20),
+              icon: const Icon(Icons.edit_outlined, color: dsAccent, size: 20),
               onPressed: onEdit,
               tooltip: l10n.editUser,
             ),
             IconButton(
               icon: Icon(
                 Icons.delete_outline_rounded,
-                color: isSelf ? theme.disabledColor : AppTheme.error,
+                color: isSelf ? dsTextSecondary.withOpacity(0.5) : _danger,
                 size: 20,
               ),
               onPressed: isSelf ? null : onDelete,
@@ -437,3 +593,9 @@ class _UserCard extends StatelessWidget {
     );
   }
 }
+
+// Status colors matching theme
+const Color _success = Color(0xFF10B981);
+const Color _warning = Color(0xFFF59E0B);
+const Color _danger = Color(0xFFEF4444);
+const Color _purple = Color(0xFF8B5CF6);

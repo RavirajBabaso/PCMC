@@ -19,6 +19,12 @@ import 'package:main_ui/widgets/app/app_card.dart';
 import 'package:main_ui/widgets/app/status_badge.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 
+// Status colors matching TrackGrievance
+const Color _success = Color(0xFF10B981);
+const Color _warning = Color(0xFFF59E0B);
+const Color _danger = Color(0xFFEF4444);
+const Color _purple = Color(0xFF8B5CF6);
+
 class CitizenHomeScreen extends ConsumerStatefulWidget {
   const CitizenHomeScreen({super.key});
 
@@ -97,8 +103,6 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context)!;
     final currentUser =
         ref.watch(authProvider) ?? ref.watch(userNotifierProvider);
@@ -112,31 +116,45 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
       return AppShell(
         title: l10n.home,
         currentRoute: '/citizen/home',
-        backgroundColor: theme.scaffoldBackgroundColor,
         child: Center(
           child: Padding(
             padding: AppSpacing.screen,
-            child: AppCard(
+            child: _buildCard(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SvgPicture.asset(
-                    'assets/icons/lock.svg',
-                    width: 24,
-                    height: 24,
-                    colorFilter: ColorFilter.mode(scheme.primary, BlendMode.srcIn),
+                  Container(
+                    width: 56,
+                    height: 56,
+                    decoration: BoxDecoration(
+                      color: dsAccent.withOpacity(0.12),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.lock_person_rounded,
+                      color: dsAccent,
+                      size: 28,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.base),
                   Text(
                     l10n.please_login,
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.titleMedium,
+                    style: const TextStyle(
+                      color: dsTextPrimary,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.md),
-                  Text(
+                  const Text(
                     'Sign in to view your citizen dashboard, recent complaints, and local updates.',
                     textAlign: TextAlign.center,
-                    style: theme.textTheme.bodyMedium,
+                    style: TextStyle(
+                      color: dsTextSecondary,
+                      fontSize: 14,
+                      height: 1.5,
+                    ),
                   ),
                   const SizedBox(height: AppSpacing.xl),
                   AppButton(
@@ -161,22 +179,17 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
     return AppShell(
       title: l10n.home,
       currentRoute: '/citizen/home',
-      backgroundColor: theme.scaffoldBackgroundColor,
       actions: [
         IconButton(
           tooltip: l10n.notifications,
-          icon: SvgPicture.asset(
-            'assets/icons/notification.svg',
-            width: 24,
-            height: 24,
-            colorFilter: ColorFilter.mode(scheme.primary, BlendMode.srcIn),
-          ),
+          icon: const Icon(Icons.notifications_outlined, color: dsAccent),
           onPressed: () => Navigator.pushNamed(context, '/notifications'),
         ),
       ],
       child: RefreshIndicator(
         onRefresh: () => _refreshHome(currentUser),
-        color: scheme.primary,
+        color: dsAccent,
+        backgroundColor: dsSurface,
         child: ListView(
           physics: const AlwaysScrollableScrollPhysics(
             parent: BouncingScrollPhysics(),
@@ -214,7 +227,7 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
             ),
             if ((adsAsync.valueOrNull ?? const <Advertisement>[]).isNotEmpty)
               const SizedBox(height: AppSpacing.xl),
-            _SectionHeader(
+            const _SectionHeader(
               title: 'Quick actions',
               subtitle: 'Jump straight to the things citizens use most.',
             ),
@@ -228,64 +241,33 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
               childAspectRatio: 1.1,
               children: [
                 _QuickActionCard(
-                  icon: SvgPicture.asset(
-                    'assets/icons/document.svg',
-                    width: 24,
-                    height: 24,
-                    colorFilter: ColorFilter.mode(scheme.primary, BlendMode.srcIn),
-                  ),
+                  icon: Icons.add_circle_outline_rounded,
                   title: l10n.submitGrievance,
                   subtitle: l10n.submitGrievanceSubtitle,
-                  tint: scheme.primaryContainer,
-                  accent: scheme.primary,
-                  onTap: () =>
-                      Navigator.pushNamed(context, '/citizen/submit').then((_) {
-                        ref.invalidate(citizenHistoryProvider(userId!));
-                      }),
+                  accent: dsAccent,
                 ),
                 _QuickActionCard(
-                  icon: SvgPicture.asset(
-                    'assets/icons/activity.svg',
-                    width: 24,
-                    height: 24,
-                    colorFilter: ColorFilter.mode(scheme.secondary, BlendMode.srcIn),
-                  ),
+                  icon: Icons.track_changes_rounded,
                   title: l10n.track_grievances,
                   subtitle: 'Follow status updates and open details fast.',
-                  tint: scheme.secondaryContainer,
-                  accent: scheme.secondary,
-                  onTap: () => Navigator.pushNamed(context, '/citizen/track'),
+                  accent: _warning,
                 ),
                 _QuickActionCard(
-                  icon: SvgPicture.asset(
-                    'assets/icons/location.svg',
-                    width: 24,
-                    height: 24,
-                    colorFilter: ColorFilter.mode(scheme.tertiary, BlendMode.srcIn),
-                  ),
+                  icon: Icons.location_on_rounded,
                   title: 'Nearby Help',
                   subtitle: 'Locate useful nearby civic places and services.',
-                  tint: scheme.tertiaryContainer,
-                  accent: scheme.tertiary,
-                  onTap: () => Navigator.pushNamed(context, '/citizen/nearby'),
+                  accent: _purple,
                 ),
                 _QuickActionCard(
-                  icon: SvgPicture.asset(
-                    'assets/icons/volume_high.svg',
-                    width: 24,
-                    height: 24,
-                    colorFilter: ColorFilter.mode(scheme.onSurfaceVariant, BlendMode.srcIn),
-                  ),
+                  icon: Icons.campaign_rounded,
                   title: l10n.announcements,
                   subtitle: 'See local notices, campaigns, and civic updates.',
-                  tint: scheme.surfaceContainerHighest,
-                  accent: scheme.onSurfaceVariant,
-                  onTap: () => Navigator.pushNamed(context, '/announcements'),
+                  accent: dsTextSecondary,
                 ),
               ],
             ),
             const SizedBox(height: AppSpacing.xl),
-            _SectionHeader(
+            const _SectionHeader(
               title: 'Your complaint pulse',
               subtitle: 'A quick read on how your complaints are moving.',
             ),
@@ -301,50 +283,26 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                 _MetricCard(
                   title: 'Total',
                   value: '${stats.total}',
-                  icon: SvgPicture.asset(
-                    'assets/icons/folder.svg',
-                    width: 24,
-                    height: 24,
-                    colorFilter: ColorFilter.mode(scheme.primary, BlendMode.srcIn),
-                  ),
-                  accent: scheme.primary,
-                  tone: scheme.primaryContainer,
+                  icon: Icons.folder_copy_rounded,
+                  accent: dsAccent,
                 ),
                 _MetricCard(
                   title: 'Active',
                   value: '${stats.active}',
-                  icon: SvgPicture.asset(
-                    'assets/icons/timer.svg',
-                    width: 24,
-                    height: 24,
-                    colorFilter: ColorFilter.mode(scheme.secondary, BlendMode.srcIn),
-                  ),
-                  accent: scheme.secondary,
-                  tone: scheme.secondaryContainer,
+                  icon: Icons.hourglass_top_rounded,
+                  accent: _warning,
                 ),
                 _MetricCard(
                   title: 'Resolved',
                   value: '${stats.resolved}',
-                  icon: SvgPicture.asset(
-                    'assets/icons/tick_circle.svg',
-                    width: 24,
-                    height: 24,
-                    colorFilter: ColorFilter.mode(AppTheme.success, BlendMode.srcIn),
-                  ),
-                  accent: AppTheme.success,
-                  tone: AppTheme.success.withOpacity(0.12),
+                  icon: Icons.check_circle_rounded,
+                  accent: _success,
                 ),
                 _MetricCard(
                   title: 'High Priority',
                   value: '${stats.highPriority}',
-                  icon: SvgPicture.asset(
-                    'assets/icons/warning_2.svg',
-                    width: 24,
-                    height: 24,
-                    colorFilter: ColorFilter.mode(AppTheme.error, BlendMode.srcIn),
-                  ),
-                  accent: AppTheme.error,
-                  tone: AppTheme.error.withOpacity(0.12),
+                  icon: Icons.warning_rounded,
+                  accent: _danger,
                 ),
               ],
             ),
@@ -362,19 +320,26 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
               data: (items) {
                 final recentItems = _sortGrievances(items).take(3).toList();
                 if (recentItems.isEmpty) {
-                  return AppCard(
-                    color: scheme.surface,
+                  return _buildCard(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Text(
                           l10n.noGrievances,
-                          style: theme.textTheme.titleMedium,
+                          style: const TextStyle(
+                            color: dsTextPrimary,
+                            fontSize: 18,
+                            fontWeight: FontWeight.w700,
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.sm),
                         Text(
                           l10n.noGrievancesMessage,
-                          style: theme.textTheme.bodyMedium,
+                          style: const TextStyle(
+                            color: dsTextSecondary,
+                            fontSize: 14,
+                            height: 1.5,
+                          ),
                         ),
                         const SizedBox(height: AppSpacing.base),
                         AppButton(
@@ -405,17 +370,20 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                   _ComplaintSkeletonCard(),
                 ],
               ),
-              error: (error, _) => AppCard(
-                color: scheme.surface,
+              error: (error, _) => _buildCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       'Could not load your recent complaints.',
-                      style: theme.textTheme.titleMedium,
+                      style: const TextStyle(
+                        color: dsTextPrimary,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    Text('$error', style: theme.textTheme.bodyMedium),
+                    Text('$error', style: const TextStyle(color: dsTextSecondary)),
                     const SizedBox(height: AppSpacing.base),
                     AppButton(
                       text: 'Retry',
@@ -433,6 +401,28 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildCard({required Widget child}) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: dsSurface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: dsBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.base),
+        child: child,
       ),
     );
   }
@@ -468,8 +458,6 @@ class _HeroPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
     final dateLabel = DateFormat('EEEE, d MMMM').format(DateTime.now());
     final name = (user.name?.trim().isNotEmpty ?? false)
         ? user.name!.trim()
@@ -483,19 +471,18 @@ class _HeroPanel extends StatelessWidget {
 
     return Container(
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        gradient: LinearGradient(
+        borderRadius: BorderRadius.circular(24),
+        gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            scheme.primary,
-            Color.lerp(scheme.primary, scheme.secondary, 0.55) ??
-                scheme.primary,
+            dsAccent,
+            Color(0xFF1D4ED8),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: scheme.primary.withOpacity(0.24),
+            color: dsAccent.withOpacity(0.24),
             blurRadius: 28,
             offset: const Offset(0, 16),
           ),
@@ -513,8 +500,9 @@ class _HeroPanel extends StatelessWidget {
                   backgroundColor: Colors.white.withOpacity(0.18),
                   child: Text(
                     initials.isEmpty ? 'C' : initials,
-                    style: theme.textTheme.titleLarge?.copyWith(
+                    style: const TextStyle(
                       color: Colors.white,
+                      fontSize: 18,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -526,16 +514,18 @@ class _HeroPanel extends StatelessWidget {
                     children: [
                       Text(
                         greeting,
-                        style: theme.textTheme.bodyMedium?.copyWith(
+                        style: TextStyle(
                           color: Colors.white.withOpacity(0.82),
+                          fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
                       const SizedBox(height: 2),
                       Text(
                         name,
-                        style: theme.textTheme.headlineSmall?.copyWith(
+                        style: const TextStyle(
                           color: Colors.white,
+                          fontSize: 22,
                           fontWeight: FontWeight.w800,
                         ),
                       ),
@@ -552,22 +542,20 @@ class _HeroPanel extends StatelessWidget {
               ),
               decoration: BoxDecoration(
                 color: Colors.white.withOpacity(0.12),
-                borderRadius: BorderRadius.circular(AppRadius.full),
+                borderRadius: BorderRadius.circular(999),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  SvgPicture.asset(
-                    'assets/icons/calendar.svg',
-                    width: 16,
-                    height: 16,
-                    colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
-                  ),
+                  const Icon(Icons.calendar_today_rounded,
+                      color: Colors.white, size: 16),
                   const SizedBox(width: AppSpacing.sm),
                   Text(
                     dateLabel,
-                    style: theme.textTheme.labelLarge?.copyWith(
+                    style: const TextStyle(
                       color: Colors.white,
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ],
@@ -576,8 +564,9 @@ class _HeroPanel extends StatelessWidget {
             const SizedBox(height: AppSpacing.base),
             Text(
               subtitle,
-              style: theme.textTheme.bodyLarge?.copyWith(
+              style: TextStyle(
                 color: Colors.white.withOpacity(0.92),
+                fontSize: 16,
                 height: 1.5,
               ),
             ),
@@ -591,7 +580,7 @@ class _HeroPanel extends StatelessWidget {
                     onPressed: () =>
                         Navigator.pushNamed(context, '/citizen/submit'),
                     backgroundColor: Colors.white,
-                    foregroundColor: scheme.primary,
+                    foregroundColor: dsAccent,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
@@ -630,12 +619,10 @@ class _AdsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionHeader(
+        const _SectionHeader(
           title: 'Latest from PCMC',
           subtitle:
               'Promotions, announcements, and useful highlights from your local system.',
@@ -669,10 +656,8 @@ class _AdsSection extends StatelessWidget {
                 width: index == currentPage ? 20 : 8,
                 height: 8,
                 decoration: BoxDecoration(
-                  color: index == currentPage
-                      ? theme.colorScheme.primary
-                      : theme.colorScheme.outlineVariant,
-                  borderRadius: BorderRadius.circular(AppRadius.full),
+                  color: index == currentPage ? dsAccent : dsBorder,
+                  borderRadius: BorderRadius.circular(999),
                 ),
               ),
             ),
@@ -688,28 +673,21 @@ class _AdsSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SectionHeader(
+        const _SectionHeader(
           title: 'Latest from PCMC',
           subtitle: 'Loading local highlights...',
         ),
         const SizedBox(height: AppSpacing.base),
-        AppCard(
-          padding: EdgeInsets.zero,
-          child: Container(
-            height: 250,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                colors: [
-                  theme.colorScheme.surfaceContainerHighest,
-                  theme.colorScheme.surfaceContainerLow,
-                ],
-              ),
-            ),
+        Container(
+          width: double.infinity,
+          height: 250,
+          decoration: BoxDecoration(
+            color: dsSurfaceAlt,
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(color: dsBorder),
           ),
         ),
       ],
@@ -722,52 +700,68 @@ class _QuickActionCard extends StatelessWidget {
     required this.icon,
     required this.title,
     required this.subtitle,
-    required this.tint,
     required this.accent,
-    required this.onTap,
   });
 
-  final Widget icon;
+  final IconData icon;
   final String title;
   final String subtitle;
-  final Color tint;
   final Color accent;
-  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return AppCard(
-      onTap: onTap,
-      color: theme.colorScheme.surface,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: tint,
-              borderRadius: BorderRadius.circular(AppRadius.md),
+    return GestureDetector(
+      onTap: () {},
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: dsSurface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: dsBorder),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
             ),
-            child: icon,
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.base),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                decoration: BoxDecoration(
+                  color: accent.withOpacity(0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: accent, size: 24),
+              ),
+              const Spacer(),
+              Text(
+                title,
+                style: const TextStyle(
+                  color: dsTextPrimary,
+                  fontSize: 14,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              Text(
+                subtitle,
+                style: const TextStyle(
+                  color: dsTextSecondary,
+                  fontSize: 12,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
-          const Spacer(),
-          Text(
-            title,
-            style: theme.textTheme.titleSmall?.copyWith(
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Text(
-            subtitle,
-            style: theme.textTheme.bodySmall,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -779,51 +773,64 @@ class _MetricCard extends StatelessWidget {
     required this.value,
     required this.icon,
     required this.accent,
-    required this.tone,
   });
 
   final String title;
   final String value;
-  final Widget icon;
+  final IconData icon;
   final Color accent;
-  final Color tone;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return AppCard(
-      color: theme.colorScheme.surface,
-      child: Row(
-        children: [
-          Container(
-            width: 42,
-            height: 42,
-            decoration: BoxDecoration(
-              color: tone,
-              borderRadius: BorderRadius.circular(AppRadius.md),
-            ),
-            child: icon,
-          ),
-          const SizedBox(width: AppSpacing.md),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  value,
-                  style: theme.textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.w800,
-                    height: 1,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(title, style: theme.textTheme.bodySmall),
-              ],
-            ),
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: dsSurface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: dsBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.base),
+        child: Row(
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              decoration: BoxDecoration(
+                color: accent.withOpacity(0.12),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: accent, size: 22),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    value,
+                    style: const TextStyle(
+                      color: dsTextPrimary,
+                      fontSize: 24,
+                      fontWeight: FontWeight.w800,
+                      height: 1,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(title, style: const TextStyle(color: dsTextSecondary, fontSize: 12)),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -836,11 +843,7 @@ class _RecentComplaintCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
-    return AppCard(
-      color: scheme.surface,
+    return GestureDetector(
       onTap: () {
         final userId =
             ref.read(authProvider)?.id ?? ref.read(userNotifierProvider)?.id;
@@ -849,89 +852,98 @@ class _RecentComplaintCard extends ConsumerWidget {
           '/citizen/detail',
           arguments: grievance.id,
         ).then((_) {
-          // Invalidate so deleted/updated grievances disappear on back-navigation
           if (userId != null) {
             ref.invalidate(citizenHistoryProvider(userId));
           }
         });
       },
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          color: dsSurface,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: dsBorder),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.base),
+          child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      grievance.title,
-                      style: theme.textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w700,
-                      ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          grievance.title,
+                          style: const TextStyle(
+                            color: dsTextPrimary,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
+                          ),
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: AppSpacing.xs),
+                        Text(
+                          grievance.complaintId,
+                          style: const TextStyle(
+                            color: dsAccent,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: AppSpacing.xs),
-                    Text(
-                      grievance.complaintId,
-                      style: theme.textTheme.labelMedium?.copyWith(
-                        color: scheme.primary,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ],
-                ),
+                  ),
+                  const SizedBox(width: AppSpacing.base),
+                  StatusBadge(status: grievance.status ?? 'new'),
+                ],
               ),
-              const SizedBox(width: AppSpacing.base),
-              StatusBadge(status: grievance.status ?? 'new'),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                grievance.description,
+                style: const TextStyle(
+                  color: dsTextSecondary,
+                  fontSize: 13,
+                  height: 1.5,
+                ),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: AppSpacing.base),
+              Wrap(
+                spacing: AppSpacing.base,
+                runSpacing: AppSpacing.sm,
+                children: [
+                  _MetaChip(
+                    icon: Icons.calendar_today_rounded,
+                    label: DateFormat('dd MMM yyyy').format(grievance.createdAt),
+                  ),
+                  if (grievance.areaName != null && grievance.areaName!.isNotEmpty)
+                    _MetaChip(
+                      icon: Icons.location_on_rounded,
+                      label: grievance.areaName!,
+                    ),
+                  if (grievance.priority != null && grievance.priority!.isNotEmpty)
+                    _MetaChip(
+                      icon: Icons.flag_rounded,
+                      label: grievance.priority!.toUpperCase(),
+                    ),
+                ],
+              ),
             ],
           ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            grievance.description,
-            style: theme.textTheme.bodyMedium,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-          ),
-          const SizedBox(height: AppSpacing.base),
-          Wrap(
-            spacing: AppSpacing.base,
-            runSpacing: AppSpacing.sm,
-            children: [
-              _MetaChip(
-                icon: SvgPicture.asset(
-                  'assets/icons/clock.svg',
-                  width: 14,
-                  height: 14,
-                  colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.onSurfaceVariant, BlendMode.srcIn),
-                ),
-                label: DateFormat('dd MMM yyyy').format(grievance.createdAt),
-              ),
-              if (grievance.areaName != null && grievance.areaName!.isNotEmpty)
-                _MetaChip(
-                  icon: SvgPicture.asset(
-                    'assets/icons/location.svg',
-                    width: 14,
-                    height: 14,
-                    colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.onSurfaceVariant, BlendMode.srcIn),
-                  ),
-                  label: grievance.areaName!,
-                ),
-              if (grievance.priority != null && grievance.priority!.isNotEmpty)
-                _MetaChip(
-                  icon: SvgPicture.asset(
-                    'assets/icons/flag.svg',
-                    width: 14,
-                    height: 14,
-                    colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.onSurfaceVariant, BlendMode.srcIn),
-                  ),
-                  label: grievance.priority!.toUpperCase(),
-                ),
-            ],
-          ),
-        ],
+        ),
       ),
     );
   }
@@ -942,20 +954,13 @@ class _ComplaintSkeletonCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return AppCard(
-      padding: EdgeInsets.zero,
-      child: Container(
-        height: 150,
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              theme.colorScheme.surfaceContainerHighest,
-              theme.colorScheme.surfaceContainerLow,
-            ],
-          ),
-        ),
+    return Container(
+      width: double.infinity,
+      height: 150,
+      decoration: BoxDecoration(
+        color: dsSurfaceAlt,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: dsBorder),
       ),
     );
   }
@@ -972,14 +977,19 @@ class _SupportPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final scheme = theme.colorScheme;
-
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(AppRadius.xl),
-        color: scheme.surface,
-        border: Border.all(color: theme.dividerColor),
+        borderRadius: BorderRadius.circular(20),
+        color: dsSurface,
+        border: Border.all(color: dsBorder),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(AppSpacing.xl),
@@ -992,21 +1002,19 @@ class _SupportPanel extends StatelessWidget {
                   width: 46,
                   height: 46,
                   decoration: BoxDecoration(
-                    color: scheme.primaryContainer,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
+                    color: dsAccent.withOpacity(0.12),
+                    borderRadius: BorderRadius.circular(12),
                   ),
-                  child: SvgPicture.asset(
-                    'assets/icons/support.svg',
-                    width: 24,
-                    height: 24,
-                    colorFilter: ColorFilter.mode(scheme.primary, BlendMode.srcIn),
-                  ),
+                  child: const Icon(Icons.support_agent_rounded,
+                      color: dsAccent, size: 24),
                 ),
                 const SizedBox(width: AppSpacing.base),
                 Expanded(
                   child: Text(
                     'Need a hand?',
-                    style: theme.textTheme.titleMedium?.copyWith(
+                    style: const TextStyle(
+                      color: dsTextPrimary,
+                      fontSize: 18,
                       fontWeight: FontWeight.w800,
                     ),
                   ),
@@ -1014,7 +1022,8 @@ class _SupportPanel extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.base),
-            Text(supportMessage, style: theme.textTheme.bodyMedium),
+            Text(supportMessage,
+                style: const TextStyle(color: dsTextSecondary, fontSize: 14)),
             const SizedBox(height: AppSpacing.lg),
             Row(
               children: [
@@ -1047,28 +1056,26 @@ class _SupportPanel extends StatelessWidget {
 class _MetaChip extends StatelessWidget {
   const _MetaChip({required this.icon, required this.label});
 
-  final Widget icon;
+  final IconData icon;
   final String label;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.sm,
         vertical: 6,
       ),
       decoration: BoxDecoration(
-        color: theme.colorScheme.surfaceContainerHighest.withOpacity(0.55),
-        borderRadius: BorderRadius.circular(AppRadius.full),
+        color: dsSurfaceAlt,
+        borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          icon,
+          Icon(icon, color: dsTextSecondary, size: 14),
           const SizedBox(width: 6),
-          Text(label, style: theme.textTheme.labelMedium),
+          Text(label, style: const TextStyle(color: dsTextSecondary, fontSize: 11)),
         ],
       ),
     );
@@ -1090,8 +1097,6 @@ class _SectionHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1101,17 +1106,24 @@ class _SectionHeader extends StatelessWidget {
             children: [
               Text(
                 title,
-                style: theme.textTheme.titleLarge?.copyWith(
+                style: const TextStyle(
+                  color: dsTextPrimary,
+                  fontSize: 18,
                   fontWeight: FontWeight.w800,
                 ),
               ),
               const SizedBox(height: 4),
-              Text(subtitle, style: theme.textTheme.bodySmall),
+              Text(subtitle,
+                  style: const TextStyle(color: dsTextSecondary, fontSize: 12)),
             ],
           ),
         ),
         if (actionLabel != null && onAction != null)
-          TextButton(onPressed: onAction, child: Text(actionLabel!)),
+          TextButton(
+            onPressed: onAction,
+            style: TextButton.styleFrom(foregroundColor: dsAccent),
+            child: Text(actionLabel!),
+          ),
       ],
     );
   }

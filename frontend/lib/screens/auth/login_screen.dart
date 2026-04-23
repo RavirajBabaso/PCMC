@@ -8,6 +8,12 @@ import 'package:main_ui/exceptions/auth_exception.dart';
 import 'package:main_ui/services/api_service.dart';
 import 'package:main_ui/theme/app_theme.dart';
 
+// Add these color definitions
+const Color _success = Color(0xFF10B981);
+const Color _warning = Color(0xFFF59E0B);
+const Color _danger = Color(0xFFEF4444);
+const Color _purple = Color(0xFF8B5CF6);
+
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -65,7 +71,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   void _showError(String msg) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(msg), behavior: SnackBarBehavior.floating),
+      SnackBar(
+        content: Text(msg),
+        behavior: SnackBarBehavior.floating,
+        backgroundColor: _danger, // Using danger color for error snacks
+      ),
     );
   }
 
@@ -74,12 +84,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: Text(title),
-        content: Text(message),
+        backgroundColor: dsSurface,
+        title: Text(title, style: const TextStyle(color: dsTextPrimary)),
+        content: Text(message, style: const TextStyle(color: dsTextSecondary)),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(ctx).pop(),
-            child: Text(l10n.ok),
+            child: Text(l10n.ok, style: const TextStyle(color: dsAccent)),
           ),
         ],
       ),
@@ -121,12 +132,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final l10n  = AppLocalizations.of(context)!;
-    final primary = theme.colorScheme.primary;
+    final l10n = AppLocalizations.of(context)!;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      // No AppBar — full immersive auth experience
+      backgroundColor: dsBackground,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(
@@ -139,23 +149,33 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               const SizedBox(height: AppSpacing.xxl),
 
               // ── App identity ─────────────────────────────────────────────
-              Icon(Icons.gavel_rounded, size: 56, color: primary),
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: dsAccent.withOpacity(0.12),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(Icons.gavel_rounded, size: 42, color: dsAccent),
+              ),
               const SizedBox(height: AppSpacing.base),
               Text(
                 'NIVARAN',
                 textAlign: TextAlign.center,
-                style: theme.textTheme.displaySmall?.copyWith(
+                style: const TextStyle(
                   fontWeight: FontWeight.w800,
-                  color: primary,
+                  color: dsAccent,
                   letterSpacing: 2,
+                  fontSize: 28,
                 ),
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 _isLogin ? l10n.welcomeBack : l10n.createAccountPrompt,
                 textAlign: TextAlign.center,
-                style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.55),
+                style: const TextStyle(
+                  color: dsTextSecondary,
+                  fontSize: 14,
                 ),
               ),
 
@@ -181,43 +201,35 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   children: [
                     // Register-only fields
                     if (!_isLogin) ...[
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          labelText: 'Full Name',
-                          prefixIcon: Icon(Icons.person_outline_rounded),
-                        ),
+                      _buildFormField(
+                        labelText: 'Full Name',
+                        prefixIcon: Icons.person_outline_rounded,
                         textCapitalization: TextCapitalization.words,
                         textInputAction: TextInputAction.next,
                         validator: validateRequired,
                         onSaved: (v) => _name = v!.trim(),
                       ),
                       const SizedBox(height: AppSpacing.base),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          labelText: 'Address',
-                          prefixIcon: Icon(Icons.home_outlined),
-                        ),
+                      _buildFormField(
+                        labelText: 'Address',
+                        prefixIcon: Icons.home_outlined,
                         textInputAction: TextInputAction.next,
                         validator: validateRequired,
                         onSaved: (v) => _address = v!.trim(),
                       ),
                       const SizedBox(height: AppSpacing.base),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          labelText: 'Phone Number',
-                          prefixIcon: Icon(Icons.phone_outlined),
-                        ),
+                      _buildFormField(
+                        labelText: 'Phone Number',
+                        prefixIcon: Icons.phone_outlined,
                         keyboardType: TextInputType.phone,
                         textInputAction: TextInputAction.next,
                         validator: (v) => _validatePhone(v, l10n),
                         onSaved: (v) => _phone = v!.trim(),
                       ),
                       const SizedBox(height: AppSpacing.base),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          labelText: 'Voter ID',
-                          prefixIcon: Icon(Icons.badge_outlined),
-                        ),
+                      _buildFormField(
+                        labelText: 'Voter ID',
+                        prefixIcon: Icons.badge_outlined,
                         textInputAction: TextInputAction.next,
                         validator: validateRequired,
                         onSaved: (v) => _voterId = v!.trim(),
@@ -226,11 +238,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ],
 
                     // Common fields
-                    TextFormField(
-                      decoration: const InputDecoration(
-                        labelText: 'Email',
-                        prefixIcon: Icon(Icons.email_outlined),
-                      ),
+                    _buildFormField(
+                      labelText: 'Email',
+                      prefixIcon: Icons.email_outlined,
                       keyboardType: TextInputType.emailAddress,
                       textInputAction: TextInputAction.next,
                       autofillHints: const [AutofillHints.email],
@@ -239,26 +249,24 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                     ),
                     const SizedBox(height: AppSpacing.base),
 
-                    TextFormField(
-                      decoration: InputDecoration(
-                        labelText: l10n.password,
-                        prefixIcon: const Icon(Icons.lock_outline_rounded),
-                        suffixIcon: IconButton(
-                          icon: Icon(_obscurePassword
-                              ? Icons.visibility_outlined
-                              : Icons.visibility_off_outlined),
-                          onPressed: () =>
-                              setState(() => _obscurePassword = !_obscurePassword),
-                        ),
-                      ),
+                    _buildFormField(
+                      labelText: l10n.password,
+                      prefixIcon: Icons.lock_outline_rounded,
                       obscureText: _obscurePassword,
-                      textInputAction: _isLogin
-                          ? TextInputAction.done
-                          : TextInputAction.next,
+                      textInputAction: _isLogin ? TextInputAction.done : TextInputAction.next,
                       autofillHints: const [AutofillHints.password],
                       validator: validateRequired,
                       onSaved: (v) => _password = v!,
                       onFieldSubmitted: (_) => _submit(),
+                      suffixIcon: IconButton(
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_outlined
+                              : Icons.visibility_off_outlined,
+                          color: dsTextSecondary,
+                        ),
+                        onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                      ),
                     ),
 
                     // Forgot password
@@ -268,10 +276,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                         alignment: Alignment.centerRight,
                         child: TextButton(
                           onPressed: _showForgotPasswordDialog,
+                          style: TextButton.styleFrom(
+                            foregroundColor: dsAccent,
+                          ),
                           child: Text(
                             l10n.forgotPassword ?? 'Forgot Password?',
-                            style: TextStyle(
-                              color: primary,
+                            style: const TextStyle(
                               fontWeight: FontWeight.w600,
                               fontSize: 13,
                             ),
@@ -299,7 +309,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                       children: [
                         Text(
                           _isLogin ? l10n.registerPrompt : l10n.loginPrompt,
-                          style: theme.textTheme.bodySmall,
+                          style: const TextStyle(
+                            color: dsTextSecondary,
+                            fontSize: 13,
+                          ),
                         ),
                         const SizedBox(width: 4),
                         TextButton(
@@ -307,10 +320,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                             _isLogin = !_isLogin;
                             _formKey.currentState?.reset();
                           }),
+                          style: TextButton.styleFrom(
+                            foregroundColor: dsAccent,
+                          ),
                           child: Text(
                             _isLogin ? l10n.register : l10n.login,
-                            style: TextStyle(
-                              color: primary,
+                            style: const TextStyle(
                               fontWeight: FontWeight.w700,
                               fontSize: 13,
                             ),
@@ -327,6 +342,61 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildFormField({
+    required String labelText,
+    required IconData prefixIcon,
+    TextInputType? keyboardType,
+    TextInputAction? textInputAction,
+    TextCapitalization textCapitalization = TextCapitalization.none,
+    bool obscureText = false,
+    List<String>? autofillHints,
+    String? Function(String?)? validator,
+    void Function(String?)? onSaved,
+    void Function(String)? onFieldSubmitted,
+    Widget? suffixIcon,
+  }) {
+    return TextFormField(
+      style: const TextStyle(color: dsTextPrimary),
+      decoration: InputDecoration(
+        labelText: labelText,
+        labelStyle: const TextStyle(color: dsTextSecondary),
+        prefixIcon: Icon(prefixIcon, color: dsAccent),
+        suffixIcon: suffixIcon,
+        filled: true,
+        fillColor: dsSurface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: dsBorder),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: dsAccent, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: _danger),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: _danger, width: 2),
+        ),
+        errorStyle: const TextStyle(color: _danger, fontSize: 12),
+      ),
+      keyboardType: keyboardType,
+      textInputAction: textInputAction,
+      textCapitalization: textCapitalization,
+      obscureText: obscureText,
+      autofillHints: autofillHints,
+      validator: validator,
+      onSaved: onSaved,
+      onFieldSubmitted: onFieldSubmitted,
     );
   }
 }
@@ -349,23 +419,23 @@ class _AuthToggle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final primary = Theme.of(context).colorScheme.primary;
     return Container(
       height: 48,
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerHighest.withOpacity(0.4),
-        borderRadius: BorderRadius.circular(AppRadius.md),
+        color: dsSurfaceAlt,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: dsBorder),
       ),
       child: Row(
         children: [
-          _tab(context, loginLabel, isLogin, () => onToggle(true), primary),
-          _tab(context, registerLabel, !isLogin, () => onToggle(false), primary),
+          _tab(context, loginLabel, isLogin, () => onToggle(true)),
+          _tab(context, registerLabel, !isLogin, () => onToggle(false)),
         ],
       ),
     );
   }
 
-  Widget _tab(BuildContext ctx, String label, bool selected, VoidCallback onTap, Color primary) {
+  Widget _tab(BuildContext ctx, String label, bool selected, VoidCallback onTap) {
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -373,14 +443,14 @@ class _AuthToggle extends StatelessWidget {
           duration: const Duration(milliseconds: 200),
           margin: const EdgeInsets.all(4),
           decoration: BoxDecoration(
-            color: selected ? primary : Colors.transparent,
-            borderRadius: BorderRadius.circular(AppRadius.sm),
+            color: selected ? dsAccent : Colors.transparent,
+            borderRadius: BorderRadius.circular(12),
           ),
           alignment: Alignment.center,
           child: Text(
             label,
             style: TextStyle(
-              color: selected ? Colors.white : Theme.of(ctx).colorScheme.onSurface.withOpacity(0.6),
+              color: selected ? Colors.white : dsTextSecondary,
               fontWeight: FontWeight.w600,
               fontSize: 14,
             ),
@@ -430,7 +500,8 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      title: const Text('Reset Password'),
+      backgroundColor: dsSurface,
+      title: const Text('Reset Password', style: TextStyle(color: dsTextPrimary)),
       content: Form(
         key: _formKey,
         child: Column(
@@ -438,14 +509,30 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
           children: [
             const Text(
               "Enter your email address. We'll send you a reset link.",
-              style: TextStyle(fontSize: 14),
+              style: TextStyle(color: dsTextSecondary, fontSize: 14),
             ),
             const SizedBox(height: AppSpacing.base),
             TextFormField(
               controller: _emailCtrl,
-              decoration: const InputDecoration(
+              style: const TextStyle(color: dsTextPrimary),
+              decoration: InputDecoration(
                 labelText: 'Email',
-                prefixIcon: Icon(Icons.email_outlined),
+                labelStyle: const TextStyle(color: dsTextSecondary),
+                prefixIcon: const Icon(Icons.email_outlined, color: dsAccent),
+                filled: true,
+                fillColor: dsSurfaceAlt,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide.none,
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: dsBorder),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: dsAccent, width: 2),
+                ),
               ),
               keyboardType: TextInputType.emailAddress,
               onChanged: (_) => setState(() {}),
@@ -458,14 +545,19 @@ class _ForgotPasswordDialogState extends State<_ForgotPasswordDialog> {
       actions: [
         TextButton(
           onPressed: _sending ? null : () => Navigator.of(context).pop(),
+          style: TextButton.styleFrom(foregroundColor: dsTextSecondary),
           child: const Text('Cancel'),
         ),
         ElevatedButton(
           onPressed: _sending || !_valid ? null : _submit,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: dsAccent,
+            foregroundColor: Colors.white,
+          ),
           child: _sending
               ? const SizedBox(
                   width: 18, height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
+                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                 )
               : const Text('Send Link'),
         ),

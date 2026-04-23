@@ -4,6 +4,7 @@ import 'package:main_ui/l10n/app_localizations.dart';
 import 'package:main_ui/navigation/nav_config.dart';
 import 'package:main_ui/providers/user_provider.dart';
 import 'package:main_ui/widgets/navigation_drawer.dart';
+import 'package:main_ui/theme/app_theme.dart';
 
 /// Mobile-first scaffold shell.
 /// Mobile (< 600 px): AppBar + Drawer + BottomNav.
@@ -44,14 +45,27 @@ class AppShell extends ConsumerWidget {
     final selectedBottomRoute = bottomNavCurrentRoute ?? currentRoute;
 
     return Scaffold(
-      backgroundColor: backgroundColor,
+      backgroundColor: backgroundColor ?? dsBackground,
       appBar: AppBar(
-        backgroundColor: appBarBackgroundColor,
-        foregroundColor: appBarForegroundColor,
-        elevation: appBarElevation,
+        backgroundColor: appBarBackgroundColor ?? dsSurface,
+        foregroundColor: appBarForegroundColor ?? dsAccent,
+        elevation: appBarElevation ?? 0,
         surfaceTintColor: Colors.transparent,
-        title: Text(title),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.3,
+          ),
+        ),
         actions: actions,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            height: 1,
+            color: dsBorder,
+          ),
+        ),
       ),
       drawer: const CustomNavigationDrawer(),
       body: SafeArea(
@@ -85,20 +99,26 @@ class _BottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final loc = AppLocalizations.of(context)!;
     final index = items.indexWhere((item) => item.route == selectedRoute);
     final selectedIndex = index < 0 ? 0 : index;
 
     return Container(
       decoration: BoxDecoration(
-        color: theme.bottomNavigationBarTheme.backgroundColor,
+        color: dsSurface,
         border: Border(
           top: BorderSide(
-            color: theme.dividerColor,
+            color: dsBorder,
             width: 1,
           ),
         ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 8,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
       child: BottomNavigationBar(
         currentIndex: selectedIndex,
@@ -108,6 +128,11 @@ class _BottomNav extends StatelessWidget {
         selectedFontSize: 11,
         unselectedFontSize: 11,
         iconSize: 22,
+        selectedItemColor: dsAccent,
+        unselectedItemColor: dsTextSecondary,
+        selectedLabelStyle: const TextStyle(
+          fontWeight: FontWeight.w600,
+        ),
         items: items
             .map(
               (item) => BottomNavigationBarItem(
