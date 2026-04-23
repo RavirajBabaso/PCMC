@@ -254,6 +254,7 @@ class AppTheme {
       useMaterial3: true,
       brightness: brightness,
       colorScheme: scheme,
+
       scaffoldBackgroundColor: scaffoldBg,
 
       // ── AppBar ──────────────────────────────────────────────────────────

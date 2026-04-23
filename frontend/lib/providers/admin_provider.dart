@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../models/grievance_model.dart';
 import '../models/kpi_model.dart';
-import '../models/paginated_result.dart';
+// import '../models/paginated_result.dart';
 import '../services/admin_service.dart';
 import '../services/api_service.dart';
 
@@ -144,6 +144,18 @@ class AdminNotifier extends StateNotifier<AdminState> {
       await getAllGrievances();
     } catch (e) {
       state = state.copyWith(error: e.toString());
+    }
+  }
+
+  Future<void> deleteGrievance(int grievanceId) async {
+    try {
+      await ApiService.delete('/admins/grievances/$grievanceId');
+      state = state.copyWith(
+        grievances: state.grievances.where((g) => g.id != grievanceId).toList(),
+      );
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+      rethrow;
     }
   }
 

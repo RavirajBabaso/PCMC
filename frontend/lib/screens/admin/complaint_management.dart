@@ -371,7 +371,7 @@ class _ComplaintManagementState extends ConsumerState<ComplaintManagement>
                 ),
               ],
 
-              // ── Assign / Comment / Details actions ────────────
+              // ── Assign / Comment / Details / Delete actions ────────────
               const SizedBox(height: 10),
               Row(children: [
                 Expanded(child: _actionBtn(
@@ -388,6 +388,8 @@ class _ComplaintManagementState extends ConsumerState<ComplaintManagement>
                 )),
                 const SizedBox(width: 6),
                 Expanded(child: _actionBtn(Icons.comment, 'COMMENT', _text2, () => _showCommentDialog(g))),
+                const SizedBox(width: 6),
+                Expanded(child: _actionBtn(Icons.delete_outline, 'DELETE', _red, () => _confirmDelete(g))),
               ]),
             ]),
           ),
@@ -703,6 +705,86 @@ class _ComplaintManagementState extends ConsumerState<ComplaintManagement>
         ),
       ),
     );
+  }
+
+  Future<void> _confirmDelete(Grievance g) async {
+    bool confirmed = false;
+
+    await showDialog(
+      context: context,
+      builder: (ctx) => Dialog(
+        backgroundColor: _surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(color: _red.withOpacity(0.4)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(children: [
+                const Icon(Icons.delete_forever, color: _red, size: 20),
+                const SizedBox(width: 10),
+                Text('DELETE GRIEVANCE',
+                    style: TextStyle(color: _red, fontSize: 14, fontWeight: FontWeight.w800, letterSpacing: 1)),
+              ]),
+              const SizedBox(height: 14),
+              Text(g.title, style: _heading(13)),
+              const SizedBox(height: 4),
+              Text(g.complaintId, style: _mono(10, c: _cyanDim)),
+              const SizedBox(height: 14),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: _red.withOpacity(0.08),
+                  borderRadius: BorderRadius.circular(10),
+                  border: Border.all(color: _red.withOpacity(0.25)),
+                ),
+                child: Row(children: [
+                  const Icon(Icons.warning_amber_rounded, color: _red, size: 16),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      'This action is permanent and cannot be undone. All associated data will be removed.',
+                      style: _mono(11, c: _red.withOpacity(0.85)),
+                    ),
+                  ),
+                ]),
+              ),
+              const SizedBox(height: 20),
+              Row(children: [
+                Expanded(child: TextButton(
+                  onPressed: () => Navigator.pop(ctx),
+                  child: Text('CANCEL', style: TextStyle(color: _text2, fontSize: 12, letterSpacing: 1)),
+                )),
+                const SizedBox(width: 10),
+                Expanded(child: ElevatedButton(
+                  onPressed: () { confirmed = true; Navigator.pop(ctx); },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: _red.withOpacity(0.2),
+                    foregroundColor: _red,
+                    side: BorderSide(color: _red.withOpacity(0.6)),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                  ),
+                  child: const Text('DELETE', style: TextStyle(fontSize: 12, fontWeight: FontWeight.w800, letterSpacing: 1)),
+                )),
+              ]),
+            ],
+          ),
+        ),
+      ),
+    );
+
+    if (!confirmed) return;
+    try {
+      await ref.read(adminProvider.notifier).deleteGrievance(g.id);
+      _showToast('Grievance deleted successfully', _red);
+      _fetchData();
+    } catch (e) {
+      _showToast('Delete failed: $e', _red);
+    }
   }
 
   void _showToast(String msg, Color color) {

@@ -17,17 +17,8 @@ import 'package:main_ui/widgets/ad_card.dart';
 import 'package:main_ui/widgets/app/app_button.dart';
 import 'package:main_ui/widgets/app/app_card.dart';
 import 'package:main_ui/widgets/app/status_badge.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
-
-
-IconData _materialIcon(IconData icon) {
-  return IconData(
-    icon.codePoint,
-    fontFamily: 'MaterialIcons',
-    fontPackage: icon.fontPackage,
-    matchTextDirection: icon.matchTextDirection,
-  );
-}
 class CitizenHomeScreen extends ConsumerStatefulWidget {
   const CitizenHomeScreen({super.key});
 
@@ -36,7 +27,9 @@ class CitizenHomeScreen extends ConsumerStatefulWidget {
 }
 
 class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
-  final PageController _adsPageController = PageController(viewportFraction: 0.92);
+  final PageController _adsPageController = PageController(
+    viewportFraction: 0.92,
+  );
   Timer? _adsTicker;
   int _currentAdPage = 0;
 
@@ -60,7 +53,8 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
     ref.invalidate(adProvider);
     ref.read(userNotifierProvider.notifier).refreshUser();
 
-    final currentUser = ref.read(authProvider) ?? ref.read(userNotifierProvider);
+    final currentUser =
+        ref.read(authProvider) ?? ref.read(userNotifierProvider);
     final userId = currentUser?.id;
     if (userId != null) {
       ref.invalidate(citizenHistoryProvider(userId));
@@ -79,7 +73,8 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
         return;
       }
 
-      final currentPage = (_adsPageController.page ?? _currentAdPage.toDouble()).round();
+      final currentPage = (_adsPageController.page ?? _currentAdPage.toDouble())
+          .round();
       final nextPage = (currentPage + 1) % ads.length;
       _adsPageController.animateToPage(
         nextPage,
@@ -105,7 +100,8 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final l10n = AppLocalizations.of(context)!;
-    final currentUser = ref.watch(authProvider) ?? ref.watch(userNotifierProvider);
+    final currentUser =
+        ref.watch(authProvider) ?? ref.watch(userNotifierProvider);
     final userId = currentUser?.id;
     final grievancesAsync = userId == null
         ? const AsyncData<List<Grievance>>(<Grievance>[])
@@ -124,10 +120,11 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(
-                    _materialIcon(Icons.lock_outline_rounded),
-                    size: 44,
-                    color: scheme.primary,
+                  SvgPicture.asset(
+                    'assets/icons/lock.svg',
+                    width: 24,
+                    height: 24,
+                    colorFilter: ColorFilter.mode(scheme.primary, BlendMode.srcIn),
                   ),
                   const SizedBox(height: AppSpacing.base),
                   Text(
@@ -144,7 +141,8 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                   const SizedBox(height: AppSpacing.xl),
                   AppButton(
                     text: l10n.login,
-                    onPressed: () => Navigator.pushReplacementNamed(context, '/login'),
+                    onPressed: () =>
+                        Navigator.pushReplacementNamed(context, '/login'),
                     fullWidth: false,
                   ),
                 ],
@@ -155,7 +153,9 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
       );
     }
 
-    final grievances = _sortGrievances(grievancesAsync.valueOrNull ?? const <Grievance>[]);
+    final grievances = _sortGrievances(
+      grievancesAsync.valueOrNull ?? const <Grievance>[],
+    );
     final stats = _CitizenHomeStats.from(grievances);
 
     return AppShell(
@@ -165,7 +165,12 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
       actions: [
         IconButton(
           tooltip: l10n.notifications,
-          icon: Icon(_materialIcon(Icons.notifications_none)),
+          icon: SvgPicture.asset(
+            'assets/icons/notification.svg',
+            width: 24,
+            height: 24,
+            colorFilter: ColorFilter.mode(scheme.primary, BlendMode.srcIn),
+          ),
           onPressed: () => Navigator.pushNamed(context, '/notifications'),
         ),
       ],
@@ -173,7 +178,9 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
         onRefresh: () => _refreshHome(currentUser),
         color: scheme.primary,
         child: ListView(
-          physics: const AlwaysScrollableScrollPhysics(parent: BouncingScrollPhysics()),
+          physics: const AlwaysScrollableScrollPhysics(
+            parent: BouncingScrollPhysics(),
+          ),
           padding: const EdgeInsets.fromLTRB(
             AppSpacing.base,
             AppSpacing.base,
@@ -221,15 +228,28 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
               childAspectRatio: 1.1,
               children: [
                 _QuickActionCard(
-                  icon: _materialIcon(Icons.assignment),
+                  icon: SvgPicture.asset(
+                    'assets/icons/document.svg',
+                    width: 24,
+                    height: 24,
+                    colorFilter: ColorFilter.mode(scheme.primary, BlendMode.srcIn),
+                  ),
                   title: l10n.submitGrievance,
                   subtitle: l10n.submitGrievanceSubtitle,
                   tint: scheme.primaryContainer,
                   accent: scheme.primary,
-                  onTap: () => Navigator.pushNamed(context, '/citizen/submit').then((_) { ref.invalidate(citizenHistoryProvider(userId!)); }),
+                  onTap: () =>
+                      Navigator.pushNamed(context, '/citizen/submit').then((_) {
+                        ref.invalidate(citizenHistoryProvider(userId!));
+                      }),
                 ),
                 _QuickActionCard(
-                  icon: _materialIcon(Icons.track_changes),
+                  icon: SvgPicture.asset(
+                    'assets/icons/activity.svg',
+                    width: 24,
+                    height: 24,
+                    colorFilter: ColorFilter.mode(scheme.secondary, BlendMode.srcIn),
+                  ),
                   title: l10n.track_grievances,
                   subtitle: 'Follow status updates and open details fast.',
                   tint: scheme.secondaryContainer,
@@ -237,7 +257,12 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                   onTap: () => Navigator.pushNamed(context, '/citizen/track'),
                 ),
                 _QuickActionCard(
-                  icon: _materialIcon(Icons.location_on),
+                  icon: SvgPicture.asset(
+                    'assets/icons/location.svg',
+                    width: 24,
+                    height: 24,
+                    colorFilter: ColorFilter.mode(scheme.tertiary, BlendMode.srcIn),
+                  ),
                   title: 'Nearby Help',
                   subtitle: 'Locate useful nearby civic places and services.',
                   tint: scheme.tertiaryContainer,
@@ -245,7 +270,12 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                   onTap: () => Navigator.pushNamed(context, '/citizen/nearby'),
                 ),
                 _QuickActionCard(
-                  icon: _materialIcon(Icons.campaign),
+                  icon: SvgPicture.asset(
+                    'assets/icons/volume_high.svg',
+                    width: 24,
+                    height: 24,
+                    colorFilter: ColorFilter.mode(scheme.onSurfaceVariant, BlendMode.srcIn),
+                  ),
                   title: l10n.announcements,
                   subtitle: 'See local notices, campaigns, and civic updates.',
                   tint: scheme.surfaceContainerHighest,
@@ -271,28 +301,48 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                 _MetricCard(
                   title: 'Total',
                   value: '${stats.total}',
-                  icon: _materialIcon(Icons.folder),
+                  icon: SvgPicture.asset(
+                    'assets/icons/folder.svg',
+                    width: 24,
+                    height: 24,
+                    colorFilter: ColorFilter.mode(scheme.primary, BlendMode.srcIn),
+                  ),
                   accent: scheme.primary,
                   tone: scheme.primaryContainer,
                 ),
                 _MetricCard(
                   title: 'Active',
                   value: '${stats.active}',
-                  icon: _materialIcon(Icons.pending_actions),
+                  icon: SvgPicture.asset(
+                    'assets/icons/timer.svg',
+                    width: 24,
+                    height: 24,
+                    colorFilter: ColorFilter.mode(scheme.secondary, BlendMode.srcIn),
+                  ),
                   accent: scheme.secondary,
                   tone: scheme.secondaryContainer,
                 ),
                 _MetricCard(
                   title: 'Resolved',
                   value: '${stats.resolved}',
-                  icon: _materialIcon(Icons.check_circle),
+                  icon: SvgPicture.asset(
+                    'assets/icons/tick_circle.svg',
+                    width: 24,
+                    height: 24,
+                    colorFilter: ColorFilter.mode(AppTheme.success, BlendMode.srcIn),
+                  ),
                   accent: AppTheme.success,
                   tone: AppTheme.success.withOpacity(0.12),
                 ),
                 _MetricCard(
                   title: 'High Priority',
                   value: '${stats.highPriority}',
-                  icon: _materialIcon(Icons.priority_high),
+                  icon: SvgPicture.asset(
+                    'assets/icons/warning_2.svg',
+                    width: 24,
+                    height: 24,
+                    colorFilter: ColorFilter.mode(AppTheme.error, BlendMode.srcIn),
+                  ),
                   accent: AppTheme.error,
                   tone: AppTheme.error.withOpacity(0.12),
                 ),
@@ -329,7 +379,8 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                         const SizedBox(height: AppSpacing.base),
                         AppButton(
                           text: l10n.submitGrievance,
-                          onPressed: () => Navigator.pushNamed(context, '/citizen/submit'),
+                          onPressed: () =>
+                              Navigator.pushNamed(context, '/citizen/submit'),
                           fullWidth: false,
                         ),
                       ],
@@ -364,10 +415,7 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                       style: theme.textTheme.titleMedium,
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    Text(
-                      '$error',
-                      style: theme.textTheme.bodyMedium,
-                    ),
+                    Text('$error', style: theme.textTheme.bodyMedium),
                     const SizedBox(height: AppSpacing.base),
                     AppButton(
                       text: 'Retry',
@@ -423,7 +471,9 @@ class _HeroPanel extends StatelessWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final dateLabel = DateFormat('EEEE, d MMMM').format(DateTime.now());
-    final name = (user.name?.trim().isNotEmpty ?? false) ? user.name!.trim() : 'Citizen';
+    final name = (user.name?.trim().isNotEmpty ?? false)
+        ? user.name!.trim()
+        : 'Citizen';
     final initials = name
         .split(RegExp(r'\s+'))
         .where((part) => part.isNotEmpty)
@@ -439,7 +489,8 @@ class _HeroPanel extends StatelessWidget {
           end: Alignment.bottomRight,
           colors: [
             scheme.primary,
-            Color.lerp(scheme.primary, scheme.secondary, 0.55) ?? scheme.primary,
+            Color.lerp(scheme.primary, scheme.secondary, 0.55) ??
+                scheme.primary,
           ],
         ),
         boxShadow: [
@@ -506,10 +557,11 @@ class _HeroPanel extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.calendar_month_rounded,
-                    size: 16,
-                    color: Colors.white,
+                  SvgPicture.asset(
+                    'assets/icons/calendar.svg',
+                    width: 16,
+                    height: 16,
+                    colorFilter: ColorFilter.mode(Colors.white, BlendMode.srcIn),
                   ),
                   const SizedBox(width: AppSpacing.sm),
                   Text(
@@ -535,8 +587,9 @@ class _HeroPanel extends StatelessWidget {
                 Expanded(
                   child: AppButton(
                     text: 'Create Complaint',
-                    icon: _materialIcon(Icons.add_circle),
-                    onPressed: () => Navigator.pushNamed(context, '/citizen/submit'),
+                    icon: Icons.add_circle,
+                    onPressed: () =>
+                        Navigator.pushNamed(context, '/citizen/submit'),
                     backgroundColor: Colors.white,
                     foregroundColor: scheme.primary,
                   ),
@@ -545,8 +598,9 @@ class _HeroPanel extends StatelessWidget {
                 Expanded(
                   child: AppButton(
                     text: 'My Updates',
-                    icon: _materialIcon(Icons.track_changes),
-                    onPressed: () => Navigator.pushNamed(context, '/citizen/track'),
+                    icon: Icons.bar_chart,
+                    onPressed: () =>
+                        Navigator.pushNamed(context, '/citizen/track'),
                     variant: AppButtonVariant.outlined,
                     backgroundColor: Colors.transparent,
                     foregroundColor: Colors.white,
@@ -583,7 +637,8 @@ class _AdsSection extends StatelessWidget {
       children: [
         _SectionHeader(
           title: 'Latest from PCMC',
-          subtitle: 'Promotions, announcements, and useful highlights from your local system.',
+          subtitle:
+              'Promotions, announcements, and useful highlights from your local system.',
         ),
         const SizedBox(height: AppSpacing.base),
         SizedBox(
@@ -672,7 +727,7 @@ class _QuickActionCard extends StatelessWidget {
     required this.onTap,
   });
 
-  final IconData icon;
+  final Widget icon;
   final String title;
   final String subtitle;
   final Color tint;
@@ -696,7 +751,7 @@ class _QuickActionCard extends StatelessWidget {
               color: tint,
               borderRadius: BorderRadius.circular(AppRadius.md),
             ),
-            child: Icon(icon, color: accent),
+            child: icon,
           ),
           const Spacer(),
           Text(
@@ -729,7 +784,7 @@ class _MetricCard extends StatelessWidget {
 
   final String title;
   final String value;
-  final IconData icon;
+  final Widget icon;
   final Color accent;
   final Color tone;
 
@@ -748,7 +803,7 @@ class _MetricCard extends StatelessWidget {
               color: tone,
               borderRadius: BorderRadius.circular(AppRadius.md),
             ),
-            child: Icon(icon, color: accent),
+            child: icon,
           ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
@@ -764,10 +819,7 @@ class _MetricCard extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
-                  title,
-                  style: theme.textTheme.bodySmall,
-                ),
+                Text(title, style: theme.textTheme.bodySmall),
               ],
             ),
           ),
@@ -790,8 +842,8 @@ class _RecentComplaintCard extends ConsumerWidget {
     return AppCard(
       color: scheme.surface,
       onTap: () {
-        final userId = ref.read(authProvider)?.id ??
-            ref.read(userNotifierProvider)?.id;
+        final userId =
+            ref.read(authProvider)?.id ?? ref.read(userNotifierProvider)?.id;
         Navigator.pushNamed(
           context,
           '/citizen/detail',
@@ -849,17 +901,32 @@ class _RecentComplaintCard extends ConsumerWidget {
             runSpacing: AppSpacing.sm,
             children: [
               _MetaChip(
-                icon: _materialIcon(Icons.schedule),
+                icon: SvgPicture.asset(
+                  'assets/icons/clock.svg',
+                  width: 14,
+                  height: 14,
+                  colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.onSurfaceVariant, BlendMode.srcIn),
+                ),
                 label: DateFormat('dd MMM yyyy').format(grievance.createdAt),
               ),
               if (grievance.areaName != null && grievance.areaName!.isNotEmpty)
                 _MetaChip(
-                  icon: _materialIcon(Icons.place),
+                  icon: SvgPicture.asset(
+                    'assets/icons/location.svg',
+                    width: 14,
+                    height: 14,
+                    colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.onSurfaceVariant, BlendMode.srcIn),
+                  ),
                   label: grievance.areaName!,
                 ),
               if (grievance.priority != null && grievance.priority!.isNotEmpty)
                 _MetaChip(
-                  icon: _materialIcon(Icons.flag),
+                  icon: SvgPicture.asset(
+                    'assets/icons/flag.svg',
+                    width: 14,
+                    height: 14,
+                    colorFilter: ColorFilter.mode(Theme.of(context).colorScheme.onSurfaceVariant, BlendMode.srcIn),
+                  ),
                   label: grievance.priority!.toUpperCase(),
                 ),
             ],
@@ -928,9 +995,11 @@ class _SupportPanel extends StatelessWidget {
                     color: scheme.primaryContainer,
                     borderRadius: BorderRadius.circular(AppRadius.md),
                   ),
-                  child: Icon(
-                    _materialIcon(Icons.support_agent),
-                    color: scheme.primary,
+                  child: SvgPicture.asset(
+                    'assets/icons/support.svg',
+                    width: 24,
+                    height: 24,
+                    colorFilter: ColorFilter.mode(scheme.primary, BlendMode.srcIn),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.base),
@@ -945,25 +1014,23 @@ class _SupportPanel extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.base),
-            Text(
-              supportMessage,
-              style: theme.textTheme.bodyMedium,
-            ),
+            Text(supportMessage, style: theme.textTheme.bodyMedium),
             const SizedBox(height: AppSpacing.lg),
             Row(
               children: [
                 Expanded(
                   child: AppButton(
                     text: supportLabel,
-                    icon: _materialIcon(Icons.call),
-                    onPressed: () => Navigator.pushNamed(context, '/contact-support'),
+                    icon: Icons.call,
+                    onPressed: () =>
+                        Navigator.pushNamed(context, '/contact-support'),
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: AppButton(
                     text: 'Profile',
-                    icon: _materialIcon(Icons.person),
+                    icon: Icons.person,
                     onPressed: () => Navigator.pushNamed(context, '/profile'),
                     variant: AppButtonVariant.outlined,
                   ),
@@ -978,12 +1045,9 @@ class _SupportPanel extends StatelessWidget {
 }
 
 class _MetaChip extends StatelessWidget {
-  const _MetaChip({
-    required this.icon,
-    required this.label,
-  });
+  const _MetaChip({required this.icon, required this.label});
 
-  final IconData icon;
+  final Widget icon;
   final String label;
 
   @override
@@ -1002,16 +1066,9 @@ class _MetaChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(
-            icon,
-            size: 14,
-            color: theme.colorScheme.onSurfaceVariant,
-          ),
+          icon,
           const SizedBox(width: 6),
-          Text(
-            label,
-            style: theme.textTheme.labelMedium,
-          ),
+          Text(label, style: theme.textTheme.labelMedium),
         ],
       ),
     );
@@ -1049,18 +1106,12 @@ class _SectionHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              Text(
-                subtitle,
-                style: theme.textTheme.bodySmall,
-              ),
+              Text(subtitle, style: theme.textTheme.bodySmall),
             ],
           ),
         ),
         if (actionLabel != null && onAction != null)
-          TextButton(
-            onPressed: onAction,
-            child: Text(actionLabel!),
-          ),
+          TextButton(onPressed: onAction, child: Text(actionLabel!)),
       ],
     );
   }
@@ -1085,7 +1136,8 @@ class _CitizenHomeStats {
 
     final active = grievances.where((grievance) {
       final status = (grievance.status ?? '').toLowerCase();
-      return !resolvedStatuses.contains(status) && !ignoredStatuses.contains(status);
+      return !resolvedStatuses.contains(status) &&
+          !ignoredStatuses.contains(status);
     }).length;
 
     final resolved = grievances.where((grievance) {
