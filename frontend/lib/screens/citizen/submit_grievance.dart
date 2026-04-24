@@ -16,6 +16,8 @@ import 'package:main_ui/widgets/form_fields.dart';
 import 'package:main_ui/widgets/multi_step_form_stepper.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 
+// DON'T import app_shell - we'll use custom scaffold
+
 class SubmitGrievance extends ConsumerStatefulWidget {
   const SubmitGrievance({super.key});
 
@@ -46,7 +48,6 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
   @override
   void initState() {
     super.initState();
-    // Add listeners to rebuild when text fields change to enable/disable Next button
     _titleController.addListener(() => setState(() {}));
     _descriptionController.addListener(() => setState(() {}));
     _addressController.addListener(() => setState(() {}));
@@ -79,7 +80,8 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${AppLocalizations.of(context)!.error}: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: _danger,
+          behavior: SnackBarBehavior.floating,
         ),
       );
     }
@@ -94,9 +96,9 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
       if (!mounted) return false;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Location services are disabled. Please enable them in Settings.',
-          ),
+          content: Text('Location services are disabled. Please enable them in Settings.'),
+          backgroundColor: _warning,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       await Geolocator.openLocationSettings();
@@ -110,9 +112,9 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
         if (!mounted) return false;
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text(
-              'Location permission denied. Please allow location access.',
-            ),
+            content: Text('Location permission denied. Please allow location access.'),
+            backgroundColor: _warning,
+            behavior: SnackBarBehavior.floating,
           ),
         );
         return false;
@@ -123,9 +125,9 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
       if (!mounted) return false;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text(
-            'Location permission permanently denied. Please enable it from Settings.',
-          ),
+          content: Text('Location permission permanently denied. Please enable it from Settings.'),
+          backgroundColor: _danger,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       await Geolocator.openAppSettings();
@@ -191,13 +193,13 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
       case 0:
         return _detailsFormKey.currentState?.validate() ?? false;
       case 1:
-        return _categoryFormKey.currentState?.validate() ?? false &&
+        return (_categoryFormKey.currentState?.validate() ?? false) &&
             _selectedSubjectId != null &&
             _selectedAreaId != null;
       case 2:
         return _locationFormKey.currentState?.validate() ?? false;
       case 3:
-        return true; // No validation needed for attachments
+        return true;
       default:
         return false;
     }
@@ -209,7 +211,8 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context)!.pleaseFillAllFields),
-          backgroundColor: Colors.red,
+          backgroundColor: _danger,
+          behavior: SnackBarBehavior.floating,
         ),
       );
       return;
@@ -225,45 +228,65 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
         subjectId: _selectedSubjectId!,
         areaId: _selectedAreaId!,
         address: _addressController.text,
+        latitude: _currentPosition?.latitude,
+        longitude: _currentPosition?.longitude,
         attachments: _attachments,
       );
 
       if (!mounted) return;
+      setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(AppLocalizations.of(context)!.grievanceSubmitted),
-          backgroundColor: Colors.green,
+          backgroundColor: _success,
+          behavior: SnackBarBehavior.floating,
         ),
       );
-      Navigator.pop(context, true);
+      // Use pushReplacementNamed instead of pop.
+      // The AppShell bottom nav uses pushReplacementNamed to open this screen,
+      // which removes the previous route from the stack. A plain pop() would
+      // then surface the SplashScreen (or nothing), causing a blank screen.
+      // Replacing with /citizen/home always lands the user in the right place,
+      // and CitizenHomeScreen.initState() refreshes the grievances list.
+      Navigator.pushReplacementNamed(context, '/citizen/home');
     } catch (e) {
       if (!mounted) return;
+      setState(() => _isSubmitting = false);
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('${AppLocalizations.of(context)!.error}: $e'),
-          backgroundColor: Colors.red,
+          backgroundColor: _danger,
+          behavior: SnackBarBehavior.floating,
         ),
       );
-    } finally {
-      if (mounted) {
-        setState(() => _isSubmitting = false);
-      }
     }
   }
 
   bool get _canProceedToNextStep {
     switch (_currentStep) {
       case 0:
-        // Check if title and description are filled without triggering validation
         return _titleController.text.isNotEmpty &&
             _descriptionController.text.isNotEmpty;
       case 1:
         return _selectedSubjectId != null && _selectedAreaId != null;
       case 2:
-        // Check if address is filled without triggering validation
         return _addressController.text.isNotEmpty;
       default:
         return true;
+    }
+  }
+
+  void _navigateToBottomNav(int index) {
+    switch (index) {
+      case 0:
+        Navigator.pushReplacementNamed(context, '/citizen/home');
+        break;
+      case 1:
+        Navigator.pushReplacementNamed(context, '/citizen/track');
+        break;
+      case 2:
+        Navigator.pushReplacementNamed(context, '/profile');
+        break;
     }
   }
 
@@ -283,8 +306,7 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
             controller: _titleController,
             label: localizations.title,
             hint: 'e.g., Pothole on Main Street',
-            validator: (value) =>
-                value!.isEmpty ? localizations.titleRequired : null,
+            validator: (value) => value!.isEmpty ? localizations.titleRequired : null,
             isRequired: true,
             textInputAction: TextInputAction.next,
           ),
@@ -293,9 +315,7 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
             controller: _descriptionController,
             label: localizations.description,
             hint: 'Describe the issue in detail',
-            validator: (value) => value!.isEmpty
-                ? localizations.descriptionRequired
-                : null,
+            validator: (value) => value!.isEmpty ? localizations.descriptionRequired : null,
             isRequired: true,
             maxLines: 5,
             minLines: 3,
@@ -306,8 +326,7 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
     );
   }
 
-  Widget _buildCategoryStep(
-      AppLocalizations localizations, WidgetRef ref) {
+  Widget _buildCategoryStep(AppLocalizations localizations, WidgetRef ref) {
     return Form(
       key: _categoryFormKey,
       child: Column(
@@ -330,13 +349,10 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
                     ),
                   )
                   .toList(),
-              onChanged: (value) =>
-                  setState(() => _selectedSubjectId = value),
+              onChanged: (value) => setState(() => _selectedSubjectId = value),
               label: localizations.filterBySubject,
               isRequired: true,
-              validator: (value) => value == null
-                  ? localizations.subjectRequired
-                  : null,
+              validator: (value) => value == null ? localizations.subjectRequired : null,
             ),
             loading: () => const SizedBox(
               height: 56,
@@ -344,7 +360,7 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
             ),
             error: (error, stack) => Text(
               '${localizations.error}: $error',
-              style: const TextStyle(color: Colors.red),
+              style: const TextStyle(color: _danger),
             ),
           ),
           const SizedBox(height: 16),
@@ -359,13 +375,10 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
                     ),
                   )
                   .toList(),
-              onChanged: (value) =>
-                  setState(() => _selectedAreaId = value),
+              onChanged: (value) => setState(() => _selectedAreaId = value),
               label: localizations.filterByArea,
               isRequired: true,
-              validator: (value) => value == null
-                  ? localizations.areaRequired
-                  : null,
+              validator: (value) => value == null ? localizations.areaRequired : null,
             ),
             loading: () => const SizedBox(
               height: 56,
@@ -373,7 +386,7 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
             ),
             error: (error, stack) => Text(
               '${localizations.error}: $error',
-              style: const TextStyle(color: Colors.red),
+              style: const TextStyle(color: _danger),
             ),
           ),
         ],
@@ -397,8 +410,7 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
             controller: _addressController,
             label: localizations.address ?? 'Address',
             hint: 'Enter the street address',
-            validator: (value) =>
-                value!.isEmpty ? 'Address is required' : null,
+            validator: (value) => value!.isEmpty ? 'Address is required' : null,
             isRequired: true,
             maxLines: 2,
             minLines: 1,
@@ -408,12 +420,8 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
             children: [
               Expanded(
                 child: AppButton(
-                  text: _isSubmitting
-                      ? 'Getting Location...'
-                      : 'Get Location',
-                  onPressed: _isSubmitting
-                      ? null
-                      : _getCurrentLocation,
+                  text: _isSubmitting ? 'Getting Location...' : 'Get Location',
+                  onPressed: _isSubmitting ? null : _getCurrentLocation,
                   icon: Icons.location_on,
                   fullWidth: true,
                 ),
@@ -450,7 +458,7 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
         if (_attachments.isNotEmpty) ...[
           Text(
             'Attached Files (${_attachments.length})',
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
               color: dsTextPrimary,
@@ -463,13 +471,14 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
             children: List.generate(_attachments.length, (index) {
               final file = _attachments[index];
               return Chip(
+                backgroundColor: dsSurfaceAlt,
                 label: Text(
                   file.name,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(fontSize: 12),
+                  style: const TextStyle(color: dsTextPrimary, fontSize: 12),
                 ),
-                avatar: const Icon(Icons.attachment, size: 18),
-                deleteIcon: const Icon(Icons.close, size: 18),
+                avatar: const Icon(Icons.attachment, color: dsAccent, size: 18),
+                deleteIcon: const Icon(Icons.close, color: dsTextSecondary, size: 18),
                 onDeleted: () => _removeAttachment(index),
               );
             }),
@@ -496,8 +505,7 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
         ),
         const SizedBox(height: 16),
         FormInfoBox(
-          message:
-              'Attachments are optional but help speed up the resolution process',
+          message: 'Attachments are optional but help speed up the resolution process',
         ),
       ],
     );
@@ -534,22 +542,72 @@ class _SubmitGrievanceState extends ConsumerState<SubmitGrievance> {
       ),
     ];
 
-    return MultiStepFormStepper(
-      steps: steps,
-      currentStep: _currentStep,
-      onNextStep: _nextStep,
-      onPreviousStep: _previousStep,
-      onSubmit: _submitGrievance,
-      isSubmitting: _isSubmitting,
-      canProceedToNext: _canProceedToNextStep,
-      onStepChanged: (newStep) {
-        if (newStep <= _maxUnlockedStep) {
-          setState(() => _currentStep = newStep);
-        }
-      },
-      nextButtonLabel: 'Next',
-      previousButtonLabel: 'Back',
-      submitButtonLabel: localizations.submit,
+    // Custom Scaffold with NO AppBar, only Bottom Navigation
+    return Scaffold(
+      backgroundColor: dsBackground,
+      // NO AppBar here - removed completely
+      body: MultiStepFormStepper(
+        steps: steps,
+        currentStep: _currentStep,
+        onNextStep: _nextStep,
+        onPreviousStep: _previousStep,
+        onSubmit: _submitGrievance,
+        isSubmitting: _isSubmitting,
+        canProceedToNext: _canProceedToNextStep,
+        onStepChanged: (newStep) {
+          if (newStep <= _maxUnlockedStep) {
+            setState(() => _currentStep = newStep);
+          }
+        },
+        nextButtonLabel: 'Next',
+        previousButtonLabel: 'Back',
+        submitButtonLabel: localizations.submit,
+      ),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: dsSurface,
+          border: Border(
+            top: BorderSide(color: dsBorder, width: 1),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha:0.08),
+              blurRadius: 8,
+              offset: const Offset(0, -2),
+            ),
+          ],
+        ),
+        child: BottomNavigationBar(
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          selectedItemColor: dsAccent,
+          unselectedItemColor: dsTextSecondary,
+          currentIndex: 0,
+          selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 11),
+          unselectedLabelStyle: const TextStyle(fontSize: 11),
+          items: const [
+            BottomNavigationBarItem(
+              icon: Icon(Icons.home_rounded),
+              label: 'Home',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.track_changes_rounded),
+              label: 'Track',
+            ),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.person_rounded),
+              label: 'Profile',
+            ),
+          ],
+          onTap: _navigateToBottomNav,
+        ),
+      ),
     );
   }
 }
+
+// Status colors matching theme
+const Color _success = Color(0xFF10B981);
+const Color _warning = Color(0xFFF59E0B);
+const Color _danger = Color(0xFFEF4444);

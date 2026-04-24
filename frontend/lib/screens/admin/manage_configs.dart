@@ -42,7 +42,7 @@ class _ManageConfigsState extends ConsumerState<ManageConfigs> {
         backgroundColor: dsSurface,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
-          side: BorderSide(color: dsAccent.withOpacity(0.3)),
+          side: BorderSide(color: dsAccent.withValues(alpha: 0.3)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(24),

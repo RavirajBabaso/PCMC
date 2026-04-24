@@ -102,7 +102,7 @@ class AppButton extends StatelessWidget {
         : IconTheme.merge(
             data: IconThemeData(
               color: effectivePressHandler == null
-                  ? resolvedForeground.withOpacity(0.6)
+                  ? resolvedForeground.withValues(alpha:0.6)
                   : resolvedForeground,
               size: _fontSize + 4,
             ),

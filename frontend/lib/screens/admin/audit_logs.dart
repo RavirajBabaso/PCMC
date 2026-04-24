@@ -4,6 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../services/api_service.dart';
 import '../../widgets/app/app_button.dart';
 import '../../widgets/empty_state.dart';
+import '../../theme/app_theme.dart';
+
+// Add these color definitions
+const Color _success = Color(0xFF10B981);
+const Color _warning = Color(0xFFF59E0B);
+const Color _danger = Color(0xFFEF4444);
+const Color _purple = Color(0xFF8B5CF6);
 
 class AuditLogs extends ConsumerStatefulWidget {
   const AuditLogs({super.key});
@@ -37,25 +44,27 @@ class _AuditLogsState extends ConsumerState<AuditLogs> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFf8fbff),
+      backgroundColor: dsBackground,
       appBar: AppBar(
         title: const Text(
           'Audit Logs',
           style: TextStyle(
             fontWeight: FontWeight.bold,
-            color: Colors.black,
+            color: dsAccent,
           ),
         ),
         centerTitle: true,
-        backgroundColor: Colors.white,
-        elevation: 2,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12),
+        backgroundColor: dsSurface,
+        elevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(height: 1, color: dsBorder),
         ),
-        iconTheme: IconThemeData(color: Colors.blue.shade800),
+        iconTheme: const IconThemeData(color: dsAccent),
         actions: [
           IconButton(
-            icon: Icon(Icons.refresh, color: Colors.blue.shade600),
+            icon: const Icon(Icons.refresh),
+            color: dsAccent,
             tooltip: "Refresh Logs",
             onPressed: _refreshLogs,
           ),
@@ -65,9 +74,9 @@ class _AuditLogsState extends ConsumerState<AuditLogs> {
         future: _logsFuture,
         builder: (context, snapshot) {
           if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
+            return const Center(
               child: CircularProgressIndicator(
-                color: Colors.blue.shade600,
+                color: dsAccent,
                 strokeWidth: 3,
               ),
             );
@@ -80,14 +89,13 @@ class _AuditLogsState extends ConsumerState<AuditLogs> {
               actionButton: AppButton(
                 text: 'Retry',
                 onPressed: _refreshLogs,
-                backgroundColor: Colors.blue.shade600,
-                
+                backgroundColor: dsAccent,
               ),
             );
           }
           final logs = snapshot.data ?? [];
           if (logs.isEmpty) {
-            return const EmptyState(
+            return EmptyState(
               icon: Icons.history_toggle_off,
               title: 'No Audit Logs',
               message: 'There are no audit logs to display at this time.',
@@ -105,20 +113,30 @@ class _AuditLogsState extends ConsumerState<AuditLogs> {
                     Text(
                       'Recent Activities',
                       style: theme.textTheme.titleLarge?.copyWith(
-                        color: Colors.blue.shade800,
+                        color: dsAccent,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
-                    Chip(
-                      label: Text(
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 12,
+                        vertical: 6,
+                      ),
+                      decoration: BoxDecoration(
+                        color: dsAccent.withValues(alpha: 0.12),
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(
+                          color: dsAccent..withValues(alpha: 0.24),
+                        ),
+                      ),
+                      child: Text(
                         '${logs.length} entries',
                         style: const TextStyle(
                           fontSize: 12,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: dsAccent,
                         ),
                       ),
-                      backgroundColor: Colors.blue.shade600,
                     ),
                   ],
                 ),
@@ -142,15 +160,20 @@ class _AuditLogsState extends ConsumerState<AuditLogs> {
   }
 
   Widget _buildLogCard(Map<String, dynamic> log, ThemeData theme) {
+    final action = log['action'] ?? 'Unknown Action';
+    final actionIcon = _getActionIcon(action);
+    final iconColor = _getIconColor(action);
+
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFecf2fe),
+        color: dsSurface,
         borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: dsBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.blue.shade100,
-            blurRadius: 8,
-            offset: const Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.06),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
@@ -167,16 +190,19 @@ class _AuditLogsState extends ConsumerState<AuditLogs> {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
-                  width: 40,
-                  height: 40,
+                  width: 44,
+                  height: 44,
                   decoration: BoxDecoration(
-                    color: Colors.blue.shade100,
+                    color: iconColor.withValues(alpha: 0.12),
                     shape: BoxShape.circle,
+                    border: Border.all(
+                      color: iconColor.withValues(alpha: 0.24),
+                    ),
                   ),
                   child: Icon(
-                    _getActionIcon(log['action']),
-                    color: Colors.blue.shade800,
-                    size: 20,
+                    actionIcon,
+                    color: iconColor,
+                    size: 22,
                   ),
                 ),
                 const SizedBox(width: 16),
@@ -185,30 +211,30 @@ class _AuditLogsState extends ConsumerState<AuditLogs> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        log['action'] ?? 'Unknown Action',
+                        action,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.blue.shade900,
+                          color: dsTextPrimary,
                         ),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
                       const SizedBox(height: 8),
                       _buildInfoRow(
-                        Icons.person,
+                        Icons.person_outline_rounded,
                         'Performed by: ${log['performed_by'] ?? 'Unknown'}',
                         theme,
                       ),
                       const SizedBox(height: 4),
                       _buildInfoRow(
-                        Icons.access_time,
+                        Icons.access_time_rounded,
                         'At: ${_formatTimestamp(log['timestamp'])}',
                         theme,
                       ),
                       if (log['details'] != null) ...[
                         const SizedBox(height: 4),
                         _buildInfoRow(
-                          Icons.description,
+                          Icons.description_outlined,
                           'Details: ${log['details']}',
                           theme,
                         ),
@@ -231,14 +257,15 @@ class _AuditLogsState extends ConsumerState<AuditLogs> {
         Icon(
           icon,
           size: 14,
-          color: Colors.blue.shade600,
+          color: dsTextSecondary,
         ),
         const SizedBox(width: 6),
         Expanded(
           child: Text(
             text,
             style: theme.textTheme.bodySmall?.copyWith(
-              color: Colors.blue.shade700,
+              color: dsTextSecondary,
+              fontSize: 12,
             ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
@@ -250,22 +277,60 @@ class _AuditLogsState extends ConsumerState<AuditLogs> {
 
   IconData _getActionIcon(String action) {
     final lowerAction = action.toLowerCase();
-    if (lowerAction.contains('login')) return Icons.login;
-    if (lowerAction.contains('create') || lowerAction.contains('add')) return Icons.add_circle;
-    if (lowerAction.contains('update') || lowerAction.contains('edit')) return Icons.edit;
-    if (lowerAction.contains('delete') || lowerAction.contains('remove')) return Icons.delete;
-    if (lowerAction.contains('view') || lowerAction.contains('read')) return Icons.visibility;
-    if (lowerAction.contains('export')) return Icons.download;
-    if (lowerAction.contains('import')) return Icons.upload;
-    return Icons.info;
+    if (lowerAction.contains('login')) return Icons.login_rounded;
+    if (lowerAction.contains('create') || lowerAction.contains('add')) return Icons.add_circle_rounded;
+    if (lowerAction.contains('update') || lowerAction.contains('edit')) return Icons.edit_rounded;
+    if (lowerAction.contains('delete') || lowerAction.contains('remove')) return Icons.delete_rounded;
+    if (lowerAction.contains('view') || lowerAction.contains('read')) return Icons.visibility_rounded;
+    if (lowerAction.contains('export')) return Icons.download_rounded;
+    if (lowerAction.contains('import')) return Icons.upload_rounded;
+    return Icons.info_rounded;
+  }
+
+  Color _getIconColor(String action) {
+    final lowerAction = action.toLowerCase();
+    if (lowerAction.contains('login')) return dsAccent;
+    if (lowerAction.contains('create') || lowerAction.contains('add')) return _success;
+    if (lowerAction.contains('update') || lowerAction.contains('edit')) return _warning;
+    if (lowerAction.contains('delete') || lowerAction.contains('remove')) return _danger;
+    if (lowerAction.contains('view') || lowerAction.contains('read')) return _purple;
+    if (lowerAction.contains('export')) return dsAccent;
+    if (lowerAction.contains('import')) return dsAccent;
+    return dsTextSecondary;
   }
 
   String _formatTimestamp(String timestamp) {
     try {
-      final dateTime = DateTime.parse(timestamp);
-      return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${dateTime.hour}:${dateTime.minute.toString().padLeft(2, '0')}';
+      final dateTime = DateTime.parse(timestamp).toLocal();
+      final now = DateTime.now();
+      final difference = now.difference(dateTime);
+      
+      // Show relative time for recent logs
+      if (difference.inDays == 0) {
+        if (difference.inHours == 0) {
+          if (difference.inMinutes == 0) {
+            return 'Just now';
+          }
+          return '${difference.inMinutes} minute${difference.inMinutes == 1 ? '' : 's'} ago';
+        }
+        return '${difference.inHours} hour${difference.inHours == 1 ? '' : 's'} ago';
+      } else if (difference.inDays == 1) {
+        return 'Yesterday at ${_formatTime(dateTime)}';
+      } else if (difference.inDays < 7) {
+        return '${difference.inDays} days ago';
+      }
+      
+      return '${dateTime.day}/${dateTime.month}/${dateTime.year} ${_formatTime(dateTime)}';
     } catch (e) {
       return timestamp;
     }
+  }
+
+  String _formatTime(DateTime dateTime) {
+    final hour = dateTime.hour;
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    final period = hour >= 12 ? 'PM' : 'AM';
+    final displayHour = hour == 0 ? 12 : hour > 12 ? hour - 12 : hour;
+    return '$displayHour:$minute $period';
   }
 }

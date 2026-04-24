@@ -190,7 +190,7 @@ class AppTheme {
     radiusLg: AppRadius.lg,
     cardElevation: 1,
     panelShadow: [
-      BoxShadow(color: Colors.black.withOpacity(0.06), blurRadius: 12, offset: const Offset(0, 4)),
+      BoxShadow(color: Colors.black.withValues(alpha:0.06), blurRadius: 12, offset: const Offset(0, 4)),
     ],
   );
 
@@ -263,7 +263,7 @@ class AppTheme {
         foregroundColor: appBarFg,
         elevation: 0,
         scrolledUnderElevation: 2,
-        shadowColor: Colors.black.withOpacity(0.1),
+        shadowColor: Colors.black.withValues(alpha:0.1),
         centerTitle: true,
         systemOverlayStyle: isDark
             ? SystemUiOverlayStyle.light
@@ -455,7 +455,7 @@ BoxDecoration dsPanelDecoration({Color? color, double radius = 16}) =>
       color: color ?? dsSurfaceAlt,
       borderRadius: BorderRadius.circular(radius),
       border: Border.all(color: dsBorder, width: 1),
-      boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.12), blurRadius: 12, offset: const Offset(0, 4))],
+      boxShadow: [BoxShadow(color: Colors.black.withValues(alpha:0.12), blurRadius: 12, offset: const Offset(0, 4))],
     );
 
 InputDecoration dsFormFieldDecoration({required String label}) =>

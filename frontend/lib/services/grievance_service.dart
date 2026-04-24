@@ -153,18 +153,22 @@ class GrievanceService {
     required int areaId,
     String? priority,
     String? address,
+    double? latitude,
+    double? longitude,
     List<PlatformFile>? attachments,
   }) async {
     try {
-      final position = await _getLocation();
+      // Use the lat/lng already captured in the UI (from _getCurrentLocation).
+      // Calling _getLocation() again here was redundant and could silently hang
+      // or pop a permission dialog mid-submission, causing a blank screen.
       final formData = FormData.fromMap({
         'title': title,
         'description': description,
         'subject_id': subjectId,
         'area_id': areaId,
         'priority': priority ?? 'medium',
-        if (position != null) 'latitude': position.latitude,
-        if (position != null) 'longitude': position.longitude,
+        if (latitude != null) 'latitude': latitude,
+        if (longitude != null) 'longitude': longitude,
         if (address != null) 'address': address,
       });
 

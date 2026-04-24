@@ -348,7 +348,7 @@ class _ManageNearbyScreenState extends State<ManageNearbyScreen> {
     );
 
     return DropdownButtonFormField<String>(
-      value: selectedCategory,
+      initialValue: selectedCategory,
       dropdownColor: dsSurface,
       style: const TextStyle(color: dsTextPrimary),
       decoration: _buildInputDecoration(
@@ -427,7 +427,7 @@ class _ManageNearbyScreenState extends State<ManageNearbyScreen> {
           Icon(
             Icons.location_off,
             size: 64,
-            color: dsTextSecondary.withOpacity(0.5),
+            color: dsTextSecondary..withValues(alpha:0.5),
           ),
           const SizedBox(height: 16),
           Text(
@@ -442,7 +442,7 @@ class _ManageNearbyScreenState extends State<ManageNearbyScreen> {
           Text(
             'Add your first nearby place by tapping the + button',
             style: TextStyle(
-              color: dsTextSecondary.withOpacity(0.7),
+              color: dsTextSecondary..withValues(alpha:0.7),
               fontSize: 14,
             ),
             textAlign: TextAlign.center,
@@ -499,7 +499,7 @@ class _ManageNearbyScreenState extends State<ManageNearbyScreen> {
                   border: Border.all(color: dsBorder),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.06),
+                      color: Colors.black..withValues(alpha:0.06),
                       blurRadius: 12,
                       offset: const Offset(0, 4),
                     ),
@@ -516,7 +516,7 @@ class _ManageNearbyScreenState extends State<ManageNearbyScreen> {
                         width: 52,
                         height: 52,
                         decoration: BoxDecoration(
-                          color: categoryColor.withOpacity(0.12),
+                          color: categoryColor..withValues(alpha:0.12),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -588,7 +588,5 @@ class _ManageNearbyScreenState extends State<ManageNearbyScreen> {
 }
 
 // Status colors matching theme
-const Color _success = Color(0xFF10B981);
-const Color _warning = Color(0xFFF59E0B);
+
 const Color _danger = Color(0xFFEF4444);
-const Color _purple = Color(0xFF8B5CF6);

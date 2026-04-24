@@ -69,9 +69,9 @@ class FaqsScreen extends StatelessWidget {
                     width: 60,
                     height: 60,
                     decoration: BoxDecoration(
-                      color: dsAccent.withOpacity(0.14),
+                      color: dsAccent.withValues(alpha:0.14),
                       borderRadius: BorderRadius.circular(18),
-                      border: Border.all(color: dsAccent.withOpacity(0.35)),
+                      border: Border.all(color: dsAccent.withValues(alpha:0.35)),
                     ),
                     child: const Icon(
                       Icons.help_outline_rounded,
@@ -143,7 +143,7 @@ class FaqsScreen extends StatelessWidget {
                         width: 42,
                         height: 42,
                         decoration: BoxDecoration(
-                          color: dsAccent.withOpacity(0.12),
+                          color: dsAccent.withValues(alpha:0.12),
                           borderRadius: BorderRadius.circular(12),
                         ),
                         child: Icon(
@@ -164,7 +164,7 @@ class FaqsScreen extends StatelessWidget {
                           width: double.infinity,
                           padding: const EdgeInsets.all(16),
                           decoration: BoxDecoration(
-                            color: dsSurface.withOpacity(0.55),
+                            color: dsSurface.withValues(alpha:0.55),
                             borderRadius: BorderRadius.circular(14),
                             border: Border.all(color: dsBorder),
                           ),

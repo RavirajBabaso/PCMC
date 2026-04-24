@@ -69,7 +69,7 @@ class _AppVersionScreenState extends State<AppVersionScreen> {
                       borderRadius: BorderRadius.circular(24),
                       boxShadow: [
                         BoxShadow(
-                          color: dsAccent.withOpacity(0.28),
+                          color: dsAccent.withValues(alpha: 0.28),
                           blurRadius: 18,
                           offset: const Offset(0, 10),
                         ),
@@ -104,9 +104,9 @@ class _AppVersionScreenState extends State<AppVersionScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
                     decoration: BoxDecoration(
-                      color: dsAccent.withOpacity(0.12),
+                      color: dsAccent.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(999),
-                      border: Border.all(color: dsAccent.withOpacity(0.34)),
+                      border: Border.all(color: dsAccent.withValues(alpha: 0.34)),
                     ),
                     child: Text(
                       version.isEmpty ? l10n.loadingData : version,
@@ -259,7 +259,7 @@ class _AppVersionScreenState extends State<AppVersionScreen> {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: dsAccent.withOpacity(0.12),
+              color: dsAccent.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(icon, size: 22, color: dsAccentSoft),

@@ -16,9 +16,9 @@ import 'package:main_ui/theme/app_theme.dart';
 
 // Status colors matching TrackGrievance
 const Color _success = Color(0xFF10B981);
-const Color _warning = Color(0xFFF59E0B);
+
 const Color _danger = Color(0xFFEF4444);
-const Color _purple = Color(0xFF8B5CF6);
+
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -211,7 +211,7 @@ class _ProfileBody extends StatelessWidget {
                 children: [
                   CircleAvatar(
                     radius: 48,
-                    backgroundColor: dsAccent.withOpacity(0.12),
+                    backgroundColor: dsAccent.withValues(alpha:0.12),
                     backgroundImage: user.profilePicture != null
                         ? NetworkImage('${Constants.baseUrl}/uploads/${user.profilePicture}')
                         : null,
@@ -263,7 +263,7 @@ class _ProfileBody extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.base, vertical: AppSpacing.xs),
                 decoration: BoxDecoration(
-                  color: dsAccent.withOpacity(0.12),
+                  color: dsAccent.withValues(alpha:0.12),
                   borderRadius: BorderRadius.circular(999),
                 ),
                 child: Text(
@@ -332,7 +332,7 @@ class _ProfileBody extends StatelessWidget {
                   trailing: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                     decoration: BoxDecoration(
-                      color: (user.isActive ? _success : _danger).withOpacity(0.12),
+                      color: (user.isActive ? _success : _danger).withValues(alpha:0.12),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Text(
@@ -495,7 +495,7 @@ class _InfoCard extends StatelessWidget {
         border: Border.all(color: dsBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha:0.06),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -524,7 +524,7 @@ class _NotLoggedIn extends StatelessWidget {
             border: Border.all(color: dsBorder),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withOpacity(0.06),
+                color: Colors.black.withValues(alpha:0.06),
                 blurRadius: 12,
                 offset: const Offset(0, 4),
               ),
@@ -539,7 +539,7 @@ class _NotLoggedIn extends StatelessWidget {
                   width: 80,
                   height: 80,
                   decoration: BoxDecoration(
-                    color: dsAccent.withOpacity(0.12),
+                    color: dsAccent.withValues(alpha:0.12),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(Icons.account_circle_outlined,

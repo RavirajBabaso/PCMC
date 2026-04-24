@@ -127,7 +127,7 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                     width: 56,
                     height: 56,
                     decoration: BoxDecoration(
-                      color: dsAccent.withOpacity(0.12),
+                      color: dsAccent.withValues(alpha:0.12),
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
@@ -206,6 +206,12 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
               greeting: _greetingForHour(),
               subtitle:
                   'Everything important for a citizen is here: updates, quick actions, and the latest progress on your complaints.',
+              onComplaintCreated: () =>
+                  Navigator.pushNamed(context, '/citizen/submit').then((_) {
+                    if (userId != null) {
+                      ref.invalidate(citizenHistoryProvider(userId));
+                    }
+                  }),
             ),
             const SizedBox(height: AppSpacing.xl),
             adsAsync.when(
@@ -345,7 +351,16 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                         AppButton(
                           text: l10n.submitGrievance,
                           onPressed: () =>
-                              Navigator.pushNamed(context, '/citizen/submit'),
+                              Navigator.pushNamed(
+                                context,
+                                '/citizen/submit',
+                              ).then((_) {
+                                if (userId != null) {
+                                  ref.invalidate(
+                                    citizenHistoryProvider(userId),
+                                  );
+                                }
+                              }),
                           fullWidth: false,
                         ),
                       ],
@@ -383,7 +398,10 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
-                    Text('$error', style: const TextStyle(color: dsTextSecondary)),
+                    Text(
+                      '$error',
+                      style: const TextStyle(color: dsTextSecondary),
+                    ),
                     const SizedBox(height: AppSpacing.base),
                     AppButton(
                       text: 'Retry',
@@ -398,6 +416,12 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
             _SupportPanel(
               supportLabel: l10n.contactSupport,
               supportMessage: l10n.supportTeamMessage,
+              onCreateComplaint: () =>
+                  Navigator.pushNamed(context, '/citizen/submit').then((_) {
+                    if (userId != null) {
+                      ref.invalidate(citizenHistoryProvider(userId));
+                    }
+                  }),
             ),
           ],
         ),
@@ -414,7 +438,7 @@ class _CitizenHomeScreenState extends ConsumerState<CitizenHomeScreen> {
         border: Border.all(color: dsBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.08),
+            color: Colors.black.withValues(alpha:0.08),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -450,11 +474,13 @@ class _HeroPanel extends StatelessWidget {
     required this.user,
     required this.greeting,
     required this.subtitle,
+    this.onComplaintCreated,
   });
 
   final User user;
   final String greeting;
   final String subtitle;
+  final VoidCallback? onComplaintCreated;
 
   @override
   Widget build(BuildContext context) {
@@ -475,14 +501,11 @@ class _HeroPanel extends StatelessWidget {
         gradient: const LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
-          colors: [
-            dsAccent,
-            Color(0xFF1D4ED8),
-          ],
+          colors: [dsAccent, Color(0xFF1D4ED8)],
         ),
         boxShadow: [
           BoxShadow(
-            color: dsAccent.withOpacity(0.24),
+            color: dsAccent.withValues(alpha:0.24),
             blurRadius: 28,
             offset: const Offset(0, 16),
           ),
@@ -497,7 +520,7 @@ class _HeroPanel extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 26,
-                  backgroundColor: Colors.white.withOpacity(0.18),
+                  backgroundColor: Colors.white.withValues(alpha:0.18),
                   child: Text(
                     initials.isEmpty ? 'C' : initials,
                     style: const TextStyle(
@@ -515,7 +538,7 @@ class _HeroPanel extends StatelessWidget {
                       Text(
                         greeting,
                         style: TextStyle(
-                          color: Colors.white.withOpacity(0.82),
+                          color: Colors.white.withValues(alpha:0.82),
                           fontSize: 14,
                           fontWeight: FontWeight.w600,
                         ),
@@ -541,14 +564,17 @@ class _HeroPanel extends StatelessWidget {
                 vertical: AppSpacing.sm,
               ),
               decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.12),
+                color: Colors.white.withValues(alpha:0.12),
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(Icons.calendar_today_rounded,
-                      color: Colors.white, size: 16),
+                  const Icon(
+                    Icons.calendar_today_rounded,
+                    color: Colors.white,
+                    size: 16,
+                  ),
                   const SizedBox(width: AppSpacing.sm),
                   Text(
                     dateLabel,
@@ -565,7 +591,7 @@ class _HeroPanel extends StatelessWidget {
             Text(
               subtitle,
               style: TextStyle(
-                color: Colors.white.withOpacity(0.92),
+                color: Colors.white.withValues(alpha:0.92),
                 fontSize: 16,
                 height: 1.5,
               ),
@@ -577,8 +603,7 @@ class _HeroPanel extends StatelessWidget {
                   child: AppButton(
                     text: 'Create Complaint',
                     icon: Icons.add_circle,
-                    onPressed: () =>
-                        Navigator.pushNamed(context, '/citizen/submit'),
+                    onPressed: onComplaintCreated,
                     backgroundColor: Colors.white,
                     foregroundColor: dsAccent,
                   ),
@@ -720,7 +745,7 @@ class _QuickActionCard extends StatelessWidget {
           border: Border.all(color: dsBorder),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha:0.06),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -735,7 +760,7 @@ class _QuickActionCard extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: accent.withOpacity(0.12),
+                  color: accent.withValues(alpha:0.12),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: accent, size: 24),
@@ -752,10 +777,7 @@ class _QuickActionCard extends StatelessWidget {
               const SizedBox(height: AppSpacing.xs),
               Text(
                 subtitle,
-                style: const TextStyle(
-                  color: dsTextSecondary,
-                  fontSize: 12,
-                ),
+                style: const TextStyle(color: dsTextSecondary, fontSize: 12),
                 maxLines: 2,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -790,7 +812,7 @@ class _MetricCard extends StatelessWidget {
         border: Border.all(color: dsBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha:0.06),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -804,7 +826,7 @@ class _MetricCard extends StatelessWidget {
               width: 42,
               height: 42,
               decoration: BoxDecoration(
-                color: accent.withOpacity(0.12),
+                color: accent.withValues(alpha:0.12),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Icon(icon, color: accent, size: 22),
@@ -825,7 +847,13 @@ class _MetricCard extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  Text(title, style: const TextStyle(color: dsTextSecondary, fontSize: 12)),
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      color: dsTextSecondary,
+                      fontSize: 12,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -865,7 +893,7 @@ class _RecentComplaintCard extends ConsumerWidget {
           border: Border.all(color: dsBorder),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.06),
+              color: Colors.black.withValues(alpha:0.06),
               blurRadius: 12,
               offset: const Offset(0, 4),
             ),
@@ -927,14 +955,18 @@ class _RecentComplaintCard extends ConsumerWidget {
                 children: [
                   _MetaChip(
                     icon: Icons.calendar_today_rounded,
-                    label: DateFormat('dd MMM yyyy').format(grievance.createdAt),
+                    label: DateFormat(
+                      'dd MMM yyyy',
+                    ).format(grievance.createdAt),
                   ),
-                  if (grievance.areaName != null && grievance.areaName!.isNotEmpty)
+                  if (grievance.areaName != null &&
+                      grievance.areaName!.isNotEmpty)
                     _MetaChip(
                       icon: Icons.location_on_rounded,
                       label: grievance.areaName!,
                     ),
-                  if (grievance.priority != null && grievance.priority!.isNotEmpty)
+                  if (grievance.priority != null &&
+                      grievance.priority!.isNotEmpty)
                     _MetaChip(
                       icon: Icons.flag_rounded,
                       label: grievance.priority!.toUpperCase(),
@@ -970,10 +1002,12 @@ class _SupportPanel extends StatelessWidget {
   const _SupportPanel({
     required this.supportLabel,
     required this.supportMessage,
+    this.onCreateComplaint,
   });
 
   final String supportLabel;
   final String supportMessage;
+  final VoidCallback? onCreateComplaint;
 
   @override
   Widget build(BuildContext context) {
@@ -985,7 +1019,7 @@ class _SupportPanel extends StatelessWidget {
         border: Border.all(color: dsBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha:0.06),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -1002,11 +1036,14 @@ class _SupportPanel extends StatelessWidget {
                   width: 46,
                   height: 46,
                   decoration: BoxDecoration(
-                    color: dsAccent.withOpacity(0.12),
+                    color: dsAccent.withValues(alpha:0.12),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.support_agent_rounded,
-                      color: dsAccent, size: 24),
+                  child: const Icon(
+                    Icons.support_agent_rounded,
+                    color: dsAccent,
+                    size: 24,
+                  ),
                 ),
                 const SizedBox(width: AppSpacing.base),
                 Expanded(
@@ -1022,17 +1059,20 @@ class _SupportPanel extends StatelessWidget {
               ],
             ),
             const SizedBox(height: AppSpacing.base),
-            Text(supportMessage,
-                style: const TextStyle(color: dsTextSecondary, fontSize: 14)),
+            Text(
+              supportMessage,
+              style: const TextStyle(color: dsTextSecondary, fontSize: 14),
+            ),
             const SizedBox(height: AppSpacing.lg),
             Row(
               children: [
                 Expanded(
                   child: AppButton(
-                    text: supportLabel,
-                    icon: Icons.call,
-                    onPressed: () =>
-                        Navigator.pushNamed(context, '/contact-support'),
+                    text: 'Create Complaint',
+                    icon: Icons.add_circle,
+                    onPressed: onCreateComplaint,
+                    backgroundColor: Colors.white,
+                    foregroundColor: dsAccent,
                   ),
                 ),
                 const SizedBox(width: AppSpacing.md),
@@ -1075,7 +1115,10 @@ class _MetaChip extends StatelessWidget {
         children: [
           Icon(icon, color: dsTextSecondary, size: 14),
           const SizedBox(width: 6),
-          Text(label, style: const TextStyle(color: dsTextSecondary, fontSize: 11)),
+          Text(
+            label,
+            style: const TextStyle(color: dsTextSecondary, fontSize: 11),
+          ),
         ],
       ),
     );
@@ -1113,8 +1156,10 @@ class _SectionHeader extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 4),
-              Text(subtitle,
-                  style: const TextStyle(color: dsTextSecondary, fontSize: 12)),
+              Text(
+                subtitle,
+                style: const TextStyle(color: dsTextSecondary, fontSize: 12),
+              ),
             ],
           ),
         ),

@@ -50,7 +50,7 @@ class StandardTextInput extends StatelessWidget {
         controller: controller,
         focusNode: focusNode,
         decoration: InputDecoration(
-        labelText: isRequired ? '${label} *' : label,
+        labelText: isRequired ? '$label *' : label,
         hintText: hint,
         helperText: helperText,
         hintStyle: const TextStyle(color: Color(0xFF5A7A9B)),
@@ -121,9 +121,9 @@ class StandardDropdown<T> extends StatelessWidget {
       hint: hint,
       child: DropdownButtonFormField<T>(
         focusNode: focusNode,
-        value: value,
+        initialValue: value,
         decoration: InputDecoration(
-        labelText: isRequired ? '${label} *' : label,
+        labelText: isRequired ? '$label *' : label,
         hintText: hint,
         labelStyle: const TextStyle(color: Color(0xFF8BA3BE)),
         filled: true,
@@ -230,7 +230,7 @@ class FormProgressIndicator extends StatelessWidget {
           child: LinearProgressIndicator(
             value: currentStep / totalSteps,
             minHeight: 6,
-            backgroundColor: dsAccent.withOpacity(0.1),
+            backgroundColor: dsAccent.withValues(alpha:0.1),
             valueColor: AlwaysStoppedAnimation<Color>(dsAccent),
           ),
         ),
@@ -271,7 +271,7 @@ class FormInfoBox extends StatelessWidget {
         color: backgroundColor,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: dsAccent.withOpacity(0.25),
+          color: dsAccent.withValues(alpha:0.25),
         ),
       ),
       child: Row(
@@ -313,7 +313,7 @@ class SuccessInfoBox extends StatelessWidget {
     return FormInfoBox(
       message: message,
       icon: icon,
-      backgroundColor: Colors.green.withOpacity(0.1),
+      backgroundColor: Colors.green.withValues(alpha:0.1),
       textColor: Colors.green,
     );
   }

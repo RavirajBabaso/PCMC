@@ -106,7 +106,7 @@ class _NearbyMeScreenState extends State<NearbyMeScreen> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(
-              height: 110,
+              height: 124,
               child: ListView.separated(
                 scrollDirection: Axis.horizontal,
                 padding: const EdgeInsets.symmetric(
@@ -123,7 +123,7 @@ class _NearbyMeScreenState extends State<NearbyMeScreen> {
                     onTap: () => fetchData(cat['key'] as String),
                     child: AnimatedContainer(
                       duration: const Duration(milliseconds: 250),
-                      width: 90,
+                      width: 96,
                       padding: const EdgeInsets.all(12),
                       decoration: dsPanelDecoration(
                         color: isSelected ? dsSurfaceAlt : dsSurface,
@@ -133,7 +133,7 @@ class _NearbyMeScreenState extends State<NearbyMeScreen> {
                         children: [
                           Icon(
                             cat['icon'] as IconData,
-                            size: 32,
+                            size: 28,
                             color: isSelected
                                 ? cat['color'] as Color
                                 : Colors.grey.shade700,
@@ -143,7 +143,7 @@ class _NearbyMeScreenState extends State<NearbyMeScreen> {
                             cat['label'] as String,
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              fontSize: 12,
+                              fontSize: 11,
                               fontWeight: isSelected
                                   ? FontWeight.bold
                                   : FontWeight.w500,
@@ -255,7 +255,7 @@ class _NearbyMeScreenState extends State<NearbyMeScreen> {
             leading: CircleAvatar(
               radius: 24,
               backgroundColor:
-                  (category['color'] as Color).withOpacity(0.15),
+                  (category['color'] as Color).withValues(alpha: 0.15),
               child: Icon(
                 category['icon'] as IconData,
                 color: category['color'] as Color,

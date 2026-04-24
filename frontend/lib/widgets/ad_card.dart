@@ -70,7 +70,7 @@ class _AdCardState extends State<AdCard> with SingleTickerProviderStateMixin {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
-        shadowColor: Colors.black.withOpacity(0.2),
+        shadowColor: Colors.black.withValues(alpha:0.2),
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: () {
@@ -84,8 +84,8 @@ class _AdCardState extends State<AdCard> with SingleTickerProviderStateMixin {
           onTapUp: _onTapUp,
           onTapCancel: _onTapCancel,
           borderRadius: BorderRadius.circular(16),
-          splashColor: theme.colorScheme.primary.withOpacity(0.1),
-          highlightColor: theme.colorScheme.primary.withOpacity(0.05),
+          splashColor: theme.colorScheme.primary.withValues(alpha:0.1),
+          highlightColor: theme.colorScheme.primary.withValues(alpha:0.05),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -94,7 +94,7 @@ class _AdCardState extends State<AdCard> with SingleTickerProviderStateMixin {
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
-                    color: theme.colorScheme.surfaceVariant.withOpacity(0.3),
+                    color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.3),
                   ),
                   child: widget.ad.imageUrl != null
                       ? _buildImageContent(theme)
@@ -112,7 +112,7 @@ class _AdCardState extends State<AdCard> with SingleTickerProviderStateMixin {
                 decoration: BoxDecoration(
                   border: Border(
                     top: BorderSide(
-                      color: theme.colorScheme.outline.withOpacity(0.1),
+                      color: theme.colorScheme.outline.withValues(alpha:0.1),
                       width: 1.0,
                     ),
                   ),
@@ -147,7 +147,7 @@ class _AdCardState extends State<AdCard> with SingleTickerProviderStateMixin {
           loadingBuilder: (context, child, loadingProgress) {
             if (loadingProgress == null) return child;
             return Container(
-              color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+              color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
               padding: const EdgeInsets.all(16),
               child: const LoadingSkeleton(height: double.infinity),
             );
@@ -164,7 +164,7 @@ class _AdCardState extends State<AdCard> with SingleTickerProviderStateMixin {
             child: Container(
               padding: const EdgeInsets.all(6),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.6),
+                color: Colors.black.withValues(alpha:0.6),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -186,13 +186,13 @@ class _AdCardState extends State<AdCard> with SingleTickerProviderStateMixin {
           Icon(
             Icons.image,
             size: 40,
-            color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+            color: theme.colorScheme.onSurfaceVariant.withValues(alpha:0.5),
           ),
           const SizedBox(height: 8),
           Text(
             'No Image',
             style: theme.textTheme.bodySmall?.copyWith(
-              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.6),
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha:0.6),
             ),
           ),
         ],
@@ -202,7 +202,7 @@ class _AdCardState extends State<AdCard> with SingleTickerProviderStateMixin {
 
   Widget _buildErrorContent(ThemeData theme) {
     return Container(
-      color: theme.colorScheme.surfaceVariant.withOpacity(0.5),
+      color: theme.colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
       child: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -210,13 +210,13 @@ class _AdCardState extends State<AdCard> with SingleTickerProviderStateMixin {
             Icon(
               Icons.image_not_supported,
               size: 40,
-              color: theme.colorScheme.onSurfaceVariant.withOpacity(0.5),
+              color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 8),
             Text(
               'Failed to load',
               style: theme.textTheme.bodySmall?.copyWith(
-                color: theme.colorScheme.onSurfaceVariant.withOpacity(0.6),
+                color: theme.colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
               ),
             ),
           ],
@@ -246,7 +246,7 @@ class _AdCardState extends State<AdCard> with SingleTickerProviderStateMixin {
       context: context,
       barrierDismissible: true,
       barrierLabel: MaterialLocalizations.of(context).modalBarrierDismissLabel,
-      barrierColor: Colors.black.withOpacity(0.85),
+      barrierColor: Colors.black.withValues(alpha: 0.85),
       transitionDuration: const Duration(milliseconds: 300),
       pageBuilder: (context, animation, secondaryAnimation) {
         return Material(
@@ -263,7 +263,7 @@ class _AdCardState extends State<AdCard> with SingleTickerProviderStateMixin {
                     icon: Container(
                       padding: const EdgeInsets.all(8),
                       decoration: BoxDecoration(
-                        color: Colors.black.withOpacity(0.5),
+                        color: Colors.black.withValues(alpha: 0.5),
                         shape: BoxShape.circle,
                       ),
                       child: const Icon(
@@ -319,7 +319,7 @@ class _AdCardState extends State<AdCard> with SingleTickerProviderStateMixin {
                     width: double.infinity,
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.4),
+                      color: Colors.black.withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(

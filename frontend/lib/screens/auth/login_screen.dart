@@ -9,10 +9,9 @@ import 'package:main_ui/services/api_service.dart';
 import 'package:main_ui/theme/app_theme.dart';
 
 // Add these color definitions
-const Color _success = Color(0xFF10B981);
-const Color _warning = Color(0xFFF59E0B);
+
 const Color _danger = Color(0xFFEF4444);
-const Color _purple = Color(0xFF8B5CF6);
+
 
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -153,7 +152,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 width: 72,
                 height: 72,
                 decoration: BoxDecoration(
-                  color: dsAccent.withOpacity(0.12),
+                  color: dsAccent.withValues(alpha:0.12),
                   shape: BoxShape.circle,
                 ),
                 child: const Icon(Icons.gavel_rounded, size: 42, color: dsAccent),

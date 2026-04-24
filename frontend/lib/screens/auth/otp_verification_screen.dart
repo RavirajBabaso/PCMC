@@ -79,7 +79,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 height: 80,
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: primary.withOpacity(0.1),
+                  color: primary.withValues(alpha: 0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(Icons.sms_outlined, size: 40, color: primary),
@@ -99,7 +99,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 'Enter the OTP sent to your registered mobile number',
                 textAlign: TextAlign.center,
                 style: theme.textTheme.bodyMedium?.copyWith(
-                  color: theme.colorScheme.onSurface.withOpacity(0.55),
+                  color: theme.colorScheme.onSurface.withValues(alpha: 0.55),
                 ),
               ),
 

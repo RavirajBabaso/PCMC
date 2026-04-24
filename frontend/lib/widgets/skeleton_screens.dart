@@ -201,7 +201,7 @@ class TableSkeleton extends StatelessWidget {
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
               border: Border.all(
-                color: dsAccent.withOpacity(0.1),
+                color: dsAccent.withValues(alpha:0.1),
               ),
               borderRadius: BorderRadius.circular(8),
             ),
@@ -324,7 +324,7 @@ class ProfileSkeleton extends StatelessWidget {
               margin: const EdgeInsets.only(bottom: 20),
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                border: Border.all(color: dsAccent.withOpacity(0.1)),
+                border: Border.all(color: dsAccent.withValues(alpha:0.1)),
                 borderRadius: BorderRadius.circular(12),
               ),
               child: Column(

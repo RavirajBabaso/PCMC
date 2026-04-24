@@ -29,7 +29,7 @@ class EmptyStateIllustration extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final primary = primaryColor ?? dsAccent;
-    final secondary = secondaryColor ?? dsAccent.withOpacity(0.3);
+    final secondary = secondaryColor ?? dsAccent.withValues(alpha:0.3);
 
     switch (type) {
       case EmptyStateType.noData:
@@ -91,7 +91,7 @@ class _NoDataIllustration extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: primaryColor.withOpacity(0.1),
+        color: primaryColor.withValues(alpha:0.1),
       ),
       child: Stack(
         alignment: Alignment.center,
@@ -100,7 +100,7 @@ class _NoDataIllustration extends StatelessWidget {
           Icon(
             Icons.description_outlined,
             size: size * 0.5,
-            color: primaryColor.withOpacity(0.3),
+            color: primaryColor.withValues(alpha:0.3),
           ),
           // X mark
           Positioned(
@@ -145,7 +145,7 @@ class _NoResultsIllustration extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: primaryColor.withOpacity(0.1),
+        color: primaryColor.withValues(alpha:0.1),
       ),
       child: Stack(
         alignment: Alignment.center,
@@ -195,7 +195,7 @@ class _NoConnectionIllustration extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: primaryColor.withOpacity(0.1),
+        color: primaryColor.withValues(alpha:0.1),
       ),
       child: Stack(
         alignment: Alignment.center,
@@ -215,7 +215,7 @@ class _NoConnectionIllustration extends StatelessWidget {
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 border: Border.all(
-                  color: primaryColor.withOpacity(opacity * 0.4),
+                  color: primaryColor.withValues(alpha:opacity * 0.4),
                   width: 2,
                 ),
               ),
@@ -246,7 +246,7 @@ class _NoPermissionIllustration extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: primaryColor.withOpacity(0.1),
+        color: primaryColor.withValues(alpha:0.1),
       ),
       child: Stack(
         alignment: Alignment.center,
@@ -309,7 +309,7 @@ class _MaintenanceIllustrationState extends State<_MaintenanceIllustration>
           height: widget.size,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: widget.primaryColor.withOpacity(0.1),
+            color: widget.primaryColor.withValues(alpha:0.1),
           ),
           child: Stack(
             alignment: Alignment.center,
@@ -377,7 +377,7 @@ class _ComingSoonIllustrationState extends State<_ComingSoonIllustration>
           height: widget.size,
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            color: widget.primaryColor.withOpacity(0.1),
+            color: widget.primaryColor.withValues(alpha:0.1),
           ),
           child: Stack(
             alignment: Alignment.center,
@@ -386,7 +386,7 @@ class _ComingSoonIllustrationState extends State<_ComingSoonIllustration>
               Icon(
                 Icons.star,
                 size: widget.size * 0.5,
-                color: widget.primaryColor.withOpacity(
+                color: widget.primaryColor.withValues(alpha:
                   0.5 + (_controller.value * 0.5),
                 ),
               ),

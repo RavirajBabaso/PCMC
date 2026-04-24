@@ -103,7 +103,7 @@ class GrievanceCard extends StatelessWidget {
                             Icon(
                               Icons.calendar_today_rounded,
                               size: 12,
-                              color: theme.colorScheme.onSurface.withOpacity(0.4),
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -116,7 +116,7 @@ class GrievanceCard extends StatelessWidget {
                             Icon(
                               Icons.location_on_outlined,
                               size: 12,
-                              color: theme.colorScheme.onSurface.withOpacity(0.4),
+                              color: theme.colorScheme.onSurface.withValues(alpha: 0.4),
                             ),
                             const SizedBox(width: 4),
                             Expanded(
@@ -142,7 +142,7 @@ class GrievanceCard extends StatelessWidget {
                           children: [
                             Icon(Icons.person_outline_rounded,
                                 size: 12,
-                                color: theme.colorScheme.onSurface.withOpacity(0.4)),
+                                color: theme.colorScheme.onSurface.withValues(alpha: 0.4)),
                             const SizedBox(width: 4),
                             Text(
                               grievance.assignee?.name ?? grievance.assignedTo!.toString(),
@@ -181,7 +181,7 @@ class _PriorityChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(AppRadius.full),
       ),
       child: Text(

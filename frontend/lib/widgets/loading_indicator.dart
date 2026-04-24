@@ -152,7 +152,7 @@ class _DotsIndicatorState extends State<_DotsIndicator>
                     height: dotSize,
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      color: color.withOpacity(opacity),
+                      color: color.withValues(alpha:opacity),
                     ),
                   ),
                 ),
@@ -285,7 +285,7 @@ class _PulseIndicatorState extends State<_PulseIndicator>
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
                   border: Border.all(
-                    color: color.withOpacity(opacity),
+                    color: color.withValues(alpha:opacity),
                     width: 3,
                   ),
                 ),

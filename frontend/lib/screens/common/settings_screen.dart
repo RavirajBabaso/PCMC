@@ -13,9 +13,9 @@ import 'package:main_ui/theme/app_theme.dart';
 
 // Status colors matching TrackGrievance
 const Color _success = Color(0xFF10B981);
-const Color _warning = Color(0xFFF59E0B);
+
 const Color _danger = Color(0xFFEF4444);
-const Color _purple = Color(0xFF8B5CF6);
+
 
 class SettingsScreen extends ConsumerStatefulWidget {
   const SettingsScreen({super.key});
@@ -169,7 +169,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
                         value: _notificationsEnabled,
                         onChanged: (v) => setState(() => _notificationsEnabled = v),
                         activeColor: dsAccent,
-                        activeTrackColor: dsAccent.withOpacity(0.4),
+                        activeTrackColor: dsAccent.withValues(alpha:0.4),
                         inactiveThumbColor: dsTextSecondary,
                         inactiveTrackColor: dsBorder,
                       ),
@@ -188,7 +188,7 @@ class _SettingsScreenState extends ConsumerState<SettingsScreen> {
   ),
   child: DropdownButtonHideUnderline(
     child: DropdownButtonFormField<Locale>(
-      value: locale,
+      initialValue: locale,
       decoration: const InputDecoration(
         labelText: 'App Language',
         labelStyle: TextStyle(color: dsTextSecondary),
@@ -385,7 +385,7 @@ class _SettingsCard extends StatelessWidget {
         border: Border.all(color: dsBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha:0.06),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -412,7 +412,7 @@ class _NavCard extends StatelessWidget {
         border: Border.all(color: dsBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha:0.06),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),

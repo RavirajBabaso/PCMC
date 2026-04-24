@@ -31,10 +31,10 @@ const Color _text2      = Color(0xFF8BA3BE);
 const Color _border     = Color(0xFF1A3050);
 
 BoxDecoration _glassCard({Color glow = _cyan, double r = 16}) => BoxDecoration(
-  color: _surfaceAlt.withOpacity(0.7),
+  color: _surfaceAlt.withValues(alpha:0.7),
   borderRadius: BorderRadius.circular(r),
-  border: Border.all(color: glow.withOpacity(0.25), width: 1),
-  boxShadow: [BoxShadow(color: glow.withOpacity(0.08), blurRadius: 20, spreadRadius: 2)],
+  border: Border.all(color: glow.withValues(alpha:0.25), width: 1),
+  boxShadow: [BoxShadow(color: glow.withValues(alpha:0.08), blurRadius: 20, spreadRadius: 2)],
 );
 TextStyle _heading(double s, {Color c = _text1}) =>
     TextStyle(color: c, fontSize: s, fontWeight: FontWeight.w700, letterSpacing: 0.5);
@@ -154,7 +154,7 @@ class _DashboardState extends ConsumerState<Dashboard>
       builder: (_, __) => Container(height: 2,
         decoration: BoxDecoration(gradient: LinearGradient(
           stops: const [0, 0.5, 1],
-          colors: [Colors.transparent, _cyan.withOpacity(0.9), Colors.transparent],
+          colors: [Colors.transparent, _cyan.withValues(alpha:0.9), Colors.transparent],
           begin: Alignment(_scan.value * 2 - 1.2, 0),
           end: Alignment(_scan.value * 2 + 0.2, 0),
         ))),
@@ -166,7 +166,7 @@ class _DashboardState extends ConsumerState<Dashboard>
     const SizedBox(width: 8),
     Text(title, style: _mono(11, c: _cyan)),
     const SizedBox(width: 8),
-    Expanded(child: Container(height: 1, color: _cyan.withOpacity(0.2))),
+    Expanded(child: Container(height: 1, color: _cyan.withValues(alpha:0.2))),
   ]);
 
   Widget _kpiGrid(KpiData kpi, AppLocalizations loc) {
@@ -201,8 +201,8 @@ class _DashboardState extends ConsumerState<Dashboard>
             decoration: BoxDecoration(
               color: _surfaceAlt,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: color.withOpacity(0.3)),
-              boxShadow: [BoxShadow(color: color.withOpacity(0.1), blurRadius: 14)],
+              border: Border.all(color: color.withValues(alpha:0.3)),
+              boxShadow: [BoxShadow(color: color.withValues(alpha:0.1), blurRadius: 14)],
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -211,11 +211,11 @@ class _DashboardState extends ConsumerState<Dashboard>
                 Row(children: [
                   Icon(item[2] as IconData, color: color, size: 14),
                   const SizedBox(width: 6),
-                  Text(item[0] as String, style: _mono(9, c: color.withOpacity(0.8))),
+                  Text(item[0] as String, style: _mono(9, c: color.withValues(alpha:0.8))),
                 ]),
                 Text(val, style: TextStyle(color: color, fontSize: 26, fontWeight: FontWeight.w900,
                     fontFamily: 'monospace',
-                    shadows: [Shadow(color: color.withOpacity(0.5), blurRadius: 12)])),
+                    shadows: [Shadow(color: color.withValues(alpha:0.5), blurRadius: 12)])),
               ],
             ),
           ),
@@ -270,7 +270,7 @@ class _DashboardState extends ConsumerState<Dashboard>
                 child: Row(children: [
                   Container(width: 8, height: 8,
                       decoration: BoxDecoration(shape: BoxShape.circle, color: color,
-                          boxShadow: [BoxShadow(color: color.withOpacity(0.7), blurRadius: 4)])),
+                          boxShadow: [BoxShadow(color: color.withValues(alpha:0.7), blurRadius: 4)])),
                   const SizedBox(width: 8),
                   Expanded(child: Text(l[0] as String, style: _mono(9))),
                   Text('$count', style: _mono(11, c: color)),
@@ -317,7 +317,7 @@ class _DashboardState extends ConsumerState<Dashboard>
             dotData: FlDotData(show: false),
             belowBarData: BarAreaData(show: true, gradient: LinearGradient(
               begin: Alignment.topCenter, end: Alignment.bottomCenter,
-              colors: [_cyan.withOpacity(0.3), Colors.transparent],
+              colors: [_cyan.withValues(alpha:0.3), Colors.transparent],
             )),
           )],
         ))),
@@ -337,7 +337,7 @@ class _DashboardState extends ConsumerState<Dashboard>
         gradient: const LinearGradient(colors: [_cyanDim, _cyan], begin: Alignment.bottomCenter, end: Alignment.topCenter),
         width: 18,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(4)),
-        backDrawRodData: BackgroundBarChartRodData(show: true, toY: 40, color: _border.withOpacity(0.3)),
+        backDrawRodData: BackgroundBarChartRodData(show: true, toY: 40, color: _border.withValues(alpha:0.3)),
       )],
     )).toList();
 
@@ -384,7 +384,7 @@ class _DashboardState extends ConsumerState<Dashboard>
             Text('${sla.toStringAsFixed(1)}%',
                 style: TextStyle(color: good ? _green : _red, fontSize: 40, fontWeight: FontWeight.w900,
                     fontFamily: 'monospace',
-                    shadows: [Shadow(color: (good ? _green : _red).withOpacity(0.7), blurRadius: 16)])),
+                    shadows: [Shadow(color: (good ? _green : _red).withValues(alpha:0.7), blurRadius: 16)])),
             Text('resolved within SLA target', style: _mono(11)),
           ])),
           SizedBox(width: 64, height: 64, child: CircularProgressIndicator(
@@ -427,14 +427,14 @@ class _DashboardState extends ConsumerState<Dashboard>
       margin: const EdgeInsets.only(bottom: 8),
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
-        color: _surfaceAlt.withOpacity(0.5),
+        color: _surfaceAlt.withValues(alpha:0.5),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: sc.withOpacity(0.2)),
+        border: Border.all(color: sc.withValues(alpha:0.2)),
       ),
       child: Row(children: [
         Container(width: 4, height: 36,
             decoration: BoxDecoration(color: sc, borderRadius: BorderRadius.circular(2),
-                boxShadow: [BoxShadow(color: sc.withOpacity(0.7), blurRadius: 6)])),
+                boxShadow: [BoxShadow(color: sc.withValues(alpha:0.7), blurRadius: 6)])),
         const SizedBox(width: 12),
         Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
           Text(g.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: _heading(13)),
@@ -443,8 +443,8 @@ class _DashboardState extends ConsumerState<Dashboard>
         ])),
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          decoration: BoxDecoration(color: sc.withOpacity(0.15), borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: sc.withOpacity(0.5))),
+          decoration: BoxDecoration(color: sc.withValues(alpha:0.15), borderRadius: BorderRadius.circular(20),
+              border: Border.all(color: sc.withValues(alpha:0.5))),
           child: Text((g.status ?? 'new').toUpperCase(),
               style: TextStyle(color: sc, fontSize: 9, fontWeight: FontWeight.w700, letterSpacing: 1)),
         ),
@@ -465,8 +465,8 @@ class _DashboardState extends ConsumerState<Dashboard>
       onTap: () => _export(type, loc),
       child: Container(
         padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(color: color.withOpacity(0.1),
-            borderRadius: BorderRadius.circular(10), border: Border.all(color: color.withOpacity(0.4))),
+        decoration: BoxDecoration(color: color.withValues(alpha:0.1),
+            borderRadius: BorderRadius.circular(10), border: Border.all(color: color.withValues(alpha:0.4))),
         child: Row(mainAxisAlignment: MainAxisAlignment.center, children: [
           Icon(icon, color: color, size: 16),
           const SizedBox(width: 8),

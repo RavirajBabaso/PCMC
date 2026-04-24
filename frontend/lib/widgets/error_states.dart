@@ -35,7 +35,7 @@ class ErrorState extends StatelessWidget {
               color: backgroundColor ?? dsSurface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.red.withOpacity(0.3),
+                color: Colors.red.withValues(alpha:0.3),
                 width: 1,
               ),
             ),
@@ -48,7 +48,7 @@ class ErrorState extends StatelessWidget {
                   height: 80,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: Colors.red.withOpacity(0.1),
+                    color: Colors.red.withValues(alpha:0.1),
                   ),
                   child: Icon(
                     Icons.error_outline,

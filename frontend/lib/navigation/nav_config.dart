@@ -57,7 +57,7 @@ List<NavSection> buildNavigationSections({
         NavItem(
           icon: Icons.home,
           route: homeRouteForRole(normalizedRole) ?? '/citizen/home',
-          label: (l) => l.home ?? 'Home',
+          label: (l) => l.home,
           highlighted: true,
           mobilePrimary: true,
         ),

@@ -105,11 +105,11 @@ BoxDecoration _sectionDecoration({
   return BoxDecoration(
     color: dsSurfaceAlt,
     borderRadius: BorderRadius.circular(radius),
-    border: Border.all(color: accent.withOpacity(0.16)),
+    border: Border.all(color: accent.withValues(alpha: 0.16)),
     boxShadow: elevated
         ? [
             BoxShadow(
-              color: accent.withOpacity(0.08),
+              color: accent.withValues(alpha: 0.08),
               blurRadius: 22,
               offset: const Offset(0, 10),
             ),
@@ -334,7 +334,7 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
         elevation: 0,
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1),
-          child: Container(height: 1, color: dsAccent.withOpacity(0.16)),
+          child: Container(height: 1, color: dsAccent.withValues(alpha: 0.16)),
         ),
         title: Text(localizations.track_grievances),
       ),
@@ -352,7 +352,7 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
                   width: 72,
                   height: 72,
                   decoration: BoxDecoration(
-                    color: dsAccent.withOpacity(0.14),
+                    color: dsAccent.withValues(alpha: 0.14),
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -469,9 +469,9 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
               icon: const Icon(Icons.refresh_rounded),
               label: Text(localizations.retry),
               style: ElevatedButton.styleFrom(
-                backgroundColor: _danger.withOpacity(0.16),
+                backgroundColor: _danger.withValues(alpha: 0.16),
                 foregroundColor: _danger,
-                side: BorderSide(color: _danger.withOpacity(0.4)),
+                side: BorderSide(color: _danger.withValues(alpha: 0.4)),
               ),
             ),
           ],
@@ -547,19 +547,19 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
       width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: dsAccent.withOpacity(0.18)),
+        border: Border.all(color: dsAccent.withValues(alpha: 0.18)),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
             dsSurface,
             dsSurfaceAlt,
-            dsAccent.withOpacity(0.14),
+            dsAccent.withValues(alpha: 0.14),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: dsAccent.withOpacity(0.08),
+            color: dsAccent.withValues(alpha: 0.08),
             blurRadius: 28,
             offset: const Offset(0, 16),
           ),
@@ -576,9 +576,9 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
                 padding:
                     const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
-                  color: dsAccent.withOpacity(0.12),
+                  color: dsAccent.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: dsAccent.withOpacity(0.28)),
+                  border: Border.all(color: dsAccent.withValues(alpha: 0.28)),
                 ),
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
@@ -639,18 +639,14 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
                 spacing: 10,
                 runSpacing: 10,
                 children: [
-                  ElevatedButton.icon(
-                    onPressed: _navigateToSubmit,
-                    icon: const Icon(Icons.add_circle_outline_rounded),
-                    label: Text(localizations.submitGrievance),
-                  ),
+                 
                   OutlinedButton.icon(
                     onPressed: _refreshData,
                     icon: const Icon(Icons.refresh_rounded),
                     label: Text(localizations.refresh),
                     style: OutlinedButton.styleFrom(
                       foregroundColor: dsTextPrimary,
-                      side: BorderSide(color: dsAccent.withOpacity(0.35)),
+                      side: BorderSide(color: dsAccent.withValues(alpha: 0.35)),
                     ),
                   ),
                 ],
@@ -691,7 +687,7 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
         width: double.infinity,
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: dsSurface.withOpacity(0.92),
+          color: dsSurface.withValues(alpha: 0.92),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(color: dsBorder),
         ),
@@ -732,9 +728,9 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
           width: double.infinity,
           padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            color: dsSurface.withOpacity(0.94),
+            color: dsSurface.withValues(alpha: 0.94),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: color.withOpacity(0.2)),
+            border: Border.all(color: color.withValues(alpha: 0.2)),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -747,7 +743,7 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
                       vertical: 6,
                     ),
                     decoration: BoxDecoration(
-                      color: color.withOpacity(0.12),
+                      color: color.withValues(alpha: 0.12),
                       borderRadius: BorderRadius.circular(999),
                     ),
                     child: Row(
@@ -813,7 +809,7 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
               Row(
                 children: [
                   Icon(Icons.calendar_today_rounded,
-                      color: dsTextSecondary.withOpacity(0.8), size: 14),
+                      color: dsTextSecondary.withValues(alpha: 0.8), size: 14),
                   const SizedBox(width: 6),
                   Text(
                     _formatDate(grievance.createdAt),
@@ -902,7 +898,7 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: data.color.withOpacity(0.12),
+              color: data.color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(data.icon, color: data.color),
@@ -1044,12 +1040,12 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            card.accent.withOpacity(0.28),
-            card.accent.withOpacity(0.1),
+            card.accent.withValues(alpha: 0.28),
+            card.accent.withValues(alpha: 0.1),
             dsSurface,
           ],
         ),
-        border: Border.all(color: card.accent.withOpacity(0.22)),
+        border: Border.all(color: card.accent.withValues(alpha: 0.22)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1058,7 +1054,7 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: card.accent.withOpacity(0.14),
+              color: card.accent.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(card.icon, color: card.accent),
@@ -1099,7 +1095,7 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
               ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: card.accent,
-                side: BorderSide(color: card.accent.withOpacity(0.35)),
+                side: BorderSide(color: card.accent.withValues(alpha: 0.35)),
                 visualDensity: VisualDensity.compact,
                 tapTargetSize: MaterialTapTargetSize.shrinkWrap,
               ),
@@ -1270,7 +1266,7 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
-                borderSide: BorderSide(color: dsAccent.withOpacity(0.4)),
+                borderSide: BorderSide(color: dsAccent.withValues(alpha: 0.4)),
               ),
             ),
           ),
@@ -1292,7 +1288,7 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
                     _filterStatus = entry.key;
                   });
                 },
-                selectedColor: color.withOpacity(0.18),
+                selectedColor: color.withValues(alpha: 0.18),
                 backgroundColor: dsSurface,
                 checkmarkColor: color,
                 side: BorderSide(
@@ -1400,7 +1396,7 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: dsAccent.withOpacity(0.12),
+              color: dsAccent.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
             child: const Icon(Icons.inbox_rounded, color: dsAccent, size: 30),
@@ -1428,7 +1424,7 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
           ElevatedButton.icon(
             onPressed: _navigateToSubmit,
             icon: const Icon(Icons.add_circle_outline_rounded),
-            label: Text(localizations.submitGrievance),
+            label: Text(localizations.submitGrievance) ,
           ),
         ],
       ),
@@ -1450,7 +1446,7 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: _warning.withOpacity(0.12),
+              color: _warning.withValues(alpha: 0.12),
               shape: BoxShape.circle,
             ),
             child:
@@ -1504,10 +1500,10 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
           decoration: BoxDecoration(
             color: dsSurface,
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: statusColor.withOpacity(0.16)),
+            border: Border.all(color: statusColor.withValues(alpha: 0.16)),
             boxShadow: [
               BoxShadow(
-                color: statusColor.withOpacity(0.06),
+                color: statusColor.withValues(alpha: 0.06),
                 blurRadius: 18,
                 offset: const Offset(0, 10),
               ),
@@ -1559,10 +1555,10 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
                           vertical: 6,
                         ),
                         decoration: BoxDecoration(
-                          color: priorityColor.withOpacity(0.12),
+                          color: priorityColor.withValues(alpha: 0.12),
                           borderRadius: BorderRadius.circular(999),
                           border: Border.all(
-                            color: priorityColor.withOpacity(0.24),
+                            color: priorityColor.withValues(alpha: 0.24),
                           ),
                         ),
                         child: Text(
@@ -1626,7 +1622,7 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
                 decoration: BoxDecoration(
                   color: dsSurfaceAlt,
                   borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: statusColor.withOpacity(0.14)),
+                  border: Border.all(color: statusColor.withValues(alpha: 0.14)),
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
@@ -1697,7 +1693,7 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
                       vertical: 10,
                     ),
                     decoration: BoxDecoration(
-                      color: dsAccent.withOpacity(0.14),
+                      color: dsAccent.withValues(alpha: 0.14),
                       borderRadius: BorderRadius.circular(14),
                     ),
                     child: const Row(
@@ -1734,9 +1730,9 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withOpacity(0.24)),
+        border: Border.all(color: color.withValues(alpha: 0.24)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1764,9 +1760,9 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.1),
+        color: color.withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withOpacity(0.18)),
+        border: Border.all(color: color.withValues(alpha: 0.18)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1816,9 +1812,9 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: dsSurface.withOpacity(0.92),
+        color: dsSurface.withValues(alpha: 0.92),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.18)),
+        border: Border.all(color: color.withValues(alpha: 0.18)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1827,7 +1823,7 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.12),
+              color: color.withValues(alpha: 0.12),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 18),
@@ -1872,7 +1868,7 @@ class _TrackGrievanceState extends ConsumerState<TrackGrievance> {
           decoration: BoxDecoration(
             color: currentIndex == index
                 ? dsAccent
-                : dsTextSecondary.withOpacity(0.35),
+                : dsTextSecondary.withValues(alpha: 0.35),
             borderRadius: BorderRadius.circular(999),
           ),
         );

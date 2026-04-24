@@ -32,7 +32,7 @@ class MultiStepFormStepper extends StatelessWidget {
   final void Function(int)? onStepChanged;
   final Color backgroundColor;
 
-  MultiStepFormStepper({
+  const MultiStepFormStepper({
     super.key,
     required this.steps,
     required this.currentStep,
@@ -106,7 +106,7 @@ class MultiStepFormStepper extends StatelessWidget {
           child: LinearProgressIndicator(
             value: (currentStep + 1) / steps.length,
             minHeight: 6,
-            backgroundColor: dsAccent.withOpacity(0.1),
+            backgroundColor: dsAccent.withValues(alpha:0.1),
             valueColor: AlwaysStoppedAnimation<Color>(dsAccent),
           ),
         ),
@@ -125,7 +125,7 @@ class MultiStepFormStepper extends StatelessWidget {
                   width: 2,
                   height: 2,
                   decoration: BoxDecoration(
-                    color: dsAccent.withOpacity(0.3),
+                    color: dsAccent.withValues(alpha:0.3),
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -179,8 +179,8 @@ class MultiStepFormStepper extends StatelessWidget {
                 : isCompleted
                     ? Colors.green
                     : isLocked
-                        ? dsAccent.withOpacity(0.2)
-                        : dsAccent.withOpacity(0.3),
+                        ? dsAccent.withValues(alpha:0.2)
+                        : dsAccent.withValues(alpha:0.3),
             border: Border.all(
               color: isCurrent ? dsAccent : Colors.transparent,
               width: 2,
@@ -192,7 +192,7 @@ class MultiStepFormStepper extends StatelessWidget {
                 : isLocked
                     ? Icon(
                         Icons.lock,
-                        color: dsAccent.withOpacity(0.5),
+                        color: dsAccent.withValues(alpha:0.5),
                         size: 20,
                       )
                     : Text(

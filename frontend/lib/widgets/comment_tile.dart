@@ -43,12 +43,12 @@ class CommentTile extends ConsumerWidget {
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   color: isCurrentUser
-                      ? Theme.of(context).colorScheme.primary.withOpacity(0.1)
-                      : Theme.of(context).colorScheme.surfaceVariant,
+                      ? Theme.of(context).colorScheme.primary.withValues(alpha:0.1)
+                      : Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: _getBorderRadius(isCurrentUser),
                   boxShadow: [
                     BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha:0.1),
                       blurRadius: 6.0,
                       offset: const Offset(0, 2),
                     ),
@@ -137,7 +137,7 @@ class CommentTile extends ConsumerWidget {
     return Text(
       _formatDateTime(comment.createdAt),
       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+            color: Theme.of(context).colorScheme.onSurface.withValues(alpha:0.6),
             fontSize: 11.0,
           ),
     );
@@ -167,12 +167,12 @@ class CommentTile extends ConsumerWidget {
               padding: const EdgeInsets.all(8.0),
               decoration: BoxDecoration(
                 color: isCurrentUser
-                    ? theme.colorScheme.primary.withOpacity(0.2)
+                    ? theme.colorScheme.primary.withValues(alpha:0.2)
                     : theme.colorScheme.surface,
                 borderRadius: BorderRadius.circular(8.0),
                 border: Border.all(
                   color: isCurrentUser
-                      ? theme.colorScheme.primary.withOpacity(0.3)
+                      ? theme.colorScheme.primary.withValues(alpha:0.3)
                       : theme.dividerColor,
                 ),
               ),
@@ -190,7 +190,7 @@ class CommentTile extends ConsumerWidget {
                             errorBuilder: (context, error, stackTrace) => const Icon(Icons.broken_image, size: 30),
                           ),
                         )
-                      : Icon(Icons.insert_drive_file, size: 30, color: theme.colorScheme.onSurface.withOpacity(0.7)),
+                      : Icon(Icons.insert_drive_file, size: 30, color: theme.colorScheme.onSurface.withValues(alpha:0.7)),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(

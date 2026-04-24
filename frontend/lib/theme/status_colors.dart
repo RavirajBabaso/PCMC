@@ -21,8 +21,8 @@ class StatusPalette {
     final color = AppStatus.fromStatus(status);
     return StatusColors(
       foreground: color,
-      background: color.withOpacity(0.12),
-      border: color.withOpacity(0.35),
+      background: color.withValues(alpha:0.12),
+      border: color.withValues(alpha:0.35),
     );
   }
 }

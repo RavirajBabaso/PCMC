@@ -298,9 +298,9 @@ class _TransitionButton extends StatelessWidget {
         child: ElevatedButton(
           onPressed: enabled ? onTap : null,
           style: ElevatedButton.styleFrom(
-            backgroundColor: color.withOpacity(0.15),
+            backgroundColor: color.withValues(alpha:0.15),
             foregroundColor: color,
-            side: BorderSide(color: color.withOpacity(0.6)),
+            side: BorderSide(color: color.withValues(alpha:0.6)),
             elevation: 0,
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
             minimumSize: const Size(0, 36),
@@ -510,7 +510,7 @@ class _FilterChip extends StatelessWidget {
         label: Text(label),
         selected: active,
         onSelected: (_) => onSelected(value),
-        selectedColor: primary.withOpacity(0.15),
+        selectedColor: primary.withValues(alpha:0.15),
         checkmarkColor: primary,
         labelStyle: TextStyle(
           fontSize: 12,
@@ -533,7 +533,7 @@ class _MetaItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final c = color ?? Theme.of(context).colorScheme.onSurface.withOpacity(0.45);
+    final c = color ?? Theme.of(context).colorScheme.onSurface.withValues(alpha:0.45);
     return Row(mainAxisSize: MainAxisSize.min, children: [
       Icon(icon, size: 12, color: c),
       const SizedBox(width: 3),
@@ -555,10 +555,10 @@ class _EmptyState extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Icon(Icons.assignment_outlined,
-                size: 72, color: theme.colorScheme.onSurface.withOpacity(0.2)),
+                size: 72, color: theme.colorScheme.onSurface.withValues(alpha:0.2)),
             const SizedBox(height: AppSpacing.base),
             Text('No Assignments', style: theme.textTheme.titleLarge?.copyWith(
-              color: theme.colorScheme.onSurface.withOpacity(0.4),
+              color: theme.colorScheme.onSurface.withValues(alpha:0.4),
             )),
             const SizedBox(height: AppSpacing.sm),
             Text('Nothing assigned to you right now',

@@ -116,7 +116,7 @@ class CustomNavigationDrawer extends ConsumerWidget {
                     decoration: BoxDecoration(
                       color: AppTheme.success,
                       shape: BoxShape.circle,
-                      boxShadow: [BoxShadow(color: AppTheme.success.withOpacity(0.5), blurRadius: 6)],
+                      boxShadow: [BoxShadow(color: AppTheme.success.withValues(alpha:0.5), blurRadius: 6)],
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
@@ -169,8 +169,8 @@ class _DrawerHeader extends StatelessWidget {
             width: 52, height: 52,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: roleTheme.accent.withOpacity(0.12),
-              border: Border.all(color: roleTheme.accent.withOpacity(0.4), width: 2),
+              color: roleTheme.accent.withValues(alpha:0.12),
+              border: Border.all(color: roleTheme.accent.withValues(alpha:0.4), width: 2),
             ),
             child: Icon(roleTheme.icon, color: roleTheme.accent, size: 26),
           ),
@@ -202,9 +202,9 @@ class _DrawerHeader extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: AppSpacing.sm, vertical: 3),
             decoration: BoxDecoration(
-              color: roleTheme.accent.withOpacity(0.12),
+              color: roleTheme.accent.withValues(alpha:0.12),
               borderRadius: BorderRadius.circular(AppRadius.full),
-              border: Border.all(color: roleTheme.accent.withOpacity(0.4)),
+              border: Border.all(color: roleTheme.accent.withValues(alpha:0.4)),
             ),
             child: Text(
               roleTheme.label,
@@ -236,14 +236,14 @@ class _SectionLabel extends StatelessWidget {
           Text(
             title.toUpperCase(),
             style: TextStyle(
-              color: color.withOpacity(0.7),
+              color: color.withValues(alpha:0.7),
               fontSize: 9,
               fontWeight: FontWeight.w800,
               letterSpacing: 1.5,
             ),
           ),
           const SizedBox(width: AppSpacing.sm),
-          Expanded(child: Divider(color: color.withOpacity(0.2), height: 1)),
+          Expanded(child: Divider(color: color.withValues(alpha:0.2), height: 1)),
         ],
       ),
     );
@@ -284,7 +284,7 @@ class _NavItem extends StatelessWidget {
             leading: Container(
               width: 34, height: 34,
               decoration: BoxDecoration(
-                color: color.withOpacity(0.1),
+                color: color.withValues(alpha:0.1),
                 borderRadius: BorderRadius.circular(AppRadius.sm),
               ),
               child: Icon(icon, color: color, size: 18),
@@ -298,7 +298,7 @@ class _NavItem extends StatelessWidget {
               ),
             ),
             trailing: Icon(Icons.chevron_right_rounded,
-                color: color.withOpacity(0.3), size: 16),
+                color: color.withValues(alpha:0.3), size: 16),
             minVerticalPadding: AppSpacing.xs,
           ),
         ),

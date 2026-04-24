@@ -40,14 +40,12 @@ class Workproof {
     };
   }
 
-  String? get fileType {
-    if (filePath == null) return null;
-    if (filePath!.contains('.mp4') || filePath!.contains('.mov') || filePath!.contains('.avi')) {
-      return 'video';
-    }
-    if (filePath!.contains('.jpg') || filePath!.contains('.png') || filePath!.contains('.jpeg')) {
-      return 'image';
-    }
-    return 'file';
-  }
+  String get fileType {
+  final path = filePath.toLowerCase();
+
+  if (['.mp4', '.mov', '.avi'].any(path.endsWith)) return 'video';
+  if (['.jpg', '.png', '.jpeg'].any(path.endsWith)) return 'image';
+
+  return 'file';
+}
 }

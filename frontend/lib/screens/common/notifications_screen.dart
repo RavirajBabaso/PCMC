@@ -86,7 +86,7 @@ class _NotificationTile extends StatelessWidget {
                 width: 44,
                 height: 44,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha:0.1),
                   shape: BoxShape.circle,
                 ),
                 child: Icon(icon, color: color, size: 22),
@@ -106,7 +106,7 @@ class _NotificationTile extends StatelessWidget {
                     Text(
                       data['body'] ?? '',
                       style: theme.textTheme.bodyMedium?.copyWith(
-                        color: theme.colorScheme.onSurface.withOpacity(0.65),
+                        color: theme.colorScheme.onSurface.withValues(alpha:0.65),
                       ),
                     ),
                     const SizedBox(height: AppSpacing.sm),
@@ -149,20 +149,20 @@ class _EmptyNotifications extends StatelessWidget {
             Icon(
               Icons.notifications_off_outlined,
               size: 72,
-              color: theme.colorScheme.onSurface.withOpacity(0.2),
+              color: theme.colorScheme.onSurface.withValues(alpha:0.2),
             ),
             const SizedBox(height: AppSpacing.base),
             Text(
               'No notifications yet',
               style: theme.textTheme.titleLarge?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.5),
+                color: theme.colorScheme.onSurface.withValues(alpha:0.5),
               ),
             ),
             const SizedBox(height: AppSpacing.sm),
             Text(
               "We'll notify you when something arrives",
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.colorScheme.onSurface.withOpacity(0.4),
+                color: theme.colorScheme.onSurface.withValues(alpha:0.4),
               ),
               textAlign: TextAlign.center,
             ),

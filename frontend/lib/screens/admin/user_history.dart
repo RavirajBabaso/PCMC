@@ -140,7 +140,7 @@ class _UserHistoryScreenState extends ConsumerState<UserHistoryScreen> {
         controller: _searchController,
         style: const TextStyle(color: dsTextPrimary),
         decoration: InputDecoration(
-          hintText: l10n.searchByName ?? 'Search by name',
+          hintText: l10n.searchByName,
           hintStyle: const TextStyle(color: dsTextSecondary),
           prefixIcon: const Icon(Icons.search, color: dsAccent),
           suffixIcon: _searchText.isNotEmpty
@@ -185,7 +185,7 @@ class _UserHistoryScreenState extends ConsumerState<UserHistoryScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: dsAccent.withOpacity(0.12),
+                color: dsAccent.withValues(alpha:0.12),
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -254,7 +254,7 @@ class _UserHistoryScreenState extends ConsumerState<UserHistoryScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: _danger.withOpacity(0.12),
+                color: _danger.withValues(alpha:0.12),
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -306,7 +306,5 @@ class _UserHistoryScreenState extends ConsumerState<UserHistoryScreen> {
 }
 
 // Status colors matching theme
-const Color _success = Color(0xFF10B981);
-const Color _warning = Color(0xFFF59E0B);
+
 const Color _danger = Color(0xFFEF4444);
-const Color _purple = Color(0xFF8B5CF6);

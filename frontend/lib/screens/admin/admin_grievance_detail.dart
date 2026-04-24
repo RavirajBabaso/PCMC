@@ -127,11 +127,11 @@ BoxDecoration _panelDecoration({
   return BoxDecoration(
     color: _surfaceAlt,
     borderRadius: BorderRadius.circular(radius),
-    border: Border.all(color: glow.withOpacity(0.18)),
+    border: Border.all(color: glow.withValues(alpha: 0.18)),
     boxShadow: elevated
         ? [
             BoxShadow(
-              color: glow.withOpacity(0.08),
+              color: glow.withValues(alpha: 0.08),
               blurRadius: 24,
               offset: const Offset(0, 10),
             ),
@@ -183,7 +183,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
-          side: BorderSide(color: color.withOpacity(0.4)),
+          side: BorderSide(color: color.withValues(alpha: 0.4)),
         ),
         content: Row(
           children: [
@@ -303,7 +303,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
       titleSpacing: 0,
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(1),
-        child: Container(height: 1, color: _cyan.withOpacity(0.2)),
+        child: Container(height: 1, color: _cyan.withValues(alpha: 0.2)),
       ),
       title: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -408,9 +408,9 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
                 icon: const Icon(Icons.refresh_rounded),
                 label: const Text('Retry'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: _red.withOpacity(0.16),
+                  backgroundColor: _red.withValues(alpha: 0.16),
                   foregroundColor: _red,
-                  side: BorderSide(color: _red.withOpacity(0.45)),
+                  side: BorderSide(color: _red.withValues(alpha: 0.45)),
                 ),
               ),
             ],
@@ -512,19 +512,19 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: statusColor.withOpacity(0.28)),
+        border: Border.all(color: statusColor.withValues(alpha: 0.28)),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
             _surface,
             _surfaceAlt,
-            statusColor.withOpacity(0.15),
+            statusColor.withValues(alpha: 0.15),
           ],
         ),
         boxShadow: [
           BoxShadow(
-            color: statusColor.withOpacity(0.1),
+            color: statusColor.withValues(alpha: 0.1),
             blurRadius: 32,
             offset: const Offset(0, 16),
           ),
@@ -540,7 +540,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
               height: 180,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: statusColor.withOpacity(0.12),
+                color: statusColor.withValues(alpha: 0.12),
               ),
             ),
           ),
@@ -552,7 +552,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
               height: 160,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: _cyan.withOpacity(0.05),
+                color: _cyan.withValues(alpha: 0.05),
               ),
             ),
           ),
@@ -720,9 +720,9 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
           Container(
             padding: const EdgeInsets.all(14),
             decoration: BoxDecoration(
-              color: currentColor.withOpacity(0.1),
+              color: currentColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: currentColor.withOpacity(0.28)),
+              border: Border.all(color: currentColor.withValues(alpha: 0.28)),
             ),
             child: Row(
               children: [
@@ -731,7 +731,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
                   height: 44,
                   decoration: BoxDecoration(
                     shape: BoxShape.circle,
-                    color: currentColor.withOpacity(0.16),
+                    color: currentColor.withValues(alpha: 0.16),
                   ),
                   child: Icon(_statusIcon(displayStatus), color: currentColor),
                 ),
@@ -938,9 +938,9 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: _red.withOpacity(0.08),
+                color: _red.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: _red.withOpacity(0.24)),
+                border: Border.all(color: _red.withValues(alpha: 0.24)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -988,7 +988,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
               decoration: BoxDecoration(
                 color: _surfaceSoft,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: _green.withOpacity(0.18)),
+                border: Border.all(color: _green.withValues(alpha: 0.18)),
               ),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1057,9 +1057,9 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
               width: double.infinity,
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: _red.withOpacity(0.08),
+                color: _red.withValues(alpha: 0.08),
                 borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: _red.withOpacity(0.24)),
+                border: Border.all(color: _red.withValues(alpha: 0.24)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -1196,7 +1196,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
               decoration: BoxDecoration(
                 color: _surfaceSoft,
                 borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: _amber.withOpacity(0.2)),
+                border: Border.all(color: _amber.withValues(alpha: 0.2)),
               ),
               child: Text(
                 grievance.feedbackText!,
@@ -1244,7 +1244,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
             decoration: BoxDecoration(
               color: _surfaceSoft,
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: _purple.withOpacity(0.22)),
+              border: Border.all(color: _purple.withValues(alpha: 0.22)),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -1270,7 +1270,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
                     ),
                     focusedBorder: OutlineInputBorder(
                       borderRadius: BorderRadius.circular(14),
-                      borderSide: BorderSide(color: _purple.withOpacity(0.55)),
+                      borderSide: BorderSide(color: _purple.withValues(alpha: 0.55)),
                     ),
                     contentPadding: const EdgeInsets.all(14),
                   ),
@@ -1303,9 +1303,9 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
                           : const Icon(Icons.send_rounded),
                       label: Text(_isPostingComment ? 'Posting...' : 'Post'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _purple.withOpacity(0.2),
+                        backgroundColor: _purple.withValues(alpha: 0.2),
                         foregroundColor: _text1,
-                        side: BorderSide(color: _purple.withOpacity(0.5)),
+                        side: BorderSide(color: _purple.withValues(alpha: 0.5)),
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 12,
@@ -1330,9 +1330,9 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withOpacity(0.32)),
+        border: Border.all(color: color.withValues(alpha: 0.32)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1389,9 +1389,9 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
       padding: const EdgeInsets.all(14),
       constraints: const BoxConstraints(minWidth: 180),
       decoration: BoxDecoration(
-        color: _surfaceSoft.withOpacity(0.9),
+        color: _surfaceSoft.withValues(alpha: 0.9),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: color.withOpacity(0.22)),
+        border: Border.all(color: color.withValues(alpha: 0.22)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1400,7 +1400,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: color.withOpacity(0.14),
+              color: color.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Icon(icon, color: color, size: 18),
@@ -1443,7 +1443,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: item.color.withOpacity(0.14),
+              color: item.color.withValues(alpha: 0.14),
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(item.icon, color: item.color),
@@ -1500,7 +1500,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
                   width: 42,
                   height: 42,
                   decoration: BoxDecoration(
-                    color: accent.withOpacity(0.14),
+                    color: accent.withValues(alpha: 0.14),
                     borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(icon, color: accent),
@@ -1557,9 +1557,9 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
         child: Ink(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
           decoration: BoxDecoration(
-            color: color.withOpacity(0.12),
+            color: color.withValues(alpha: 0.12),
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: color.withOpacity(0.38)),
+            border: Border.all(color: color.withValues(alpha: 0.38)),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -1622,7 +1622,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
       decoration: BoxDecoration(
         color: _surfaceSoft,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accent.withOpacity(0.2)),
+        border: Border.all(color: accent.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1631,7 +1631,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
             children: [
               CircleAvatar(
                 radius: 22,
-                backgroundColor: accent.withOpacity(0.18),
+                backgroundColor: accent.withValues(alpha: 0.18),
                 child: Text(
                   _initials(user.name),
                   style: TextStyle(
@@ -1715,9 +1715,9 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: color.withOpacity(0.12),
+        color: color.withValues(alpha: 0.12),
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: color.withOpacity(0.24)),
+        border: Border.all(color: color.withValues(alpha: 0.24)),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -1748,7 +1748,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
       decoration: BoxDecoration(
         color: _surfaceSoft,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: accent.withOpacity(0.18)),
+        border: Border.all(color: accent.withValues(alpha: 0.18)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1792,7 +1792,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
           width: 38,
           height: 38,
           decoration: BoxDecoration(
-            color: item.color.withOpacity(0.14),
+            color: item.color.withValues(alpha: 0.14),
             shape: BoxShape.circle,
           ),
           child: Icon(item.icon, color: item.color, size: 18),
@@ -1836,7 +1836,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
       decoration: BoxDecoration(
         color: _surfaceSoft,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: _green.withOpacity(0.2)),
+        border: Border.all(color: _green.withValues(alpha: 0.2)),
       ),
       child: Text(
         '$label: $value',
@@ -1900,7 +1900,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
           decoration: BoxDecoration(
             color: _surfaceSoft,
             borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: accent.withOpacity(0.18)),
+            border: Border.all(color: accent.withValues(alpha: 0.18)),
           ),
           child: Row(
             children: [
@@ -1968,7 +1968,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
       decoration: BoxDecoration(
         color: _surfaceSoft,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: _green.withOpacity(0.18)),
+        border: Border.all(color: _green.withValues(alpha: 0.18)),
       ),
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -2017,7 +2017,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
       decoration: BoxDecoration(
         color: isCurrentUser ? _surfaceSoft : _surface,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: accent.withOpacity(0.2)),
+        border: Border.all(color: accent.withValues(alpha: 0.2)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -2027,7 +2027,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
             children: [
               CircleAvatar(
                 radius: 18,
-                backgroundColor: accent.withOpacity(0.18),
+                backgroundColor: accent.withValues(alpha: 0.18),
                 child: Text(
                   _initials(comment.userName),
                   style: TextStyle(
@@ -2064,7 +2064,7 @@ class _AdminGrievanceDetailState extends ConsumerState<AdminGrievanceDetail> {
                               vertical: 4,
                             ),
                             decoration: BoxDecoration(
-                              color: _cyan.withOpacity(0.14),
+                              color: _cyan.withValues(alpha: 0.14),
                               borderRadius: BorderRadius.circular(999),
                             ),
                             child: const Text(

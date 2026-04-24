@@ -108,7 +108,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                     ),
                     const SizedBox(height: AppSpacing.md),
                     DropdownButtonFormField<String>(
-                      value: role,
+                      initialValue: role,
                       dropdownColor: dsSurface,
                       style: const TextStyle(color: dsTextPrimary),
                       decoration: InputDecoration(
@@ -254,7 +254,7 @@ class _ManageUsersState extends ConsumerState<ManageUsers> {
                     ),
                     const SizedBox(height: AppSpacing.md),
                     DropdownButtonFormField<String>(
-                      value: role,
+                      initialValue: role,
                       dropdownColor: dsSurface,
                       style: const TextStyle(color: dsTextPrimary),
                       decoration: InputDecoration(
@@ -509,7 +509,7 @@ class _UserCard extends StatelessWidget {
         border: Border.all(color: dsBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black..withValues(alpha:0.06),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -521,7 +521,7 @@ class _UserCard extends StatelessWidget {
           width: 48,
           height: 48,
           decoration: BoxDecoration(
-            color: roleColor.withOpacity(0.12),
+            color: roleColor..withValues(alpha:0.12),
             borderRadius: BorderRadius.circular(12),
           ),
           child: Center(
@@ -555,7 +555,7 @@ class _UserCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: roleColor.withOpacity(0.12),
+                color: roleColor..withValues(alpha:0.12),
                 borderRadius: BorderRadius.circular(999),
               ),
               child: Text(
@@ -581,7 +581,7 @@ class _UserCard extends StatelessWidget {
             IconButton(
               icon: Icon(
                 Icons.delete_outline_rounded,
-                color: isSelf ? dsTextSecondary.withOpacity(0.5) : _danger,
+                color: isSelf ? dsTextSecondary.withValues(alpha:0.5) : _danger,
                 size: 20,
               ),
               onPressed: isSelf ? null : onDelete,

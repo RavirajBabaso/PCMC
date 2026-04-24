@@ -5,7 +5,7 @@ import 'package:main_ui/models/user_model.dart';
 import 'package:main_ui/models/grievance_model.dart';
 import 'package:main_ui/l10n/app_localizations.dart';
 import 'package:main_ui/theme/app_theme.dart';
-import '../../widgets/empty_state.dart';
+
 
 class AllUsersHistoryScreen extends StatefulWidget {
   const AllUsersHistoryScreen({super.key});
@@ -175,7 +175,7 @@ class _AllUsersHistoryScreenState extends State<AllUsersHistoryScreen> {
         controller: _searchController,
         style: const TextStyle(color: dsTextPrimary),
         decoration: InputDecoration(
-          hintText: l10n.searchByName ?? 'Search by name or email',
+          hintText: l10n.searchByName ,
           hintStyle: const TextStyle(color: dsTextSecondary),
           prefixIcon: const Icon(Icons.search, color: dsAccent),
           suffixIcon: _searchText.isNotEmpty
@@ -218,7 +218,7 @@ class _AllUsersHistoryScreenState extends State<AllUsersHistoryScreen> {
         border: Border.all(color: dsBorder),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.06),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
@@ -244,7 +244,8 @@ class _AllUsersHistoryScreenState extends State<AllUsersHistoryScreen> {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: dsAccent.withOpacity(0.12),
+                  color: dsAccent.withValues(alpha: 0.12),
+
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: const Icon(
@@ -280,7 +281,8 @@ class _AllUsersHistoryScreenState extends State<AllUsersHistoryScreen> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                 decoration: BoxDecoration(
-                  color: dsAccent.withOpacity(0.12),
+                  color: dsAccent.withValues(alpha: 0.12),
+
                   borderRadius: BorderRadius.circular(20),
                 ),
                 child: Text(
@@ -346,7 +348,8 @@ class _AllUsersHistoryScreenState extends State<AllUsersHistoryScreen> {
             width: 36,
             height: 36,
             decoration: BoxDecoration(
-              color: statusColor.withOpacity(0.12),
+              color: statusColor.withValues(alpha: 0.12),
+
               borderRadius: BorderRadius.circular(10),
             ),
             child: Icon(
@@ -370,7 +373,7 @@ class _AllUsersHistoryScreenState extends State<AllUsersHistoryScreen> {
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  grievance.description ?? 'No description',
+                  grievance.description,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
@@ -385,7 +388,8 @@ class _AllUsersHistoryScreenState extends State<AllUsersHistoryScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                       decoration: BoxDecoration(
-                        color: statusColor.withOpacity(0.12),
+                        color: statusColor.withValues(alpha: 0.12),
+
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Row(
@@ -405,7 +409,7 @@ class _AllUsersHistoryScreenState extends State<AllUsersHistoryScreen> {
                       ),
                     ),
                     const Spacer(),
-                    if (createdAt != null)
+                    
                       Row(
                         children: [
                           const Icon(
@@ -460,7 +464,8 @@ class _AllUsersHistoryScreenState extends State<AllUsersHistoryScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: _danger.withOpacity(0.12),
+                color: _danger.withValues(alpha: 0.12),
+
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -512,7 +517,8 @@ class _AllUsersHistoryScreenState extends State<AllUsersHistoryScreen> {
               width: 80,
               height: 80,
               decoration: BoxDecoration(
-                color: dsAccent.withOpacity(0.12),
+                color: dsAccent.withValues(alpha: 0.12),
+
                 shape: BoxShape.circle,
               ),
               child: Icon(
@@ -553,4 +559,3 @@ class _AllUsersHistoryScreenState extends State<AllUsersHistoryScreen> {
 const Color _success = Color(0xFF10B981);
 const Color _warning = Color(0xFFF59E0B);
 const Color _danger = Color(0xFFEF4444);
-const Color _purple = Color(0xFF8B5CF6);

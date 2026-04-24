@@ -131,7 +131,9 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
                             builder: (context, child) {
                               return Theme(
                                 data: ThemeData.dark().copyWith(
-                                  dialogBackgroundColor: dsSurface,
+                                   dialogTheme: DialogThemeData(
+    backgroundColor: dsSurface,
+  ),
                                   colorScheme: const ColorScheme.dark(
                                     primary: dsAccent,
                                     secondary: dsAccentSoft,
@@ -388,9 +390,9 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
             width: 58,
             height: 58,
             decoration: BoxDecoration(
-              color: dsAccent.withOpacity(0.14),
+              color: dsAccent.withValues(alpha:0.14),
               borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: dsAccent.withOpacity(0.35)),
+              border: Border.all(color: dsAccent.withValues(alpha:0.35)),
             ),
             child: const Icon(
               Icons.campaign_rounded,
@@ -475,9 +477,9 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
                 width: 46,
                 height: 46,
                 decoration: BoxDecoration(
-                  color: accent.withOpacity(0.14),
+                  color: accent.withValues(alpha:0.14),
                   borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: accent.withOpacity(0.28)),
+                  border: Border.all(color: accent.withValues(alpha:0.28)),
                 ),
                 child: Icon(
                   announcement.type == 'emergency'
@@ -573,7 +575,7 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
       decoration: BoxDecoration(
-        color: dsSurface.withOpacity(0.5),
+        color: dsSurface.withValues(alpha:0.5),
         borderRadius: BorderRadius.circular(999),
         border: Border.all(color: dsBorder),
       ),
@@ -611,7 +613,7 @@ class _AnnouncementsScreenState extends ConsumerState<AnnouncementsScreen> {
             width: 64,
             height: 64,
             decoration: BoxDecoration(
-              color: accent.withOpacity(0.14),
+              color: accent.withValues(alpha:0.14),
               borderRadius: BorderRadius.circular(20),
             ),
             child: Icon(icon, size: 32, color: accent),
