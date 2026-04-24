@@ -83,7 +83,7 @@ grievance-system-backend/.coverage
 grievance-system-backend/htmlcov/
 grievance-system-backend/instance/
 grievance-system-backend/migrations/versions/
-grievance-system-backend/uploads/
+
 grievance-system-backend/.idea/
 grievance-system-backend/.vscode/
 grievance-system-backend/*.iml
